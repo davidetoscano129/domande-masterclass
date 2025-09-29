@@ -8,6 +8,7 @@ const { testConnection } = require("./config/database");
 
 // Importa routes
 const authRoutes = require("./routes/auth");
+const questionnaireRoutes = require("./routes/questionnaires");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +23,7 @@ testConnection();
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/questionnaires", questionnaireRoutes);
 
 // Test route (una sola versione)
 app.get("/", (req, res) => {
@@ -32,6 +34,11 @@ app.get("/", (req, res) => {
     endpoints: [
       "POST /api/auth/register",
       "POST /api/auth/login",
+      "GET /api/questionnaires",
+      "POST /api/questionnaires",
+      "GET /api/questionnaires/:id",
+      "PUT /api/questionnaires/:id",
+      "DELETE /api/questionnaires/:id",
       "GET /health",
     ],
   });
