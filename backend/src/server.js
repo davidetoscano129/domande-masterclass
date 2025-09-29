@@ -9,6 +9,7 @@ const { testConnection } = require("./config/database");
 // Importa routes
 const authRoutes = require("./routes/auth");
 const questionnaireRoutes = require("./routes/questionnaires");
+const questionRoutes = require("./routes/questions");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +25,7 @@ testConnection();
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/questionnaires", questionnaireRoutes);
+app.use("/api", questionRoutes);
 
 // Test route (una sola versione)
 app.get("/", (req, res) => {
@@ -39,16 +41,20 @@ app.get("/", (req, res) => {
       "GET /api/questionnaires/:id",
       "PUT /api/questionnaires/:id",
       "DELETE /api/questionnaires/:id",
+      "GET /api/questionnaires/:id/questions",
+      "POST /api/questionnaires/:id/questions",
+      "PUT /api/questions/:id",
+      "DELETE /api/questions/:id",
       "GET /health",
     ],
   });
 });
 
-// Health check (corretta)
+// Health check
 app.get("/health", (req, res) => {
   res.json({
     status: "OK",
-    database: "Connected", // ← Corretto
+    database: "Connected",
     uptime: process.uptime(),
   });
 });
