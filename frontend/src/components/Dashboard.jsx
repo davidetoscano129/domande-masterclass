@@ -1,15 +1,12 @@
 import { useState, useEffect } from "react";
 import { questionnaires } from "../services/api";
+import QuestionnaireEditor from "./QuestionnaireEditor";
 
 function Dashboard({ onLogout }) {
+  const [view, setView] = useState("list"); // 'list' o 'editor'
   const [questionnairesList, setQuestionnairesList] = useState([]);
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [newQuestionnaire, setNewQuestionnaire] = useState({
-    title: "",
-    description: "",
-  });
 
   // Carica questionari all'avvio
   useEffect(() => {
@@ -27,26 +24,28 @@ function Dashboard({ onLogout }) {
     }
   };
 
-  const handleCreateQuestionnaire = async (e) => {
-    e.preventDefault();
-
-    try {
-      await questionnaires.create(newQuestionnaire);
-      setNewQuestionnaire({ title: "", description: "" });
-      setShowCreateForm(false);
-      loadQuestionnaires(); // Ricarica la lista
-    } catch (err) {
-      setError("Errore nella creazione del questionario");
-    }
+  // Vai all'editor
+  const goToEditor = () => {
+    setView("editor");
   };
 
-  const handleInputChange = (e) => {
-    setNewQuestionnaire({
-      ...newQuestionnaire,
-      [e.target.name]: e.target.value,
-    });
+  // Torna alla lista
+  const goToList = () => {
+    setView("list");
+    loadQuestionnaires(); // Ricarica la lista
   };
 
+  // Gestisci salvataggio
+  const handleSave = () => {
+    goToList();
+  };
+
+  // Se siamo nell'editor, mostra solo quello
+  if (view === "editor") {
+    return <QuestionnaireEditor onBack={goToList} onSave={handleSave} />;
+  }
+
+  // Vista principale semplificata
   return (
     <div style={{ maxWidth: "800px", margin: "20px auto", padding: "20px" }}>
       {/* Header */}
@@ -72,82 +71,54 @@ function Dashboard({ onLogout }) {
         </button>
       </div>
 
-      {/* Bottone Nuovo Questionario */}
-      <div style={{ marginBottom: "20px" }}>
+      {/* Bottone Principale */}
+      <div style={{ textAlign: "center", marginBottom: "30px" }}>
         <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
+          onClick={goToEditor}
           style={{
-            padding: "10px 20px",
+            padding: "15px 30px",
             backgroundColor: "#28a745",
             color: "white",
             border: "none",
+            fontSize: "18px",
+            fontWeight: "bold",
           }}
         >
-          {showCreateForm ? "Annulla" : "+ Nuovo Questionario"}
+          + Crea Nuovo Questionario
         </button>
       </div>
 
-      {/* Form Creazione Questionario */}
-      {showCreateForm && (
+      {/* Errori */}
+      {error && (
         <div
-          style={{
-            backgroundColor: "#f8f9fa",
-            padding: "20px",
-            marginBottom: "20px",
-            border: "1px solid #ddd",
-          }}
+          style={{ color: "red", marginBottom: "20px", textAlign: "center" }}
         >
-          <h3>Crea Nuovo Questionario</h3>
-          <form onSubmit={handleCreateQuestionnaire}>
-            <div style={{ marginBottom: "15px" }}>
-              <input
-                type="text"
-                name="title"
-                placeholder="Titolo del questionario"
-                value={newQuestionnaire.title}
-                onChange={handleInputChange}
-                required
-                style={{ width: "100%", padding: "10px" }}
-              />
-            </div>
-            <div style={{ marginBottom: "15px" }}>
-              <textarea
-                name="description"
-                placeholder="Descrizione (opzionale)"
-                value={newQuestionnaire.description}
-                onChange={handleInputChange}
-                rows="3"
-                style={{ width: "100%", padding: "10px" }}
-              />
-            </div>
-            <button
-              type="submit"
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#007bff",
-                color: "white",
-                border: "none",
-              }}
-            >
-              Crea Questionario
-            </button>
-          </form>
+          {error}
         </div>
       )}
 
-      {/* Errori */}
-      {error && (
-        <div style={{ color: "red", marginBottom: "20px" }}>{error}</div>
-      )}
-
-      {/* Lista Questionari */}
+      {/* Lista Questionari Esistenti */}
       <div>
-        <h2>Lista Questionari ({questionnairesList.length})</h2>
+        <h3>Questionari Esistenti ({questionnairesList.length})</h3>
 
         {loading ? (
-          <p>Caricamento...</p>
+          <p style={{ textAlign: "center" }}>Caricamento...</p>
         ) : questionnairesList.length === 0 ? (
-          <p>Nessun questionario presente. Creane uno nuovo!</p>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "40px",
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #ddd",
+            }}
+          >
+            <p style={{ fontSize: "16px", color: "#666" }}>
+              Nessun questionario creato ancora.
+            </p>
+            <p style={{ color: "#888" }}>
+              Clicca su "Crea Nuovo Questionario" per iniziare!
+            </p>
+          </div>
         ) : (
           <div>
             {questionnairesList.map((questionnaire) => (
@@ -155,21 +126,57 @@ function Dashboard({ onLogout }) {
                 key={questionnaire.id}
                 style={{
                   border: "1px solid #ddd",
-                  padding: "15px",
-                  marginBottom: "10px",
+                  padding: "20px",
+                  marginBottom: "15px",
                   backgroundColor: "white",
+                  borderRadius: "5px",
                 }}
               >
-                <h4>{questionnaire.title}</h4>
-                <p style={{ color: "#666", margin: "5px 0" }}>
-                  {questionnaire.description || "Nessuna descrizione"}
-                </p>
-                <small style={{ color: "#888" }}>
-                  Creato il:{" "}
-                  {new Date(questionnaire.created_at).toLocaleDateString(
-                    "it-IT"
-                  )}
-                </small>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ margin: "0 0 8px 0" }}>
+                      {questionnaire.title}
+                    </h4>
+                    <p style={{ color: "#666", margin: "0 0 8px 0" }}>
+                      {questionnaire.description || "Nessuna descrizione"}
+                    </p>
+                    <small style={{ color: "#888" }}>
+                      Creato il:{" "}
+                      {new Date(questionnaire.created_at).toLocaleDateString(
+                        "it-IT"
+                      )}
+                    </small>
+                  </div>
+                  <div style={{ marginLeft: "20px" }}>
+                    <button
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#007bff",
+                        color: "white",
+                        border: "none",
+                        marginRight: "8px",
+                      }}
+                    >
+                      Modifica
+                    </button>
+                    <button
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#17a2b8",
+                        color: "white",
+                        border: "none",
+                      }}
+                    >
+                      Visualizza
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
