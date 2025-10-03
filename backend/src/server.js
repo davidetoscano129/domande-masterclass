@@ -10,6 +10,7 @@ const { testConnection } = require("./config/database");
 const authRoutes = require("./routes/auth");
 const questionnaireRoutes = require("./routes/questionnaires");
 const questionRoutes = require("./routes/questions");
+const sharedRoutes = require("./routes/shared");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,6 +27,7 @@ testConnection();
 app.use("/api/auth", authRoutes);
 app.use("/api/questionnaires", questionnaireRoutes);
 app.use("/api", questionRoutes);
+app.use("/api/shared", sharedRoutes);
 
 // Test route (una sola versione)
 app.get("/", (req, res) => {
@@ -41,10 +43,14 @@ app.get("/", (req, res) => {
       "GET /api/questionnaires/:id",
       "PUT /api/questionnaires/:id",
       "DELETE /api/questionnaires/:id",
+      "POST /api/questionnaires/:id/share",
+      "DELETE /api/questionnaires/:id/share",
       "GET /api/questionnaires/:id/questions",
       "POST /api/questionnaires/:id/questions",
       "PUT /api/questions/:id",
       "DELETE /api/questions/:id",
+      "GET /api/shared/:token",
+      "POST /api/shared/:token/responses",
       "GET /health",
     ],
   });

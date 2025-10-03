@@ -49,4 +49,61 @@ export const questionnaires = {
       method: "POST",
       body: JSON.stringify(questionnaireData),
     }),
+
+  // Genera link di condivisione
+  generateShareLink: (id) =>
+    apiRequest(`/questionnaires/${id}/share`, {
+      method: "POST",
+    }),
+
+  // Rimuovi condivisione
+  removeShare: (id) =>
+    apiRequest(`/questionnaires/${id}/share`, {
+      method: "DELETE",
+    }),
+};
+
+// API per questionari condivisi (senza autenticazione)
+export const shared = {
+  // Recupera questionario condiviso
+  getQuestionnaire: async (token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/shared/${token}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Errore nella richiesta");
+      }
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Invia risposta al questionario condiviso
+  submitResponse: async (token, responseData) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/shared/${token}/responses`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(responseData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Errore nella richiesta");
+      }
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

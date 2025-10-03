@@ -1,8 +1,14 @@
 const express = require("express");
+const crypto = require("crypto");
 const { query } = require("../config/database");
 const { authenticateToken } = require("../middleware/auth");
 
 const router = express.Router();
+
+// Genera un token sicuro per la condivisione
+function generateShareToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
 
 // Applica autenticazione a tutte le rotte
 router.use(authenticateToken);
@@ -16,6 +22,8 @@ router.get("/", async (req, res) => {
                 title, 
                 description, 
                 is_active, 
+                share_token,
+                is_public,
                 created_at, 
                 updated_at 
              FROM questionnaires 
@@ -239,6 +247,102 @@ router.delete("/:id", async (req, res) => {
     console.error("Error deleting questionnaire:", error);
     res.status(500).json({
       error: "Errore nell'eliminazione del questionario",
+    });
+  }
+});
+
+// POST /api/questionnaires/:id/share - Genera link di condivisione
+router.post("/:id/share", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verifica che l'ID sia un numero
+    if (isNaN(id)) {
+      return res.status(400).json({
+        error: "ID questionario non valido",
+      });
+    }
+
+    // Verifica che il questionario appartenga all'utente
+    const questionnaires = await query(
+      `SELECT id, title, share_token FROM questionnaires 
+       WHERE id = ? AND user_id = ?`,
+      [id, req.user.userId]
+    );
+
+    if (questionnaires.length === 0) {
+      return res.status(404).json({
+        error: "Questionario non trovato",
+      });
+    }
+
+    const questionnaire = questionnaires[0];
+    let shareToken = questionnaire.share_token;
+
+    // Se non esiste già un token, generane uno nuovo
+    if (!shareToken) {
+      shareToken = generateShareToken();
+
+      await query(
+        `UPDATE questionnaires 
+         SET share_token = ?, is_public = TRUE 
+         WHERE id = ?`,
+        [shareToken, id]
+      );
+    }
+
+    res.json({
+      message: "Link di condivisione generato con successo",
+      share_token: shareToken,
+      share_url: `${req.protocol}://${req.get("host")}/share/${shareToken}`,
+    });
+  } catch (error) {
+    console.error("Error generating share link:", error);
+    res.status(500).json({
+      error: "Errore nella generazione del link di condivisione",
+    });
+  }
+});
+
+// DELETE /api/questionnaires/:id/share - Rimuovi condivisione
+router.delete("/:id/share", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (isNaN(id)) {
+      return res.status(400).json({
+        error: "ID questionario non valido",
+      });
+    }
+
+    // Verifica che il questionario appartenga all'utente
+    const questionnaires = await query(
+      `SELECT id FROM questionnaires 
+       WHERE id = ? AND user_id = ?`,
+      [id, req.user.userId]
+    );
+
+    if (questionnaires.length === 0) {
+      return res.status(404).json({
+        error: "Questionario non trovato",
+      });
+    }
+
+    // Rimuovi la condivisione
+    await query(
+      `UPDATE questionnaires 
+       SET share_token = NULL, is_public = FALSE 
+       WHERE id = ?`,
+      [id]
+    );
+
+    res.json({
+      message: "Condivisione rimossa con successo",
+    });
+  } catch (error) {
+    console.error("Error removing share:", error);
+    res.status(500).json({
+      error: "Errore nella rimozione della condivisione",
     });
   }
 });
