@@ -61,6 +61,10 @@ export const questionnaires = {
     apiRequest(`/questionnaires/${id}/share`, {
       method: "DELETE",
     }),
+
+  // Recupera risposte per un questionario
+  getResponses: (questionnaireId) =>
+    apiRequest(`/questionnaires/${questionnaireId}/responses`),
 };
 
 // API per questionari condivisi (senza autenticazione)

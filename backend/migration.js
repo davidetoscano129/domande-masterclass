@@ -10,7 +10,7 @@ async function runMigration() {
       host: process.env.DB_HOST || "localhost",
       user: process.env.DB_USER || "root",
       password: process.env.DB_PASSWORD || "",
-      database: process.env.DB_NAME || "questionari_app",
+      database: process.env.DB_NAME || "domande-questionari",
     });
 
     console.log("Connesso al database MySQL");
@@ -23,7 +23,7 @@ async function runMigration() {
       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'questionnaires' 
       AND COLUMN_NAME IN ('share_token', 'is_public')
     `,
-      [process.env.DB_NAME || "questionari_app"]
+      [process.env.DB_NAME || "domande-questionari"]
     );
 
     if (columns.length === 0) {

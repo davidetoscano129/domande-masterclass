@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { questionnaires } from "../services/api";
 import QuestionnaireEditor from "./QuestionnaireEditor";
+import ResponsesViewer from "./ResponsesViewer";
 
 function Dashboard({ onLogout }) {
-  const [view, setView] = useState("list"); // 'list' o 'editor'
+  const [view, setView] = useState("list"); // 'list', 'editor', 'responses'
   const [questionnairesList, setQuestionnairesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedQuestionnaire, setSelectedQuestionnaire] = useState(null);
 
   // Stati per la condivisione
   const [shareModal, setShareModal] = useState({
@@ -40,7 +42,14 @@ function Dashboard({ onLogout }) {
   // Torna alla lista
   const goToList = () => {
     setView("list");
+    setSelectedQuestionnaire(null);
     loadQuestionnaires(); // Ricarica la lista
+  };
+
+  // Vai al visualizzatore risposte
+  const goToResponses = (questionnaire) => {
+    setSelectedQuestionnaire(questionnaire);
+    setView("responses");
   };
 
   // Gestisci salvataggio
@@ -146,6 +155,17 @@ function Dashboard({ onLogout }) {
   // Se siamo nell'editor, mostra solo quello
   if (view === "editor") {
     return <QuestionnaireEditor onBack={goToList} onSave={handleSave} />;
+  }
+
+  // Se siamo nel visualizzatore risposte, mostra solo quello
+  if (view === "responses" && selectedQuestionnaire) {
+    return (
+      <ResponsesViewer
+        questionnaireId={selectedQuestionnaire.id}
+        questionnaireName={selectedQuestionnaire.title}
+        onBack={goToList}
+      />
+    );
   }
 
   // Vista principale semplificata
@@ -307,6 +327,7 @@ function Dashboard({ onLogout }) {
                         border: "none",
                         borderRadius: "4px",
                         cursor: shareLoading ? "not-allowed" : "pointer",
+                        marginRight: "8px",
                       }}
                       title={
                         questionnaire.is_public
@@ -317,6 +338,19 @@ function Dashboard({ onLogout }) {
                       {questionnaire.is_public
                         ? "🔗 Condiviso"
                         : "📤 Condividi"}
+                    </button>
+                    <button
+                      onClick={() => goToResponses(questionnaire)}
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#6f42c1",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                      }}
+                      title="Visualizza risposte raccolte"
+                    >
+                      📊 Risposte
                     </button>
                   </div>
                 </div>

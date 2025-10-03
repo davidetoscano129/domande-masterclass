@@ -41,8 +41,20 @@ const query = async (sql, params = []) => {
   }
 };
 
+// Funzione helper per comandi di transazione (senza parametri)
+const executeCommand = async (sql) => {
+  try {
+    const [rows] = await pool.query(sql);
+    return rows;
+  } catch (error) {
+    console.error("Database command error:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   pool,
   query,
+  executeCommand,
   testConnection,
 };

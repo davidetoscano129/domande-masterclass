@@ -347,4 +347,88 @@ router.delete("/:id/share", async (req, res) => {
   }
 });
 
+// GET /api/questionnaires/:id/responses - Recupera risposte di un questionario
+router.get("/:id/responses", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verifica che l'ID sia un numero
+    if (isNaN(id)) {
+      return res.status(400).json({
+        error: "ID questionario non valido",
+      });
+    }
+
+    // Verifica che il questionario appartenga all'utente
+    const questionnaires = await query(
+      "SELECT id, title FROM questionnaires WHERE id = ? AND user_id = ?",
+      [id, req.user.userId]
+    );
+
+    if (questionnaires.length === 0) {
+      return res.status(404).json({
+        error: "Questionario non trovato",
+      });
+    }
+
+    // Recupera le risposte con i dettagli
+    const responses = await query(
+      `SELECT 
+        r.id,
+        r.respondent_name,
+        r.respondent_email,
+        r.submitted_at,
+        q.question_text,
+        a.answer_value
+       FROM responses r
+       LEFT JOIN answers a ON r.id = a.response_id
+       LEFT JOIN questions q ON a.question_id = q.id
+       WHERE r.questionnaire_id = ?
+       ORDER BY r.submitted_at DESC, q.order_index ASC`,
+      [id]
+    );
+
+    // Raggruppa le risposte per response_id
+    const groupedResponses = {};
+
+    responses.forEach((row) => {
+      if (!groupedResponses[row.id]) {
+        groupedResponses[row.id] = {
+          id: row.id,
+          respondent_name: row.respondent_name,
+          respondent_email: row.respondent_email,
+          submitted_at: row.submitted_at,
+          responses: {},
+        };
+      }
+
+      if (row.question_text && row.answer_value) {
+        // Parse del JSON dell'answer_value
+        try {
+          const parsedAnswer = JSON.parse(row.answer_value);
+          groupedResponses[row.id].responses[row.question_text] = parsedAnswer;
+        } catch (e) {
+          groupedResponses[row.id].responses[row.question_text] =
+            row.answer_value;
+        }
+      }
+    });
+
+    // Converti in array
+    const formattedResponses = Object.values(groupedResponses);
+
+    res.json({
+      message: "Risposte recuperate con successo",
+      questionnaire: questionnaires[0],
+      count: formattedResponses.length,
+      responses: formattedResponses,
+    });
+  } catch (error) {
+    console.error("Error fetching responses:", error);
+    res.status(500).json({
+      error: "Errore nel recupero delle risposte",
+    });
+  }
+});
+
 module.exports = router;
