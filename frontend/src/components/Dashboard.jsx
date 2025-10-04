@@ -169,6 +169,28 @@ function Dashboard({ onLogout }) {
     }
   };
 
+  // Elimina questionario
+  const deleteQuestionnaire = async (questionnaire) => {
+    if (
+      !confirm(
+        `Vuoi davvero eliminare il questionario "${questionnaire.title}"?\n\nQuesta azione è irreversibile e cancellerà anche tutte le risposte raccolte.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await questionnaires.delete(questionnaire.id);
+      loadQuestionnaires();
+      alert("Questionario eliminato con successo");
+    } catch (err) {
+      setError("Errore nell'eliminazione del questionario: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Se siamo nell'editor, mostra solo quello
   if (view === "editor") {
     return (
@@ -385,10 +407,25 @@ function Dashboard({ onLogout }) {
                         color: "white",
                         border: "none",
                         borderRadius: "4px",
+                        marginRight: "8px",
                       }}
                       title="Visualizza risposte raccolte"
                     >
                       📊 Risposte
+                    </button>
+                    <button
+                      onClick={() => deleteQuestionnaire(questionnaire)}
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#dc3545",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                      title="Elimina questionario definitivamente"
+                    >
+                      🗑️ Elimina
                     </button>
                   </div>
                 </div>

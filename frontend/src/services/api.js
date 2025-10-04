@@ -67,6 +67,11 @@ export const questionnaires = {
     apiRequest(`/questionnaires/${id}/share`, {
       method: "DELETE",
     }),
+
+  delete: (id) =>
+    apiRequest(`/questionnaires/${id}`, {
+      method: "DELETE",
+    }),
 };
 
 export const shared = {
