@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { questionnaires } from "../services/api";
 import QuestionnaireEditor from "./QuestionnaireEditor";
+import QuestionnaireViewer from "./QuestionnaireViewer";
 import ResponsesViewer from "./ResponsesViewer";
 
 function Dashboard({ onLogout }) {
-  const [view, setView] = useState("list"); // 'list', 'editor', 'responses'
+  const [view, setView] = useState("list"); // 'list', 'editor', 'viewer', 'responses'
   const [questionnairesList, setQuestionnairesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState(null);
+  const [editQuestionnaireId, setEditQuestionnaireId] = useState(null);
 
   // Stati per la condivisione
   const [shareModal, setShareModal] = useState({
@@ -36,6 +38,20 @@ function Dashboard({ onLogout }) {
 
   // Vai all'editor
   const goToEditor = () => {
+    setEditQuestionnaireId(null);
+    setView("editor");
+  };
+
+  // Vai al visualizzatore
+  const goToViewer = (questionnaire) => {
+    setSelectedQuestionnaire(questionnaire);
+    setView("viewer");
+  };
+
+  // Vai all'editor per modificare
+  const goToEdit = (questionnaire) => {
+    setEditQuestionnaireId(questionnaire.id);
+    setSelectedQuestionnaire(questionnaire);
     setView("editor");
   };
 
@@ -43,6 +59,7 @@ function Dashboard({ onLogout }) {
   const goToList = () => {
     setView("list");
     setSelectedQuestionnaire(null);
+    setEditQuestionnaireId(null);
     loadQuestionnaires(); // Ricarica la lista
   };
 
@@ -154,7 +171,24 @@ function Dashboard({ onLogout }) {
 
   // Se siamo nell'editor, mostra solo quello
   if (view === "editor") {
-    return <QuestionnaireEditor onBack={goToList} onSave={handleSave} />;
+    return (
+      <QuestionnaireEditor
+        onBack={goToList}
+        onSave={handleSave}
+        editQuestionnaireId={editQuestionnaireId}
+      />
+    );
+  }
+
+  // Se siamo nel visualizzatore, mostra solo quello
+  if (view === "viewer" && selectedQuestionnaire) {
+    return (
+      <QuestionnaireViewer
+        questionnaireId={selectedQuestionnaire.id}
+        onBack={goToList}
+        onEdit={() => goToEdit(selectedQuestionnaire)}
+      />
+    );
   }
 
   // Se siamo nel visualizzatore risposte, mostra solo quello
@@ -292,6 +326,7 @@ function Dashboard({ onLogout }) {
                   </div>
                   <div style={{ marginLeft: "20px" }}>
                     <button
+                      onClick={() => goToEdit(questionnaire)}
                       style={{
                         padding: "8px 16px",
                         backgroundColor: "#007bff",
@@ -299,11 +334,13 @@ function Dashboard({ onLogout }) {
                         border: "none",
                         marginRight: "8px",
                         borderRadius: "4px",
+                        cursor: "pointer",
                       }}
                     >
                       Modifica
                     </button>
                     <button
+                      onClick={() => goToViewer(questionnaire)}
                       style={{
                         padding: "8px 16px",
                         backgroundColor: "#17a2b8",
@@ -311,6 +348,7 @@ function Dashboard({ onLogout }) {
                         border: "none",
                         marginRight: "8px",
                         borderRadius: "4px",
+                        cursor: "pointer",
                       }}
                     >
                       Visualizza

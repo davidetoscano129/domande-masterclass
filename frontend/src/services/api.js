@@ -44,70 +44,37 @@ export const auth = {
 export const questionnaires = {
   getAll: () => apiRequest("/questionnaires"),
 
+  getById: (id) => apiRequest(`/questionnaires/${id}`),
+
   create: (questionnaireData) =>
     apiRequest("/questionnaires", {
       method: "POST",
       body: JSON.stringify(questionnaireData),
     }),
 
-  // Genera link di condivisione
+  update: (id, questionnaireData) =>
+    apiRequest(`/questionnaires/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(questionnaireData),
+    }),
+
   generateShareLink: (id) =>
     apiRequest(`/questionnaires/${id}/share`, {
       method: "POST",
     }),
 
-  // Rimuovi condivisione
   removeShare: (id) =>
     apiRequest(`/questionnaires/${id}/share`, {
       method: "DELETE",
     }),
-
-  // Recupera risposte per un questionario
-  getResponses: (questionnaireId) =>
-    apiRequest(`/questionnaires/${questionnaireId}/responses`),
 };
 
-// API per questionari condivisi (senza autenticazione)
 export const shared = {
-  // Recupera questionario condiviso
-  getQuestionnaire: async (token) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/shared/${token}`);
-      const data = await response.json();
+  getQuestionnaire: (token) => apiRequest(`/shared/${token}`),
 
-      if (!response.ok) {
-        throw new Error(data.error || "Errore nella richiesta");
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Invia risposta al questionario condiviso
-  submitResponse: async (token, responseData) => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/shared/${token}/responses`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(responseData),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Errore nella richiesta");
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  },
+  submitResponse: (token, responseData) =>
+    apiRequest(`/shared/${token}/response`, {
+      method: "POST",
+      body: JSON.stringify(responseData),
+    }),
 };

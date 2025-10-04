@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { questionnaires } from "../services/api";
 
-function QuestionnaireEditor({ onBack, onSave }) {
+function QuestionnaireEditor({ onBack, onSave, editQuestionnaireId = null }) {
   const [questionnaire, setQuestionnaire] = useState({
     title: "",
     description: "",
@@ -9,6 +9,50 @@ function QuestionnaireEditor({ onBack, onSave }) {
 
   const [questions, setQuestions] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Se stiamo editando, carica i dati del questionario
+  useEffect(() => {
+    if (editQuestionnaireId) {
+      loadQuestionnaire();
+    }
+  }, [editQuestionnaireId]);
+
+  const loadQuestionnaire = async () => {
+    try {
+      setLoading(true);
+      const data = await questionnaires.getById(editQuestionnaireId);
+      setQuestionnaire({
+        title: data.questionnaire.title,
+        description: data.questionnaire.description || "",
+      });
+
+      // Adatta le domande al formato dell'editor
+      const adaptedQuestions = (data.questionnaire.questions || []).map(
+        (q) => ({
+          id: q.id,
+          question_text: q.text,
+          question_type:
+            q.type === "text"
+              ? "text"
+              : q.type === "single"
+              ? "multiple_choice"
+              : q.type === "multiple"
+              ? "checkbox"
+              : q.type,
+          question_options: q.options || null,
+          is_required: q.required || false,
+        })
+      );
+
+      setQuestions(adaptedQuestions);
+    } catch (err) {
+      setError("Errore nel caricamento del questionario: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Aggiungi nuova domanda
   const addQuestion = (type) => {
@@ -79,9 +123,17 @@ function QuestionnaireEditor({ onBack, onSave }) {
 
     setSaving(true);
     try {
-      // Crea il questionario
-      const response = await questionnaires.create(questionnaire);
-      const questionnaireId = response.questionnaire.id;
+      let questionnaireId;
+
+      if (editQuestionnaireId) {
+        // Aggiorna questionario esistente
+        await questionnaires.update(editQuestionnaireId, questionnaire);
+        questionnaireId = editQuestionnaireId;
+      } else {
+        // Crea nuovo questionario
+        const response = await questionnaires.create(questionnaire);
+        questionnaireId = response.questionnaire.id;
+      }
 
       // Salva tutte le domande
       for (const question of questions) {
@@ -103,7 +155,11 @@ function QuestionnaireEditor({ onBack, onSave }) {
         );
       }
 
-      alert("Questionario salvato con successo!");
+      alert(
+        editQuestionnaireId
+          ? "Questionario aggiornato con successo!"
+          : "Questionario salvato con successo!"
+      );
       onSave();
     } catch (error) {
       alert("Errore nel salvataggio: " + error.message);
@@ -114,168 +170,192 @@ function QuestionnaireEditor({ onBack, onSave }) {
 
   return (
     <div style={{ maxWidth: "800px", margin: "20px auto", padding: "20px" }}>
-      {/* Header */}
-      <div
-        style={{
-          marginBottom: "30px",
-          borderBottom: "1px solid #ddd",
-          paddingBottom: "20px",
-        }}
-      >
-        <button
-          onClick={onBack}
-          style={{
-            marginBottom: "15px",
-            padding: "8px 16px",
-            backgroundColor: "#6c757d",
-            color: "white",
-            border: "none",
-          }}
-        >
-          ← Indietro
-        </button>
-
-        <h2>Crea Nuovo Questionario</h2>
-
-        {/* Info Questionario */}
-        <div style={{ marginTop: "20px" }}>
-          <input
-            type="text"
-            placeholder="Titolo del questionario"
-            value={questionnaire.title}
-            onChange={(e) =>
-              setQuestionnaire({ ...questionnaire, title: e.target.value })
-            }
-            style={{
-              width: "100%",
-              padding: "12px",
-              marginBottom: "15px",
-              fontSize: "18px",
-              fontWeight: "bold",
-            }}
-          />
-          <textarea
-            placeholder="Descrizione del questionario (opzionale)"
-            value={questionnaire.description}
-            onChange={(e) =>
-              setQuestionnaire({
-                ...questionnaire,
-                description: e.target.value,
-              })
-            }
-            rows="3"
-            style={{ width: "100%", padding: "12px", marginBottom: "20px" }}
-          />
+      {/* Loading */}
+      {loading && (
+        <div style={{ textAlign: "center", padding: "50px" }}>
+          <p>Caricamento questionario...</p>
         </div>
-      </div>
+      )}
 
-      {/* Lista Domande */}
-      <div style={{ marginBottom: "30px" }}>
-        {questions.map((question, index) => (
-          <QuestionEditor
-            key={question.id}
-            question={question}
-            index={index}
-            onUpdate={updateQuestion}
-            onAddOption={addOption}
-            onRemoveOption={removeOption}
-            onRemove={removeQuestion}
-          />
-        ))}
-      </div>
-
-      {/* Aggiungi Domanda */}
-      <div
-        style={{
-          marginBottom: "30px",
-          padding: "20px",
-          backgroundColor: "#f8f9fa",
-          border: "1px solid #ddd",
-        }}
-      >
-        <h4>Aggiungi Domanda</h4>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <button
-            onClick={() => addQuestion("text")}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#007bff",
-              color: "white",
-              border: "none",
-            }}
-          >
-            📝 Testo
-          </button>
-          <button
-            onClick={() => addQuestion("multiple_choice")}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#28a745",
-              color: "white",
-              border: "none",
-            }}
-          >
-            🔘 Scelta Multipla
-          </button>
-          <button
-            onClick={() => addQuestion("checkbox")}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#17a2b8",
-              color: "white",
-              border: "none",
-            }}
-          >
-            ☑️ Checkbox
-          </button>
-          <button
-            onClick={() => addQuestion("scale")}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#ffc107",
-              color: "black",
-              border: "none",
-            }}
-          >
-            ⭐ Scala 1-5
-          </button>
-          <button
-            onClick={() => addQuestion("dropdown")}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#6c757d",
-              color: "white",
-              border: "none",
-            }}
-          >
-            📋 Dropdown
-          </button>
-        </div>
-      </div>
-
-      {/* Azioni */}
-      <div
-        style={{
-          textAlign: "center",
-          borderTop: "1px solid #ddd",
-          paddingTop: "20px",
-        }}
-      >
-        <button
-          onClick={handleSave}
-          disabled={saving || !questionnaire.title.trim()}
-          style={{
-            padding: "12px 30px",
-            backgroundColor: saving ? "#6c757d" : "#28a745",
-            color: "white",
-            border: "none",
-            fontSize: "16px",
-            fontWeight: "bold",
-          }}
+      {/* Error */}
+      {error && (
+        <div
+          style={{ color: "red", marginBottom: "20px", textAlign: "center" }}
         >
-          {saving ? "Salvataggio..." : "Salva Questionario"}
-        </button>
-      </div>
+          {error}
+        </div>
+      )}
+
+      {!loading && (
+        <>
+          {/* Header */}
+          <div
+            style={{
+              marginBottom: "30px",
+              borderBottom: "1px solid #ddd",
+              paddingBottom: "20px",
+            }}
+          >
+            <button
+              onClick={onBack}
+              style={{
+                marginBottom: "15px",
+                padding: "8px 16px",
+                backgroundColor: "#6c757d",
+                color: "white",
+                border: "none",
+              }}
+            >
+              ← Indietro
+            </button>
+
+            <h2>
+              {editQuestionnaireId
+                ? "Modifica Questionario"
+                : "Crea Nuovo Questionario"}
+            </h2>
+
+            {/* Info Questionario */}
+            <div style={{ marginTop: "20px" }}>
+              <input
+                type="text"
+                placeholder="Titolo del questionario"
+                value={questionnaire.title}
+                onChange={(e) =>
+                  setQuestionnaire({ ...questionnaire, title: e.target.value })
+                }
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  marginBottom: "15px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                }}
+              />
+              <textarea
+                placeholder="Descrizione del questionario (opzionale)"
+                value={questionnaire.description}
+                onChange={(e) =>
+                  setQuestionnaire({
+                    ...questionnaire,
+                    description: e.target.value,
+                  })
+                }
+                rows="3"
+                style={{ width: "100%", padding: "12px", marginBottom: "20px" }}
+              />
+            </div>
+          </div>
+
+          {/* Lista Domande */}
+          <div style={{ marginBottom: "30px" }}>
+            {questions.map((question, index) => (
+              <QuestionEditor
+                key={question.id}
+                question={question}
+                index={index}
+                onUpdate={updateQuestion}
+                onAddOption={addOption}
+                onRemoveOption={removeOption}
+                onRemove={removeQuestion}
+              />
+            ))}
+          </div>
+
+          {/* Aggiungi Domanda */}
+          <div
+            style={{
+              marginBottom: "30px",
+              padding: "20px",
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #ddd",
+            }}
+          >
+            <h4>Aggiungi Domanda</h4>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <button
+                onClick={() => addQuestion("text")}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#007bff",
+                  color: "white",
+                  border: "none",
+                }}
+              >
+                📝 Testo
+              </button>
+              <button
+                onClick={() => addQuestion("multiple_choice")}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#28a745",
+                  color: "white",
+                  border: "none",
+                }}
+              >
+                🔘 Scelta Multipla
+              </button>
+              <button
+                onClick={() => addQuestion("checkbox")}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#17a2b8",
+                  color: "white",
+                  border: "none",
+                }}
+              >
+                ☑️ Checkbox
+              </button>
+              <button
+                onClick={() => addQuestion("scale")}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#ffc107",
+                  color: "black",
+                  border: "none",
+                }}
+              >
+                ⭐ Scala 1-5
+              </button>
+              <button
+                onClick={() => addQuestion("dropdown")}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#6c757d",
+                  color: "white",
+                  border: "none",
+                }}
+              >
+                📋 Dropdown
+              </button>
+            </div>
+          </div>
+
+          {/* Azioni */}
+          <div
+            style={{
+              textAlign: "center",
+              borderTop: "1px solid #ddd",
+              paddingTop: "20px",
+            }}
+          >
+            <button
+              onClick={handleSave}
+              disabled={saving || !questionnaire.title.trim()}
+              style={{
+                padding: "12px 30px",
+                backgroundColor: saving ? "#6c757d" : "#28a745",
+                color: "white",
+                border: "none",
+                fontSize: "16px",
+                fontWeight: "bold",
+              }}
+            >
+              {saving ? "Salvataggio..." : "Salva Questionario"}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -8,7 +8,6 @@ import {
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import SharedQuestionnaire from "./components/SharedQuestionnaire";
-import "./App.css";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
