@@ -27,9 +27,9 @@ function SharedQuestionnaire() {
       setIsHttpsRedirect(true);
       return;
     }
+
     loadQuestionnaire();
   }, [token]);
-
   const loadQuestionnaire = async () => {
     try {
       setLoading(true);
@@ -119,9 +119,7 @@ function SharedQuestionnaire() {
         );
 
       case "multiple_choice":
-        const options = question.question_options
-          ? JSON.parse(question.question_options)
-          : [];
+        const options = question.question_options || [];
         return (
           <div>
             {options.map((option, index) => (
@@ -143,9 +141,7 @@ function SharedQuestionnaire() {
         );
 
       case "checkbox":
-        const checkboxOptions = question.question_options
-          ? JSON.parse(question.question_options)
-          : [];
+        const checkboxOptions = question.question_options || [];
         const selectedOptions = Array.isArray(answer) ? answer : [];
 
         return (
@@ -171,9 +167,7 @@ function SharedQuestionnaire() {
         );
 
       case "scale":
-        const scale = question.question_options
-          ? JSON.parse(question.question_options)
-          : { min: 1, max: 5 };
+        const scale = question.question_options || { min: 1, max: 5 };
         return (
           <div>
             <input
@@ -485,7 +479,8 @@ function SharedQuestionnaire() {
                 )}
               </h3>
               <small style={{ color: "#666" }}>
-                Tipo: {question.question_type.replace("_", " ")}
+                Tipo:{" "}
+                {question.question_type?.replace("_", " ") || "Sconosciuto"}
               </small>
             </div>
             {renderQuestion(question)}

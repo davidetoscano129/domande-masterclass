@@ -221,7 +221,7 @@ function QuestionnaireViewer({ questionnaireId, onBack, onEdit }) {
                   </span>
                   <div style={{ flex: 1 }}>
                     <h4 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
-                      {question.text}
+                      {question.question_text}
                     </h4>
                     <div
                       style={{
@@ -231,14 +231,14 @@ function QuestionnaireViewer({ questionnaireId, onBack, onEdit }) {
                       }}
                     >
                       <strong>Tipo:</strong>{" "}
-                      {question.type === "text"
+                      {question.question_type === "text"
                         ? "Testo libero"
-                        : question.type === "single"
+                        : question.question_type === "single"
                         ? "Scelta singola"
-                        : question.type === "multiple"
+                        : question.question_type === "multiple"
                         ? "Scelta multipla"
-                        : question.type}
-                      {question.required && (
+                        : question.question_type}
+                      {question.is_required && (
                         <span
                           style={{
                             marginLeft: "10px",
@@ -255,10 +255,10 @@ function QuestionnaireViewer({ questionnaireId, onBack, onEdit }) {
                     </div>
 
                     {/* Mostra opzioni se presente */}
-                    {(question.type === "single" ||
-                      question.type === "multiple") &&
-                      question.options &&
-                      question.options.length > 0 && (
+                    {(question.question_type === "single" ||
+                      question.question_type === "multiple") &&
+                      question.question_options &&
+                      question.question_options.length > 0 && (
                         <div>
                           <strong
                             style={{ fontSize: "14px", marginBottom: "8px" }}
@@ -268,18 +268,20 @@ function QuestionnaireViewer({ questionnaireId, onBack, onEdit }) {
                           <ul
                             style={{ margin: "8px 0 0 0", paddingLeft: "20px" }}
                           >
-                            {question.options.map((option, optIndex) => (
-                              <li
-                                key={optIndex}
-                                style={{
-                                  marginBottom: "4px",
-                                  fontSize: "14px",
-                                  color: "#555",
-                                }}
-                              >
-                                {option}
-                              </li>
-                            ))}
+                            {question.question_options.map(
+                              (option, optIndex) => (
+                                <li
+                                  key={optIndex}
+                                  style={{
+                                    marginBottom: "4px",
+                                    fontSize: "14px",
+                                    color: "#555",
+                                  }}
+                                >
+                                  {option}
+                                </li>
+                              )
+                            )}
                           </ul>
                         </div>
                       )}

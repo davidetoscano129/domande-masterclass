@@ -7,14 +7,20 @@ const router = express.Router();
 router.get("/:token", async (req, res) => {
   try {
     const { token } = req.params;
+    console.log(
+      "📥 Richiesta questionario condiviso - Token:",
+      token?.substring(0, 10) + "..."
+    );
 
     // Valida il token
     if (!token || token.length !== 64) {
+      console.log("❌ Token non valido:", token?.length);
       return res.status(400).json({
         error: "Token di condivisione non valido",
       });
     }
 
+    console.log("🔍 Cerca questionario nel database...");
     // Recupera questionario tramite token
     const questionnaires = await query(
       `SELECT 
@@ -28,12 +34,16 @@ router.get("/:token", async (req, res) => {
       [token]
     );
 
+    console.log("📊 Questionari trovati:", questionnaires.length);
     if (questionnaires.length === 0) {
+      console.log("❌ Questionario non trovato");
       return res.status(404).json({
         error: "Questionario non trovato o non più disponibile",
       });
     }
 
+    console.log("✅ Questionario trovato:", questionnaires[0].title);
+    console.log("🔍 Cerca domande...");
     // Recupera le domande del questionario
     const questions = await query(
       `SELECT 
@@ -49,15 +59,49 @@ router.get("/:token", async (req, res) => {
       [questionnaires[0].id]
     );
 
-    const questionnaire = questionnaires[0];
-    questionnaire.questions = questions;
+    console.log("📊 Domande trovate:", questions.length);
+    console.log("🔄 Processa opzioni JSON...");
 
+    // Processa le opzioni JSON per ogni domanda
+    const processedQuestions = questions.map((question) => {
+      let parsedOptions = null;
+
+      // Parsing sicuro delle opzioni JSON
+      if (question.question_options) {
+        try {
+          // Se è già un oggetto/array, non parsare
+          if (typeof question.question_options === "string") {
+            parsedOptions = JSON.parse(question.question_options);
+          } else {
+            parsedOptions = question.question_options;
+          }
+        } catch (e) {
+          console.error(
+            "Error parsing question options:",
+            e,
+            "Options:",
+            question.question_options
+          );
+          parsedOptions = null;
+        }
+      }
+
+      return {
+        ...question,
+        question_options: parsedOptions,
+      };
+    });
+
+    const questionnaire = questionnaires[0];
+    questionnaire.questions = processedQuestions;
+
+    console.log("✅ Risposta preparata, invio al frontend...");
     res.json({
       message: "Questionario condiviso",
       questionnaire: questionnaire,
     });
   } catch (error) {
-    console.error("Error fetching shared questionnaire:", error);
+    console.error("❌ Error fetching shared questionnaire:", error);
     res.status(500).json({
       error: "Errore nel recupero del questionario condiviso",
     });

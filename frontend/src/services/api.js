@@ -78,7 +78,7 @@ export const shared = {
   getQuestionnaire: (token) => apiRequest(`/shared/${token}`),
 
   submitResponse: (token, responseData) =>
-    apiRequest(`/shared/${token}/response`, {
+    apiRequest(`/shared/${token}/responses`, {
       method: "POST",
       body: JSON.stringify(responseData),
     }),
