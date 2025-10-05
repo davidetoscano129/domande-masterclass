@@ -84,4 +84,10 @@ export const shared = {
       method: "POST",
       body: JSON.stringify(responseData),
     }),
+
+  registerStudent: (studentData) =>
+    apiRequest("/shared/register-student", {
+      method: "POST",
+      body: JSON.stringify(studentData),
+    }),
 };

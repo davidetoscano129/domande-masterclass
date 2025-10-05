@@ -11,6 +11,15 @@ function SharedQuestionnaire() {
   const [submitted, setSubmitted] = useState(false);
   const [isHttpsRedirect, setIsHttpsRedirect] = useState(false);
 
+  // Sistema identificazione studenti
+  const [studentIdentified, setStudentIdentified] = useState(false);
+  const [studentInfo, setStudentInfo] = useState({
+    email: "",
+    matricola: "",
+    nome: "",
+    cognome: "",
+  });
+
   // Risposte dell'utente
   const [answers, setAnswers] = useState({});
   const [respondentInfo, setRespondentInfo] = useState({
@@ -92,6 +101,57 @@ function SharedQuestionnaire() {
       setSubmitted(true);
     } catch (err) {
       setError(err.message || "Errore nell'invio delle risposte");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleStudentIdentification = async (e) => {
+    e.preventDefault();
+
+    // Validazione campi obbligatori
+    if (
+      !studentInfo.email ||
+      !studentInfo.matricola ||
+      !studentInfo.nome ||
+      !studentInfo.cognome
+    ) {
+      setError("Tutti i campi sono obbligatori per l'identificazione");
+      return;
+    }
+
+    // Validazione formato email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(studentInfo.email)) {
+      setError("Inserisci un'email valida");
+      return;
+    }
+
+    try {
+      setError("");
+      setSubmitting(true);
+
+      // Registra lo studente nel database
+      const registrationData = {
+        email: studentInfo.email,
+        matricola: studentInfo.matricola,
+        nome: studentInfo.nome,
+        cognome: studentInfo.cognome,
+        questionnaireToken: token,
+      };
+
+      const result = await shared.registerStudent(registrationData);
+      console.log("✅ Studente registrato:", result);
+
+      // Trasferisce i dati dello studente nel formato compatibile
+      setRespondentInfo({
+        name: `${studentInfo.nome} ${studentInfo.cognome}`,
+        email: studentInfo.email,
+      });
+
+      setStudentIdentified(true);
+    } catch (err) {
+      setError("Errore nell'identificazione studente: " + err.message);
     } finally {
       setSubmitting(false);
     }
@@ -340,6 +400,188 @@ function SharedQuestionnaire() {
           </p>
           <p style={{ fontSize: "14px", color: "#666" }}>
             Risposte inviate il {new Date().toLocaleDateString("it-IT")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Form identificazione studenti
+  if (!studentIdentified) {
+    return (
+      <div style={{ maxWidth: "600px", margin: "50px auto", padding: "20px" }}>
+        <div style={{ textAlign: "center", marginBottom: "30px" }}>
+          <h2>🎓 Identificazione Studente</h2>
+          <p style={{ color: "#666", fontSize: "16px" }}>
+            Prima di procedere con il questionario, identifica con i tuoi dati
+          </p>
+        </div>
+
+        {error && (
+          <div
+            style={{
+              backgroundColor: "#f8d7da",
+              color: "#721c24",
+              padding: "10px",
+              borderRadius: "4px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleStudentIdentification}>
+          <div style={{ marginBottom: "20px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "5px",
+                fontWeight: "bold",
+              }}
+            >
+              Email Universitaria *
+            </label>
+            <input
+              type="email"
+              value={studentInfo.email}
+              onChange={(e) =>
+                setStudentInfo({ ...studentInfo, email: e.target.value })
+              }
+              placeholder="es: mario.rossi@studenti.unisalento.it"
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                fontSize: "16px",
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: "20px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "5px",
+                fontWeight: "bold",
+              }}
+            >
+              Numero di Matricola *
+            </label>
+            <input
+              type="text"
+              value={studentInfo.matricola}
+              onChange={(e) =>
+                setStudentInfo({ ...studentInfo, matricola: e.target.value })
+              }
+              placeholder="es: 0612345"
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                fontSize: "16px",
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "5px",
+                  fontWeight: "bold",
+                }}
+              >
+                Nome *
+              </label>
+              <input
+                type="text"
+                value={studentInfo.nome}
+                onChange={(e) =>
+                  setStudentInfo({ ...studentInfo, nome: e.target.value })
+                }
+                placeholder="Mario"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
+                required
+              />
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "5px",
+                  fontWeight: "bold",
+                }}
+              >
+                Cognome *
+              </label>
+              <input
+                type="text"
+                value={studentInfo.cognome}
+                onChange={(e) =>
+                  setStudentInfo({ ...studentInfo, cognome: e.target.value })
+                }
+                placeholder="Rossi"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              width: "100%",
+              padding: "15px",
+              backgroundColor: submitting ? "#6c757d" : "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              cursor: submitting ? "not-allowed" : "pointer",
+            }}
+          >
+            {submitting
+              ? "Registrazione in corso..."
+              : "Procedi al Questionario"}
+          </button>
+        </form>
+
+        <div
+          style={{
+            backgroundColor: "#e7f3ff",
+            border: "1px solid #b8daff",
+            borderRadius: "8px",
+            padding: "15px",
+            marginTop: "20px",
+            fontSize: "14px",
+          }}
+        >
+          <p style={{ color: "#004085", margin: 0 }}>
+            <strong>🔒 Privacy:</strong> I tuoi dati saranno utilizzati
+            esclusivamente per il tracciamento delle risposte e non saranno
+            condivisi con terze parti.
           </p>
         </div>
       </div>

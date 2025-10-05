@@ -217,4 +217,91 @@ router.post("/:token/responses", async (req, res) => {
   }
 });
 
+// POST /api/shared/register-student - Registra uno studente nel sistema
+router.post("/register-student", async (req, res) => {
+  try {
+    const { email, matricola, nome, cognome, questionnaireToken } = req.body;
+
+    console.log("📝 Registrazione studente:", {
+      email,
+      matricola,
+      nome,
+      cognome,
+    });
+
+    // Validazioni
+    if (!email || !matricola || !nome || !cognome) {
+      return res.status(400).json({
+        error:
+          "Tutti i campi sono obbligatori (email, matricola, nome, cognome)",
+      });
+    }
+
+    // Validazione formato email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        error: "Formato email non valido",
+      });
+    }
+
+    // Verifica se lo studente esiste già
+    const existingStudent = await query(
+      "SELECT id FROM students WHERE email = ? OR matricola = ?",
+      [email, matricola]
+    );
+
+    let studentId;
+
+    if (existingStudent.length > 0) {
+      // Studente esistente - aggiorna le informazioni se necessario
+      studentId = existingStudent[0].id;
+      console.log("👤 Studente esistente trovato, ID:", studentId);
+
+      // Combiniamo nome e cognome in un unico campo name
+      const fullName = `${nome} ${cognome}`;
+      await query(
+        "UPDATE students SET name = ?, updated_at = NOW() WHERE id = ?",
+        [fullName, studentId]
+      );
+    } else {
+      // Nuovo studente - crea record
+      console.log("➕ Creazione nuovo studente");
+      // Combiniamo nome e cognome in un unico campo name
+      const fullName = `${nome} ${cognome}`;
+      const result = await query(
+        "INSERT INTO students (email, matricola, name, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())",
+        [email, matricola, fullName]
+      );
+      studentId = result.insertId;
+    }
+
+    // Se abbiamo un token questionario, verifichiamo che esista
+    let questionnaireId = null;
+    if (questionnaireToken) {
+      const questionnaire = await query(
+        "SELECT id FROM questionnaires WHERE share_token = ?",
+        [questionnaireToken]
+      );
+
+      if (questionnaire.length > 0) {
+        questionnaireId = questionnaire[0].id;
+      }
+    }
+
+    console.log("✅ Studente registrato con successo, ID:", studentId);
+
+    res.json({
+      message: "Studente registrato con successo",
+      student_id: studentId,
+      questionnaire_id: questionnaireId,
+    });
+  } catch (error) {
+    console.error("Errore registrazione studente:", error);
+    res.status(500).json({
+      error: "Errore nella registrazione dello studente",
+    });
+  }
+});
+
 module.exports = router;
