@@ -2,22 +2,31 @@ import { useState, useEffect } from "react";
 import { questionnaires } from "../services/api";
 
 function ResponsesViewer({ questionnaireId, questionnaireName, onBack }) {
+  const [questionnaire, setQuestionnaire] = useState(null);
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [viewMode, setViewMode] = useState("table"); // 'table', 'cards', 'analytics'
 
   useEffect(() => {
-    loadResponses();
+    loadData();
   }, [questionnaireId]);
 
-  const loadResponses = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await questionnaires.getResponses(questionnaireId);
-      setResponses(data.responses || []);
+
+      // Carica questionario e risposte in parallelo
+      const [questionnaireData, responsesData] = await Promise.all([
+        questionnaires.getById(questionnaireId),
+        questionnaires.getResponses(questionnaireId),
+      ]);
+
+      setQuestionnaire(questionnaireData.questionnaire);
+      setResponses(responsesData.responses || []);
     } catch (err) {
-      setError(err.message || "Errore nel caricamento delle risposte");
+      setError(err.message || "Errore nel caricamento dei dati");
     } finally {
       setLoading(false);
     }
@@ -31,6 +40,89 @@ function ResponsesViewer({ questionnaireId, questionnaireName, onBack }) {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Calcola statistiche per una domanda
+  const getQuestionStats = (question) => {
+    const questionText = question.question_text;
+    const answers = responses
+      .map((r) => r.responses[questionText])
+      .filter(Boolean);
+
+    if (question.question_type === "text") {
+      return {
+        type: "text",
+        totalAnswers: answers.length,
+        averageLength:
+          answers.reduce((sum, answer) => sum + (answer?.length || 0), 0) /
+            answers.length || 0,
+      };
+    }
+
+    if (question.question_type === "scale") {
+      const numericAnswers = answers
+        .map((a) => parseInt(a))
+        .filter((n) => !isNaN(n));
+      return {
+        type: "scale",
+        totalAnswers: numericAnswers.length,
+        average:
+          numericAnswers.reduce((sum, n) => sum + n, 0) /
+            numericAnswers.length || 0,
+        distribution: [1, 2, 3, 4, 5].map((val) => ({
+          value: val,
+          count: numericAnswers.filter((n) => n === val).length,
+        })),
+      };
+    }
+
+    if (
+      question.question_type === "single" ||
+      question.question_type === "multiple_choice"
+    ) {
+      const answerCounts = {};
+      answers.forEach((answer) => {
+        if (answer) {
+          answerCounts[answer] = (answerCounts[answer] || 0) + 1;
+        }
+      });
+
+      return {
+        type: "choice",
+        totalAnswers: answers.length,
+        distribution: Object.entries(answerCounts).map(([option, count]) => ({
+          option,
+          count,
+          percentage: ((count / answers.length) * 100).toFixed(1),
+        })),
+      };
+    }
+
+    if (
+      question.question_type === "multiple" ||
+      question.question_type === "checkbox"
+    ) {
+      const optionCounts = {};
+      answers.forEach((answer) => {
+        if (Array.isArray(answer)) {
+          answer.forEach((option) => {
+            optionCounts[option] = (optionCounts[option] || 0) + 1;
+          });
+        }
+      });
+
+      return {
+        type: "multiple",
+        totalAnswers: answers.length,
+        distribution: Object.entries(optionCounts).map(([option, count]) => ({
+          option,
+          count,
+          percentage: ((count / answers.length) * 100).toFixed(1),
+        })),
+      };
+    }
+
+    return { type: "unknown", totalAnswers: answers.length };
   };
 
   const exportToCSV = () => {
@@ -70,7 +162,7 @@ function ResponsesViewer({ questionnaireId, questionnaireName, onBack }) {
   };
 
   return (
-    <div style={{ maxWidth: "1000px", margin: "20px auto", padding: "20px" }}>
+    <div style={{ maxWidth: "1200px", margin: "20px auto", padding: "20px" }}>
       {/* Header */}
       <div
         style={{
@@ -78,6 +170,8 @@ function ResponsesViewer({ questionnaireId, questionnaireName, onBack }) {
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "30px",
+          borderBottom: "2px solid #eee",
+          paddingBottom: "20px",
         }}
       >
         <div>
@@ -88,27 +182,82 @@ function ResponsesViewer({ questionnaireId, questionnaireName, onBack }) {
               backgroundColor: "#6c757d",
               color: "white",
               border: "none",
-              marginRight: "15px",
+              borderRadius: "4px",
+              marginBottom: "15px",
             }}
           >
             ← Torna alla Dashboard
           </button>
-          <h1 style={{ display: "inline" }}>Risposte: {questionnaireName}</h1>
+          <h1 style={{ margin: "0 0 8px 0" }}>
+            Risposte: {questionnaire?.title || questionnaireName}
+          </h1>
+          {questionnaire?.description && (
+            <p style={{ color: "#666", margin: 0 }}>
+              {questionnaire.description}
+            </p>
+          )}
         </div>
-        {responses.length > 0 && (
-          <button
-            onClick={exportToCSV}
-            style={{
-              padding: "10px 20px",
-              backgroundColor: "#28a745",
-              color: "white",
-              border: "none",
-              fontSize: "14px",
-            }}
-          >
-            📊 Esporta CSV
-          </button>
-        )}
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          {/* Modalità visualizzazione */}
+          <div>
+            <button
+              onClick={() => setViewMode("table")}
+              style={{
+                padding: "8px 12px",
+                backgroundColor: viewMode === "table" ? "#007bff" : "#f8f9fa",
+                color: viewMode === "table" ? "white" : "#333",
+                border: "1px solid #ddd",
+                borderRadius: "4px 0 0 4px",
+                fontSize: "12px",
+              }}
+            >
+              📊 Tabella
+            </button>
+            <button
+              onClick={() => setViewMode("cards")}
+              style={{
+                padding: "8px 12px",
+                backgroundColor: viewMode === "cards" ? "#007bff" : "#f8f9fa",
+                color: viewMode === "cards" ? "white" : "#333",
+                border: "1px solid #ddd",
+                borderLeft: "none",
+                fontSize: "12px",
+              }}
+            >
+              📋 Schede
+            </button>
+            <button
+              onClick={() => setViewMode("analytics")}
+              style={{
+                padding: "8px 12px",
+                backgroundColor:
+                  viewMode === "analytics" ? "#007bff" : "#f8f9fa",
+                color: viewMode === "analytics" ? "white" : "#333",
+                border: "1px solid #ddd",
+                borderLeft: "none",
+                borderRadius: "0 4px 4px 0",
+                fontSize: "12px",
+              }}
+            >
+              📈 Analisi
+            </button>
+          </div>
+          {responses.length > 0 && (
+            <button
+              onClick={exportToCSV}
+              style={{
+                padding: "10px 20px",
+                backgroundColor: "#28a745",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "14px",
+              }}
+            >
+              � Esporta CSV
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Errore */}
@@ -151,88 +300,324 @@ function ResponsesViewer({ questionnaireId, questionnaireName, onBack }) {
         </div>
       ) : (
         <div>
-          {/* Statistiche */}
+          {/* Statistiche generali */}
           <div
             style={{
               backgroundColor: "#e7f3ff",
-              padding: "15px",
+              padding: "20px",
               borderRadius: "5px",
-              marginBottom: "20px",
+              marginBottom: "30px",
             }}
           >
-            <h3 style={{ margin: "0 0 10px 0" }}>📊 Statistiche</h3>
-            <p style={{ margin: "0" }}>
-              <strong>Totale risposte:</strong> {responses.length}
-            </p>
+            <h3 style={{ margin: "0 0 15px 0" }}>📊 Statistiche Generali</h3>
+            <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
+              <div>
+                <strong>Totale risposte:</strong> {responses.length}
+              </div>
+              <div>
+                <strong>Domande:</strong>{" "}
+                {questionnaire?.questions?.length || 0}
+              </div>
+              {responses.length > 0 && (
+                <div>
+                  <strong>Tasso di completamento:</strong> 100%
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Lista Risposte */}
-          <div>
-            <h3>Risposte Raccolte</h3>
-            {responses.map((response, index) => (
-              <div
-                key={response.id}
-                style={{
-                  border: "1px solid #ddd",
-                  padding: "20px",
-                  marginBottom: "15px",
-                  backgroundColor: "white",
-                  borderRadius: "5px",
-                }}
-              >
-                <div
+          {/* Contenuto basato sulla modalità */}
+          {viewMode === "analytics" && questionnaire && (
+            <div>
+              <h3>📈 Analisi per Domanda</h3>
+              {questionnaire.questions.map((question, index) => {
+                const stats = getQuestionStats(question);
+                return (
+                  <div
+                    key={question.id}
+                    style={{
+                      border: "1px solid #ddd",
+                      padding: "20px",
+                      marginBottom: "20px",
+                      backgroundColor: "white",
+                      borderRadius: "5px",
+                    }}
+                  >
+                    <h4 style={{ margin: "0 0 15px 0" }}>
+                      Domanda {index + 1}: {question.question_text}
+                    </h4>
+                    <div
+                      style={{
+                        marginBottom: "10px",
+                        fontSize: "14px",
+                        color: "#666",
+                      }}
+                    >
+                      Tipo: {question.question_type} | Risposte:{" "}
+                      {stats.totalAnswers}/{responses.length}
+                    </div>
+
+                    {stats.type === "choice" && (
+                      <div>
+                        <strong>Distribuzione risposte:</strong>
+                        {stats.distribution.map((item, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              margin: "8px 0",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <div style={{ width: "200px", fontSize: "14px" }}>
+                              {item.option}
+                            </div>
+                            <div
+                              style={{
+                                width: `${Math.max(item.percentage, 5)}%`,
+                                backgroundColor: "#007bff",
+                                height: "20px",
+                                marginRight: "10px",
+                                borderRadius: "3px",
+                              }}
+                            ></div>
+                            <span style={{ fontSize: "12px" }}>
+                              {item.count} ({item.percentage}%)
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {stats.type === "scale" && (
+                      <div>
+                        <div style={{ marginBottom: "10px" }}>
+                          <strong>Media:</strong> {stats.average.toFixed(1)}/5
+                        </div>
+                        <strong>Distribuzione:</strong>
+                        {stats.distribution.map((item) => (
+                          <div
+                            key={item.value}
+                            style={{
+                              margin: "5px 0",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <div style={{ width: "30px" }}>{item.value}</div>
+                            <div
+                              style={{
+                                width: `${Math.max(
+                                  (item.count / stats.totalAnswers) * 100,
+                                  3
+                                )}%`,
+                                backgroundColor: "#28a745",
+                                height: "15px",
+                                marginRight: "10px",
+                                borderRadius: "3px",
+                              }}
+                            ></div>
+                            <span style={{ fontSize: "12px" }}>
+                              {item.count}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {stats.type === "text" && (
+                      <div>
+                        <strong>Lunghezza media:</strong>{" "}
+                        {stats.averageLength.toFixed(0)} caratteri
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {viewMode === "table" && questionnaire && (
+            <div>
+              <h3>📊 Vista Tabella</h3>
+              <div style={{ overflowX: "auto" }}>
+                <table
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "15px",
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    backgroundColor: "white",
                   }}
                 >
-                  <h4 style={{ margin: "0" }}>Risposta #{index + 1}</h4>
-                  <small style={{ color: "#666" }}>
-                    {formatDate(response.submitted_at)}
-                  </small>
-                </div>
-
-                {/* Risposte */}
-                <div>
-                  {Object.entries(response.responses).map(
-                    ([question, answer]) => (
-                      <div
-                        key={question}
+                  <thead>
+                    <tr style={{ backgroundColor: "#f8f9fa" }}>
+                      <th
                         style={{
-                          marginBottom: "12px",
-                          paddingBottom: "12px",
-                          borderBottom: "1px solid #eee",
+                          padding: "12px",
+                          border: "1px solid #ddd",
+                          textAlign: "left",
                         }}
                       >
-                        <div
+                        Data
+                      </th>
+                      {questionnaire.questions.map((question, index) => (
+                        <th
+                          key={question.id}
                           style={{
-                            fontWeight: "bold",
-                            marginBottom: "5px",
-                            color: "#333",
+                            padding: "12px",
+                            border: "1px solid #ddd",
+                            textAlign: "left",
+                            minWidth: "150px",
                           }}
                         >
-                          {question}
-                        </div>
-                        <div style={{ color: "#666" }}>
-                          {Array.isArray(answer) ? (
-                            <ul style={{ margin: "0", paddingLeft: "20px" }}>
-                              {answer.map((item, idx) => (
-                                <li key={idx}>{item}</li>
-                              ))}
-                            </ul>
-                          ) : (
-                            answer || <em>Nessuna risposta</em>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
+                          Q{index + 1}:{" "}
+                          {question.question_text.length > 30
+                            ? question.question_text.substring(0, 30) + "..."
+                            : question.question_text}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {responses.map((response, index) => (
+                      <tr
+                        key={response.id}
+                        style={{
+                          backgroundColor:
+                            index % 2 === 0 ? "white" : "#f9f9f9",
+                        }}
+                      >
+                        <td
+                          style={{
+                            padding: "12px",
+                            border: "1px solid #ddd",
+                            fontSize: "12px",
+                          }}
+                        >
+                          {formatDate(response.submitted_at)}
+                        </td>
+                        {questionnaire.questions.map((question) => (
+                          <td
+                            key={question.id}
+                            style={{
+                              padding: "12px",
+                              border: "1px solid #ddd",
+                              fontSize: "14px",
+                            }}
+                          >
+                            {Array.isArray(
+                              response.responses[question.question_text]
+                            )
+                              ? response.responses[question.question_text].join(
+                                  ", "
+                                )
+                              : response.responses[question.question_text] ||
+                                "-"}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {viewMode === "cards" && (
+            <div>
+              <h3>📋 Vista Schede</h3>
+              {responses.map((response, index) => (
+                <div
+                  key={response.id}
+                  style={{
+                    border: "1px solid #ddd",
+                    padding: "20px",
+                    marginBottom: "20px",
+                    backgroundColor: "white",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "20px",
+                      borderBottom: "1px solid #eee",
+                      paddingBottom: "10px",
+                    }}
+                  >
+                    <h4 style={{ margin: "0", color: "#007bff" }}>
+                      Risposta #{index + 1}
+                    </h4>
+                    <small
+                      style={{
+                        color: "#666",
+                        backgroundColor: "#f8f9fa",
+                        padding: "4px 8px",
+                        borderRadius: "3px",
+                      }}
+                    >
+                      {formatDate(response.submitted_at)}
+                    </small>
+                  </div>
+
+                  <div style={{ display: "grid", gap: "15px" }}>
+                    {Object.entries(response.responses).map(
+                      ([question, answer]) => (
+                        <div
+                          key={question}
+                          style={{
+                            padding: "15px",
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: "5px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontWeight: "bold",
+                              marginBottom: "8px",
+                              color: "#333",
+                            }}
+                          >
+                            {question}
+                          </div>
+                          <div style={{ color: "#555", lineHeight: "1.4" }}>
+                            {Array.isArray(answer) ? (
+                              <div>
+                                {answer.map((item, idx) => (
+                                  <span
+                                    key={idx}
+                                    style={{
+                                      display: "inline-block",
+                                      margin: "2px 4px 2px 0",
+                                      padding: "2px 8px",
+                                      backgroundColor: "#007bff",
+                                      color: "white",
+                                      borderRadius: "12px",
+                                      fontSize: "12px",
+                                    }}
+                                  >
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              answer || (
+                                <em style={{ color: "#999" }}>
+                                  Nessuna risposta
+                                </em>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
