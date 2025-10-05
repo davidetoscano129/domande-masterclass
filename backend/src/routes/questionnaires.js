@@ -134,8 +134,18 @@ router.get("/:id", async (req, res) => {
       [id]
     );
 
+    // Parsa le opzioni JSON per ogni domanda
+    const parsedQuestions = questions.map((question) => ({
+      ...question,
+      question_options: question.question_options
+        ? typeof question.question_options === "string"
+          ? JSON.parse(question.question_options)
+          : question.question_options
+        : null,
+    }));
+
     const questionnaire = questionnaires[0];
-    questionnaire.questions = questions;
+    questionnaire.questions = parsedQuestions;
 
     res.json({
       message: "Dettaglio questionario",

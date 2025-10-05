@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { questionnaires } from "../services/api";
 import QuestionnaireEditor from "./QuestionnaireEditor";
-import QuestionnaireViewer from "./QuestionnaireViewer";
 import ResponsesViewer from "./ResponsesViewer";
 
 function Dashboard({ onLogout }) {
@@ -42,8 +41,9 @@ function Dashboard({ onLogout }) {
     setView("editor");
   };
 
-  // Vai al visualizzatore
+  // Vai al visualizzatore (usa editor in modalità readOnly)
   const goToViewer = (questionnaire) => {
+    setEditQuestionnaireId(questionnaire.id);
     setSelectedQuestionnaire(questionnaire);
     setView("viewer");
   };
@@ -202,12 +202,14 @@ function Dashboard({ onLogout }) {
     );
   }
 
-  // Se siamo nel visualizzatore, mostra solo quello
+  // Se siamo nel visualizzatore, mostra l'editor in modalità sola lettura
   if (view === "viewer" && selectedQuestionnaire) {
     return (
-      <QuestionnaireViewer
-        questionnaireId={selectedQuestionnaire.id}
+      <QuestionnaireEditor
         onBack={goToList}
+        onSave={goToList}
+        editQuestionnaireId={editQuestionnaireId}
+        readOnly={true}
         onEdit={() => goToEdit(selectedQuestionnaire)}
       />
     );

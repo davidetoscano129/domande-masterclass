@@ -78,4 +78,26 @@ router.post("/questionnaires/:questionnaireId/questions", async (req, res) => {
   }
 });
 
+// DELETE - Elimina tutte le domande di un questionario
+router.delete(
+  "/questionnaires/:questionnaireId/questions",
+  async (req, res) => {
+    try {
+      const { questionnaireId } = req.params;
+
+      // Elimina tutte le domande del questionario
+      await query("DELETE FROM questions WHERE questionnaire_id = ?", [
+        questionnaireId,
+      ]);
+
+      res.json({
+        message: "Domande eliminate con successo",
+      });
+    } catch (error) {
+      console.error("Errore nell'eliminazione domande:", error);
+      res.status(500).json({ error: "Errore interno del server" });
+    }
+  }
+);
+
 module.exports = router;

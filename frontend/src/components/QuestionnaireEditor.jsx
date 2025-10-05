@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { questionnaires } from "../services/api";
 
-function QuestionnaireEditor({ onBack, onSave, editQuestionnaireId = null }) {
+function QuestionnaireEditor({
+  onBack,
+  onSave,
+  editQuestionnaireId = null,
+  readOnly = false,
+  onEdit = null,
+}) {
   const [questionnaire, setQuestionnaire] = useState({
     title: "",
     description: "",
@@ -32,17 +38,17 @@ function QuestionnaireEditor({ onBack, onSave, editQuestionnaireId = null }) {
       const adaptedQuestions = (data.questionnaire.questions || []).map(
         (q) => ({
           id: q.id,
-          question_text: q.text,
+          question_text: q.question_text,
           question_type:
-            q.type === "text"
+            q.question_type === "text"
               ? "text"
-              : q.type === "single"
+              : q.question_type === "single"
               ? "multiple_choice"
-              : q.type === "multiple"
+              : q.question_type === "multiple"
               ? "checkbox"
-              : q.type,
-          question_options: q.options || null,
-          is_required: q.required || false,
+              : q.question_type,
+          question_options: q.question_options || null,
+          is_required: q.is_required || false,
         })
       );
 
@@ -129,6 +135,18 @@ function QuestionnaireEditor({ onBack, onSave, editQuestionnaireId = null }) {
         // Aggiorna questionario esistente
         await questionnaires.update(editQuestionnaireId, questionnaire);
         questionnaireId = editQuestionnaireId;
+
+        // Elimina tutte le domande esistenti prima di aggiungere quelle nuove
+        await fetch(
+          `http://localhost:3000/api/questionnaires/${questionnaireId}/questions`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
       } else {
         // Crea nuovo questionario
         const response = await questionnaires.create(questionnaire);
@@ -196,55 +214,97 @@ function QuestionnaireEditor({ onBack, onSave, editQuestionnaireId = null }) {
               paddingBottom: "20px",
             }}
           >
-            <button
-              onClick={onBack}
+            <div
               style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 marginBottom: "15px",
-                padding: "8px 16px",
-                backgroundColor: "#6c757d",
-                color: "white",
-                border: "none",
               }}
             >
-              ← Indietro
-            </button>
+              <button
+                onClick={onBack}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#6c757d",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                }}
+              >
+                ← Indietro
+              </button>
+
+              {readOnly && onEdit && (
+                <button
+                  onClick={onEdit}
+                  style={{
+                    padding: "10px 20px",
+                    backgroundColor: "#007bff",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  ✏️ Modifica
+                </button>
+              )}
+            </div>
 
             <h2>
-              {editQuestionnaireId
+              {readOnly
+                ? questionnaire.title || "Visualizza Questionario"
+                : editQuestionnaireId
                 ? "Modifica Questionario"
                 : "Crea Nuovo Questionario"}
             </h2>
 
+            {readOnly && questionnaire.description && (
+              <p style={{ color: "#666", margin: "10px 0 0 0" }}>
+                {questionnaire.description}
+              </p>
+            )}
+
             {/* Info Questionario */}
-            <div style={{ marginTop: "20px" }}>
-              <input
-                type="text"
-                placeholder="Titolo del questionario"
-                value={questionnaire.title}
-                onChange={(e) =>
-                  setQuestionnaire({ ...questionnaire, title: e.target.value })
-                }
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  marginBottom: "15px",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                }}
-              />
-              <textarea
-                placeholder="Descrizione del questionario (opzionale)"
-                value={questionnaire.description}
-                onChange={(e) =>
-                  setQuestionnaire({
-                    ...questionnaire,
-                    description: e.target.value,
-                  })
-                }
-                rows="3"
-                style={{ width: "100%", padding: "12px", marginBottom: "20px" }}
-              />
-            </div>
+            {!readOnly && (
+              <div style={{ marginTop: "20px" }}>
+                <input
+                  type="text"
+                  placeholder="Titolo del questionario"
+                  value={questionnaire.title}
+                  onChange={(e) =>
+                    setQuestionnaire({
+                      ...questionnaire,
+                      title: e.target.value,
+                    })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    marginBottom: "15px",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                  }}
+                />
+                <textarea
+                  placeholder="Descrizione del questionario (opzionale)"
+                  value={questionnaire.description}
+                  onChange={(e) =>
+                    setQuestionnaire({
+                      ...questionnaire,
+                      description: e.target.value,
+                    })
+                  }
+                  rows="3"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    marginBottom: "20px",
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Lista Domande */}
@@ -258,102 +318,107 @@ function QuestionnaireEditor({ onBack, onSave, editQuestionnaireId = null }) {
                 onAddOption={addOption}
                 onRemoveOption={removeOption}
                 onRemove={removeQuestion}
+                readOnly={readOnly}
               />
             ))}
           </div>
 
           {/* Aggiungi Domanda */}
-          <div
-            style={{
-              marginBottom: "30px",
-              padding: "20px",
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #ddd",
-            }}
-          >
-            <h4>Aggiungi Domanda</h4>
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <button
-                onClick={() => addQuestion("text")}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#007bff",
-                  color: "white",
-                  border: "none",
-                }}
-              >
-                📝 Testo
-              </button>
-              <button
-                onClick={() => addQuestion("multiple_choice")}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#28a745",
-                  color: "white",
-                  border: "none",
-                }}
-              >
-                🔘 Scelta Multipla
-              </button>
-              <button
-                onClick={() => addQuestion("checkbox")}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#17a2b8",
-                  color: "white",
-                  border: "none",
-                }}
-              >
-                ☑️ Checkbox
-              </button>
-              <button
-                onClick={() => addQuestion("scale")}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#ffc107",
-                  color: "black",
-                  border: "none",
-                }}
-              >
-                ⭐ Scala 1-5
-              </button>
-              <button
-                onClick={() => addQuestion("dropdown")}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#6c757d",
-                  color: "white",
-                  border: "none",
-                }}
-              >
-                📋 Dropdown
-              </button>
-            </div>
-          </div>
-
-          {/* Azioni */}
-          <div
-            style={{
-              textAlign: "center",
-              borderTop: "1px solid #ddd",
-              paddingTop: "20px",
-            }}
-          >
-            <button
-              onClick={handleSave}
-              disabled={saving || !questionnaire.title.trim()}
+          {!readOnly && (
+            <div
               style={{
-                padding: "12px 30px",
-                backgroundColor: saving ? "#6c757d" : "#28a745",
-                color: "white",
-                border: "none",
-                fontSize: "16px",
-                fontWeight: "bold",
+                marginBottom: "30px",
+                padding: "20px",
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #ddd",
               }}
             >
-              {saving ? "Salvataggio..." : "Salva Questionario"}
-            </button>
-          </div>
+              <h4>Aggiungi Domanda</h4>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => addQuestion("text")}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#007bff",
+                    color: "white",
+                    border: "none",
+                  }}
+                >
+                  📝 Testo
+                </button>
+                <button
+                  onClick={() => addQuestion("multiple_choice")}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#28a745",
+                    color: "white",
+                    border: "none",
+                  }}
+                >
+                  🔘 Scelta Multipla
+                </button>
+                <button
+                  onClick={() => addQuestion("checkbox")}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#17a2b8",
+                    color: "white",
+                    border: "none",
+                  }}
+                >
+                  ☑️ Checkbox
+                </button>
+                <button
+                  onClick={() => addQuestion("scale")}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#ffc107",
+                    color: "black",
+                    border: "none",
+                  }}
+                >
+                  ⭐ Scala 1-5
+                </button>
+                <button
+                  onClick={() => addQuestion("dropdown")}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#6c757d",
+                    color: "white",
+                    border: "none",
+                  }}
+                >
+                  📋 Dropdown
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Azioni */}
+          {!readOnly && (
+            <div
+              style={{
+                textAlign: "center",
+                borderTop: "1px solid #ddd",
+                paddingTop: "20px",
+              }}
+            >
+              <button
+                onClick={handleSave}
+                disabled={saving || !questionnaire.title.trim()}
+                style={{
+                  padding: "12px 30px",
+                  backgroundColor: saving ? "#6c757d" : "#28a745",
+                  color: "white",
+                  border: "none",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                }}
+              >
+                {saving ? "Salvataggio..." : "Salva Questionario"}
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
@@ -368,6 +433,7 @@ function QuestionEditor({
   onAddOption,
   onRemoveOption,
   onRemove,
+  readOnly = false,
 }) {
   return (
     <div
@@ -389,49 +455,86 @@ function QuestionEditor({
         }}
       >
         <h4>Domanda {index + 1}</h4>
-        <button
-          onClick={() => onRemove(question.id)}
-          style={{
-            backgroundColor: "#dc3545",
-            color: "white",
-            border: "none",
-            padding: "5px 10px",
-          }}
-        >
-          🗑️ Rimuovi
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => onRemove(question.id)}
+            style={{
+              backgroundColor: "#dc3545",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+            }}
+          >
+            🗑️ Rimuovi
+          </button>
+        )}
       </div>
 
       {/* Testo domanda */}
-      <input
-        type="text"
-        placeholder="Scrivi la domanda..."
-        value={question.question_text}
-        onChange={(e) => onUpdate(question.id, "question_text", e.target.value)}
-        style={{
-          width: "100%",
-          padding: "10px",
-          marginBottom: "15px",
-          fontSize: "16px",
-        }}
-      />
+      {readOnly ? (
+        <div
+          style={{
+            width: "100%",
+            padding: "10px",
+            marginBottom: "15px",
+            fontSize: "16px",
+            fontWeight: "bold",
+            backgroundColor: "#f8f9fa",
+            border: "1px solid #e9ecef",
+            borderRadius: "4px",
+          }}
+        >
+          {question.question_text}
+        </div>
+      ) : (
+        <input
+          type="text"
+          placeholder="Scrivi la domanda..."
+          value={question.question_text}
+          onChange={(e) =>
+            onUpdate(question.id, "question_text", e.target.value)
+          }
+          style={{
+            width: "100%",
+            padding: "10px",
+            marginBottom: "15px",
+            fontSize: "16px",
+          }}
+        />
+      )}
 
       {/* Tipo domanda */}
       <div style={{ marginBottom: "15px" }}>
         <strong>Tipo: </strong>
-        <select
-          value={question.question_type}
-          onChange={(e) =>
-            onUpdate(question.id, "question_type", e.target.value)
-          }
-          style={{ padding: "8px", marginLeft: "10px" }}
-        >
-          <option value="text">Testo libero</option>
-          <option value="multiple_choice">Scelta multipla</option>
-          <option value="checkbox">Checkbox</option>
-          <option value="scale">Scala 1-5</option>
-          <option value="dropdown">Dropdown</option>
-        </select>
+        {readOnly ? (
+          <span style={{ marginLeft: "10px" }}>
+            {question.question_type === "text"
+              ? "Testo libero"
+              : question.question_type === "multiple_choice"
+              ? "Scelta multipla"
+              : question.question_type === "checkbox"
+              ? "Checkbox"
+              : question.question_type === "scale"
+              ? "Scala 1-5"
+              : question.question_type === "dropdown"
+              ? "Dropdown"
+              : question.question_type}
+          </span>
+        ) : (
+          <select
+            value={question.question_type}
+            onChange={(e) =>
+              onUpdate(question.id, "question_type", e.target.value)
+            }
+            style={{ padding: "8px", marginLeft: "10px" }}
+          >
+            <option value="text">Testo libero</option>
+            <option value="multiple_choice">Scelta multipla</option>
+            <option value="checkbox">Checkbox</option>
+            <option value="scale">Scala 1-5</option>
+            <option value="dropdown">Dropdown</option>
+          </select>
+        )}
       </div>
 
       {/* Opzioni per domande multiple */}
@@ -440,52 +543,73 @@ function QuestionEditor({
         question.question_type === "dropdown") && (
         <div style={{ marginBottom: "15px" }}>
           <strong>Opzioni:</strong>
-          {question.question_options?.map((option, optionIndex) => (
-            <div
-              key={optionIndex}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginTop: "8px",
-              }}
-            >
-              <input
-                type="text"
-                value={option}
-                onChange={(e) => {
-                  const newOptions = [...question.question_options];
-                  newOptions[optionIndex] = e.target.value;
-                  onUpdate(question.id, "question_options", newOptions);
-                }}
-                style={{ flex: 1, padding: "8px", marginRight: "10px" }}
-              />
-              {question.question_options.length > 1 && (
-                <button
-                  onClick={() => onRemoveOption(question.id, optionIndex)}
+          {readOnly ? (
+            <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
+              {question.question_options?.map((option, optionIndex) => (
+                <li
+                  key={optionIndex}
                   style={{
-                    backgroundColor: "#dc3545",
-                    color: "white",
-                    border: "none",
-                    padding: "5px 8px",
+                    marginBottom: "4px",
+                    fontSize: "14px",
+                    color: "#555",
                   }}
                 >
-                  ✕
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            onClick={() => onAddOption(question.id)}
-            style={{
-              marginTop: "10px",
-              padding: "8px 16px",
-              backgroundColor: "#28a745",
-              color: "white",
-              border: "none",
-            }}
-          >
-            + Aggiungi Opzione
-          </button>
+                  {question.question_type === "multiple_choice" && "○ "}
+                  {question.question_type === "checkbox" && "☐ "}
+                  {option}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <>
+              {question.question_options?.map((option, optionIndex) => (
+                <div
+                  key={optionIndex}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginTop: "8px",
+                  }}
+                >
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => {
+                      const newOptions = [...question.question_options];
+                      newOptions[optionIndex] = e.target.value;
+                      onUpdate(question.id, "question_options", newOptions);
+                    }}
+                    style={{ flex: 1, padding: "8px", marginRight: "10px" }}
+                  />
+                  {question.question_options.length > 1 && (
+                    <button
+                      onClick={() => onRemoveOption(question.id, optionIndex)}
+                      style={{
+                        backgroundColor: "#dc3545",
+                        color: "white",
+                        border: "none",
+                        padding: "5px 8px",
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                onClick={() => onAddOption(question.id)}
+                style={{
+                  marginTop: "10px",
+                  padding: "8px 16px",
+                  backgroundColor: "#28a745",
+                  color: "white",
+                  border: "none",
+                }}
+              >
+                + Aggiungi Opzione
+              </button>
+            </>
+          )}
         </div>
       )}
 
@@ -505,17 +629,35 @@ function QuestionEditor({
       )}
 
       {/* Obbligatorio */}
-      <label style={{ display: "flex", alignItems: "center" }}>
-        <input
-          type="checkbox"
-          checked={question.is_required}
-          onChange={(e) =>
-            onUpdate(question.id, "is_required", e.target.checked)
-          }
-          style={{ marginRight: "8px" }}
-        />
-        Domanda obbligatoria
-      </label>
+      {readOnly ? (
+        question.is_required && (
+          <div
+            style={{
+              padding: "6px 12px",
+              backgroundColor: "#dc3545",
+              color: "white",
+              fontSize: "12px",
+              borderRadius: "3px",
+              display: "inline-block",
+              marginTop: "10px",
+            }}
+          >
+            OBBLIGATORIA
+          </div>
+        )
+      ) : (
+        <label style={{ display: "flex", alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={question.is_required}
+            onChange={(e) =>
+              onUpdate(question.id, "is_required", e.target.checked)
+            }
+            style={{ marginRight: "8px" }}
+          />
+          Domanda obbligatoria
+        </label>
+      )}
     </div>
   );
 }
