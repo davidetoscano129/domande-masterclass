@@ -1,4 +1,6 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { query, executeCommand } = require("../config/database");
 
 const router = express.Router();
@@ -300,6 +302,217 @@ router.post("/register-student", async (req, res) => {
     console.error("Errore registrazione studente:", error);
     res.status(500).json({
       error: "Errore nella registrazione dello studente",
+    });
+  }
+});
+
+// POST /api/shared/login-user - Login utente esterno
+router.post("/login-user", async (req, res) => {
+  try {
+    const { email, password, questionnaireToken } = req.body;
+
+    console.log("🔐 Tentativo login utente:", email);
+
+    // Validazioni
+    if (!email || !password) {
+      return res.status(400).json({
+        error: "Email e password sono obbligatori",
+      });
+    }
+
+    // Cerca utente nel database
+    const users = await query(
+      "SELECT id, email, password, nome, cognome, azienda FROM external_users WHERE email = ? AND is_active = TRUE",
+      [email]
+    );
+
+    if (users.length === 0) {
+      return res.status(401).json({
+        error: "Utente non trovato o credenziali non valide",
+      });
+    }
+
+    const user = users[0];
+
+    // Verifica password
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({
+        error: "Credenziali non valide",
+      });
+    }
+
+    // Se c'è un token questionario, associa il questionario all'utente
+    let questionnaireId = null;
+    if (questionnaireToken) {
+      const questionnaire = await query(
+        "SELECT id FROM questionnaires WHERE share_token = ? AND is_active = TRUE",
+        [questionnaireToken]
+      );
+
+      if (questionnaire.length > 0) {
+        questionnaireId = questionnaire[0].id;
+
+        // Inserisci nella tabella user_questionnaires se non esiste già
+        await query(
+          `INSERT IGNORE INTO user_questionnaires 
+           (external_user_id, questionnaire_id, accessed_via_token) 
+           VALUES (?, ?, ?)`,
+          [user.id, questionnaireId, questionnaireToken]
+        );
+
+        console.log(
+          `📋 Questionario ${questionnaireId} associato all'utente ${user.id}`
+        );
+      }
+    }
+
+    // Genera JWT token
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        type: "external_user",
+      },
+      process.env.JWT_SECRET || "fallback-secret",
+      { expiresIn: "7d" }
+    );
+
+    console.log("✅ Login effettuato con successo per:", email);
+
+    res.json({
+      message: "Login effettuato con successo",
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: `${user.nome} ${user.cognome}`,
+        azienda: user.azienda,
+      },
+      questionnaire_id: questionnaireId,
+    });
+  } catch (error) {
+    console.error("Errore login utente:", error);
+    res.status(500).json({
+      error: "Errore durante il login",
+    });
+  }
+});
+
+// POST /api/shared/register-user - Registra un utente lavoratore nel sistema
+router.post("/register-user", async (req, res) => {
+  try {
+    const { email, password, azienda, nome, cognome, questionnaireToken } =
+      req.body;
+
+    console.log("📝 Registrazione utente:", {
+      email,
+      azienda,
+      nome,
+      cognome,
+    });
+
+    // Validazioni
+    if (!email || !password || !azienda || !nome || !cognome) {
+      return res.status(400).json({
+        error:
+          "Tutti i campi sono obbligatori (email, password, azienda, nome, cognome)",
+      });
+    }
+
+    // Validazione formato email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        error: "Formato email non valido",
+      });
+    }
+
+    // Validazione password
+    if (password.length < 6) {
+      return res.status(400).json({
+        error: "La password deve essere di almeno 6 caratteri",
+      });
+    }
+
+    // Verifica se l'utente esiste già nella tabella external_users
+    const existingUser = await query(
+      "SELECT id FROM external_users WHERE email = ?",
+      [email]
+    );
+
+    if (existingUser.length > 0) {
+      return res.status(400).json({
+        error: "Email già registrata",
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Crea nuovo utente nella tabella external_users
+    console.log("➕ Creazione nuovo utente");
+    const result = await query(
+      `INSERT INTO external_users (email, password, nome, cognome, azienda, created_at, updated_at) 
+       VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
+      [email, hashedPassword, nome, cognome, azienda]
+    );
+
+    const userId = result.insertId;
+
+    // Se abbiamo un token questionario, associalo all'utente
+    let questionnaireId = null;
+    if (questionnaireToken) {
+      const questionnaire = await query(
+        "SELECT id FROM questionnaires WHERE share_token = ? AND is_active = TRUE",
+        [questionnaireToken]
+      );
+
+      if (questionnaire.length > 0) {
+        questionnaireId = questionnaire[0].id;
+
+        // Inserisci nella tabella user_questionnaires
+        await query(
+          `INSERT INTO user_questionnaires 
+           (external_user_id, questionnaire_id, accessed_via_token) 
+           VALUES (?, ?, ?)`,
+          [userId, questionnaireId, questionnaireToken]
+        );
+
+        console.log(
+          `📋 Questionario ${questionnaireId} associato al nuovo utente ${userId}`
+        );
+      }
+    }
+
+    // Genera JWT token
+    const token = jwt.sign(
+      {
+        userId: userId,
+        email: email,
+        type: "external_user",
+      },
+      process.env.JWT_SECRET || "fallback-secret",
+      { expiresIn: "7d" }
+    );
+
+    console.log("✅ Utente registrato con successo, ID:", userId);
+
+    res.json({
+      message: "Utente registrato con successo",
+      token,
+      user: {
+        id: userId,
+        email: email,
+        name: `${nome} ${cognome}`,
+        azienda: azienda,
+      },
+      questionnaire_id: questionnaireId,
+    });
+  } catch (error) {
+    console.error("Errore registrazione utente:", error);
+    res.status(500).json({
+      error: "Errore nella registrazione dell'utente",
     });
   }
 });

@@ -11,11 +11,13 @@ function SharedQuestionnaire() {
   const [submitted, setSubmitted] = useState(false);
   const [isHttpsRedirect, setIsHttpsRedirect] = useState(false);
 
-  // Sistema identificazione studenti
-  const [studentIdentified, setStudentIdentified] = useState(false);
-  const [studentInfo, setStudentInfo] = useState({
+  // Sistema identificazione utenti
+  const [userIdentified, setUserIdentified] = useState(false);
+  const [isLogin, setIsLogin] = useState(true); // true = login, false = registrazione
+  const [userInfo, setUserInfo] = useState({
     email: "",
-    matricola: "",
+    password: "",
+    azienda: "",
     nome: "",
     cognome: "",
   });
@@ -106,53 +108,90 @@ function SharedQuestionnaire() {
     }
   };
 
-  const handleStudentIdentification = async (e) => {
+  const handleUserIdentification = async (e) => {
     e.preventDefault();
 
-    // Validazione campi obbligatori
-    if (
-      !studentInfo.email ||
-      !studentInfo.matricola ||
-      !studentInfo.nome ||
-      !studentInfo.cognome
-    ) {
-      setError("Tutti i campi sono obbligatori per l'identificazione");
+    // Validazione email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userInfo.email)) {
+      setError("Inserisci un indirizzo email valido");
       return;
     }
 
-    // Validazione formato email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(studentInfo.email)) {
-      setError("Inserisci un'email valida");
+    // Validazione password
+    if (!userInfo.password || userInfo.password.length < 6) {
+      setError("La password deve essere di almeno 6 caratteri");
       return;
+    }
+
+    // Validazione campi registrazione (solo se non è login)
+    if (!isLogin) {
+      if (!userInfo.azienda || !userInfo.nome || !userInfo.cognome) {
+        setError("Tutti i campi sono obbligatori per la registrazione");
+        return;
+      }
     }
 
     try {
       setError("");
       setSubmitting(true);
 
-      // Registra lo studente nel database
-      const registrationData = {
-        email: studentInfo.email,
-        matricola: studentInfo.matricola,
-        nome: studentInfo.nome,
-        cognome: studentInfo.cognome,
-        questionnaireToken: token,
-      };
+      let result;
 
-      const result = await shared.registerStudent(registrationData);
-      console.log("✅ Studente registrato:", result);
+      if (isLogin) {
+        // Tentativo di login
+        const loginData = {
+          email: userInfo.email,
+          password: userInfo.password,
+          questionnaireToken: token,
+        };
 
-      // Trasferisce i dati dello studente nel formato compatibile
-      setRespondentInfo({
-        name: `${studentInfo.nome} ${studentInfo.cognome}`,
-        email: studentInfo.email,
-      });
+        result = await shared.loginUser(loginData);
+        console.log("✅ Login effettuato:", result);
 
-      setStudentIdentified(true);
-    } catch (err) {
-      setError("Errore nell'identificazione studente: " + err.message);
-    } finally {
+        // Se login ha successo, usa i dati dell'utente esistente
+        setRespondentInfo({
+          name: result.user.name,
+          email: result.user.email,
+        });
+      } else {
+        // Registrazione nuovo utente
+        const registrationData = {
+          email: userInfo.email,
+          password: userInfo.password,
+          azienda: userInfo.azienda,
+          nome: userInfo.nome,
+          cognome: userInfo.cognome,
+          questionnaireToken: token,
+        };
+
+        result = await shared.registerUser(registrationData);
+        console.log("✅ Utente registrato:", result);
+
+        // Trasferisce i dati del nuovo utente
+        setRespondentInfo({
+          name: `${userInfo.nome} ${userInfo.cognome}`,
+          email: userInfo.email,
+        });
+      }
+
+      // Salva token JWT se fornito
+      if (result.token) {
+        localStorage.setItem("external_user_token", result.token);
+      }
+
+      setUserIdentified(true);
+      setSubmitting(false);
+    } catch (error) {
+      console.error("❌ Errore autenticazione:", error);
+
+      // Se il login fallisce, suggerisci la registrazione
+      if (isLogin && error.message?.includes("non trovato")) {
+        setError("Utente non trovato. Prova a registrarti!");
+      } else {
+        setError(error.message || "Errore durante l'autenticazione");
+      }
+      setError(error.message || "Errore durante l'identificazione");
       setSubmitting(false);
     }
   };
@@ -406,15 +445,37 @@ function SharedQuestionnaire() {
     );
   }
 
-  // Form identificazione studenti
-  if (!studentIdentified) {
+  // Form identificazione utenti
+  if (!userIdentified) {
     return (
       <div style={{ maxWidth: "600px", margin: "50px auto", padding: "20px" }}>
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
-          <h2>🎓 Identificazione Studente</h2>
+          <h2>💼 {isLogin ? "Accedi" : "Registrati"}</h2>
           <p style={{ color: "#666", fontSize: "16px" }}>
-            Prima di procedere con il questionario, identifica con i tuoi dati
+            {isLogin
+              ? "Accedi al tuo account per completare il questionario"
+              : "Crea un account per accedere ai questionari condivisi"}
           </p>
+
+          {/* Toggle Login/Registrazione */}
+          <div style={{ marginTop: "15px" }}>
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#007bff",
+                textDecoration: "underline",
+                cursor: "pointer",
+                fontSize: "14px",
+              }}
+            >
+              {isLogin
+                ? "Non hai un account? Registrati qui"
+                : "Hai già un account? Accedi qui"}
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -432,7 +493,7 @@ function SharedQuestionnaire() {
           </div>
         )}
 
-        <form onSubmit={handleStudentIdentification}>
+        <form onSubmit={handleUserIdentification}>
           <div style={{ marginBottom: "20px" }}>
             <label
               style={{
@@ -441,15 +502,15 @@ function SharedQuestionnaire() {
                 fontWeight: "bold",
               }}
             >
-              Email Universitaria *
+              Email Professionale *
             </label>
             <input
               type="email"
-              value={studentInfo.email}
+              value={userInfo.email}
               onChange={(e) =>
-                setStudentInfo({ ...studentInfo, email: e.target.value })
+                setUserInfo({ ...userInfo, email: e.target.value })
               }
-              placeholder="es: mario.rossi@studenti.unisalento.it"
+              placeholder="es: mario.rossi@azienda.com"
               style={{
                 width: "100%",
                 padding: "12px",
@@ -461,6 +522,7 @@ function SharedQuestionnaire() {
             />
           </div>
 
+          {/* Campo Password - sempre visibile */}
           <div style={{ marginBottom: "20px" }}>
             <label
               style={{
@@ -469,15 +531,15 @@ function SharedQuestionnaire() {
                 fontWeight: "bold",
               }}
             >
-              Numero di Matricola *
+              Password *
             </label>
             <input
-              type="text"
-              value={studentInfo.matricola}
+              type="password"
+              value={userInfo.password}
               onChange={(e) =>
-                setStudentInfo({ ...studentInfo, matricola: e.target.value })
+                setUserInfo({ ...userInfo, password: e.target.value })
               }
-              placeholder="es: 0612345"
+              placeholder="Minimo 6 caratteri"
               style={{
                 width: "100%",
                 padding: "12px",
@@ -489,63 +551,98 @@ function SharedQuestionnaire() {
             />
           </div>
 
-          <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-            <div style={{ flex: 1 }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "5px",
-                  fontWeight: "bold",
-                }}
-              >
-                Nome *
-              </label>
-              <input
-                type="text"
-                value={studentInfo.nome}
-                onChange={(e) =>
-                  setStudentInfo({ ...studentInfo, nome: e.target.value })
-                }
-                placeholder="Mario"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  fontSize: "16px",
-                }}
-                required
-              />
-            </div>
+          {/* Campi aggiuntivi solo per registrazione */}
+          {!isLogin && (
+            <>
+              <div style={{ marginBottom: "20px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "5px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Azienda/Organizzazione *
+                </label>
+                <input
+                  type="text"
+                  value={userInfo.azienda}
+                  onChange={(e) =>
+                    setUserInfo({ ...userInfo, azienda: e.target.value })
+                  }
+                  placeholder="es: Acme Corp, Ministero XYZ, Studio Legale ABC"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                    fontSize: "16px",
+                  }}
+                  required
+                />
+              </div>
 
-            <div style={{ flex: 1 }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "5px",
-                  fontWeight: "bold",
-                }}
+              <div
+                style={{ display: "flex", gap: "10px", marginBottom: "20px" }}
               >
-                Cognome *
-              </label>
-              <input
-                type="text"
-                value={studentInfo.cognome}
-                onChange={(e) =>
-                  setStudentInfo({ ...studentInfo, cognome: e.target.value })
-                }
-                placeholder="Rossi"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  fontSize: "16px",
-                }}
-                required
-              />
-            </div>
-          </div>
+                <div style={{ flex: 1 }}>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "5px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Nome *
+                  </label>
+                  <input
+                    type="text"
+                    value={userInfo.nome}
+                    onChange={(e) =>
+                      setUserInfo({ ...userInfo, nome: e.target.value })
+                    }
+                    placeholder="Mario"
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      fontSize: "16px",
+                    }}
+                    required
+                  />
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "5px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Cognome *
+                  </label>
+                  <input
+                    type="text"
+                    value={userInfo.cognome}
+                    onChange={(e) =>
+                      setUserInfo({ ...userInfo, cognome: e.target.value })
+                    }
+                    placeholder="Rossi"
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      fontSize: "16px",
+                    }}
+                    required
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           <button
             type="submit"
@@ -562,9 +659,7 @@ function SharedQuestionnaire() {
               cursor: submitting ? "not-allowed" : "pointer",
             }}
           >
-            {submitting
-              ? "Registrazione in corso..."
-              : "Procedi al Questionario"}
+            {submitting ? "Attendere..." : isLogin ? "Accedi" : "Registrati"}
           </button>
         </form>
 
