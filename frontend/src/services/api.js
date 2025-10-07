@@ -79,11 +79,28 @@ export const questionnaires = {
 export const shared = {
   getQuestionnaire: (token) => apiRequest(`/shared/${token}`),
 
-  submitResponse: (token, responseData) =>
-    apiRequest(`/shared/${token}/responses`, {
+  submitResponse: (token, responseData) => {
+    const externalUserToken = localStorage.getItem("external_user_token");
+    const headers = {
+      "Content-Type": "application/json",
+      ...(externalUserToken && {
+        Authorization: `Bearer ${externalUserToken}`,
+      }),
+    };
+
+    return fetch(`${API_BASE_URL}/shared/${token}/responses`, {
       method: "POST",
+      headers,
       body: JSON.stringify(responseData),
-    }),
+    }).then((response) => {
+      if (!response.ok) {
+        return response.json().then((error) => {
+          throw new Error(error.error || "Errore nell'invio delle risposte");
+        });
+      }
+      return response.json();
+    });
+  },
 
   registerStudent: (studentData) =>
     apiRequest("/shared/register-student", {
@@ -102,4 +119,37 @@ export const shared = {
       method: "POST",
       body: JSON.stringify(loginData),
     }),
+
+  getUserQuestionnaires: () => {
+    const token = localStorage.getItem("external_user_token");
+    return fetch(`${API_BASE_URL}/shared/my-questionnaires`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error("Errore nel caricamento dei questionari");
+      }
+      return response.json();
+    });
+  },
+
+  getMyResponses: (shareToken) => {
+    const token = localStorage.getItem("external_user_token");
+    return fetch(`${API_BASE_URL}/shared/${shareToken}/my-responses`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((response) => {
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Nessuna risposta trovata");
+        }
+        throw new Error("Errore nel caricamento delle risposte");
+      }
+      return response.json();
+    });
+  },
 };

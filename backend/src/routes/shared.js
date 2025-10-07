@@ -5,6 +5,67 @@ const { query, executeCommand } = require("../config/database");
 
 const router = express.Router();
 
+// GET /api/shared/my-questionnaires - Ottieni questionari dell'utente loggato
+router.get("/my-questionnaires", async (req, res) => {
+  try {
+    // Verifica token JWT
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).json({ error: "Token richiesto" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret");
+    } catch (error) {
+      return res.status(401).json({ error: "Token non valido" });
+    }
+
+    if (decoded.type !== "external_user") {
+      return res.status(403).json({ error: "Accesso non autorizzato" });
+    }
+
+    console.log(`📋 Caricamento questionari per utente ${decoded.userId}`);
+
+    // Ottieni questionari associati all'utente
+    const questionnaires = await query(
+      `
+      SELECT 
+        q.id,
+        q.title,
+        q.description,
+        q.share_token,
+        uq.status,
+        uq.assigned_at,
+        uq.completed_at,
+        COUNT(questions.id) as total_questions
+      FROM user_questionnaires uq
+      JOIN questionnaires q ON uq.questionnaire_id = q.id
+      LEFT JOIN questions ON q.id = questions.questionnaire_id
+      WHERE uq.external_user_id = ?
+      GROUP BY q.id, q.title, q.description, q.share_token, uq.status, uq.assigned_at, uq.completed_at
+      ORDER BY uq.assigned_at DESC
+    `,
+      [decoded.userId]
+    );
+
+    console.log(
+      `✅ Trovati ${questionnaires.length} questionari per utente ${decoded.userId}`
+    );
+
+    res.json({
+      message: "Questionari caricati con successo",
+      questionnaires: questionnaires,
+      user_id: decoded.userId,
+    });
+  } catch (error) {
+    console.error("Errore caricamento questionari utente:", error);
+    res.status(500).json({
+      error: "Errore nel caricamento dei questionari",
+    });
+  }
+});
+
 // GET /api/shared/:token - Visualizza questionario condiviso pubblicamente
 router.get("/:token", async (req, res) => {
   try {
@@ -140,6 +201,25 @@ router.post("/:token/responses", async (req, res) => {
       });
     }
 
+    // Verifica se c'è un utente esterno loggato
+    let externalUserId = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      try {
+        const jwtToken = authHeader.replace("Bearer ", "");
+        const decoded = jwt.verify(
+          jwtToken,
+          process.env.JWT_SECRET || "fallback-secret"
+        );
+        if (decoded.type === "external_user") {
+          externalUserId = decoded.userId;
+          console.log("👤 Utente esterno identificato:", externalUserId);
+        }
+      } catch (error) {
+        console.log("⚠️ Token JWT non valido o scaduto:", error.message);
+      }
+    }
+
     // Recupera questionario tramite token
     const questionnaires = await query(
       `SELECT id FROM questionnaires 
@@ -167,16 +247,32 @@ router.post("/:token/responses", async (req, res) => {
     await executeCommand("START TRANSACTION");
 
     try {
-      // Crea record risposta
+      // Crea record risposta (con external_user_id se presente)
       console.log("💾 Salvataggio risposta principale...");
       const responseResult = await query(
-        `INSERT INTO responses (questionnaire_id, respondent_name, respondent_email) 
-         VALUES (?, ?, ?)`,
-        [questionnaireId, respondent_name || null, respondent_email || null]
+        `INSERT INTO responses (questionnaire_id, respondent_name, respondent_email, external_user_id) 
+         VALUES (?, ?, ?, ?)`,
+        [
+          questionnaireId,
+          respondent_name || null,
+          respondent_email || null,
+          externalUserId,
+        ]
       );
 
       const responseId = responseResult.insertId;
       console.log("✅ Response ID creato:", responseId);
+
+      // Se c'è un utente esterno, aggiorna lo status del questionario a completato
+      if (externalUserId) {
+        await query(
+          `UPDATE user_questionnaires 
+           SET status = 'completed', completed_at = NOW() 
+           WHERE external_user_id = ? AND questionnaire_id = ?`,
+          [externalUserId, questionnaireId]
+        );
+        console.log("✅ Status questionario aggiornato a completato");
+      }
 
       // Salva tutte le risposte
       console.log("💾 Salvataggio", answers.length, "risposte...");
@@ -322,10 +418,9 @@ router.post("/login-user", async (req, res) => {
 
     // Cerca utente nel database
     const users = await query(
-      "SELECT id, email, password, nome, cognome, azienda FROM external_users WHERE email = ? AND is_active = TRUE",
+      "SELECT id, email, password, name, surname, company FROM external_users WHERE email = ?",
       [email]
     );
-
     if (users.length === 0) {
       return res.status(401).json({
         error: "Utente non trovato o credenziali non valide",
@@ -346,7 +441,7 @@ router.post("/login-user", async (req, res) => {
     let questionnaireId = null;
     if (questionnaireToken) {
       const questionnaire = await query(
-        "SELECT id FROM questionnaires WHERE share_token = ? AND is_active = TRUE",
+        "SELECT id FROM questionnaires WHERE share_token = ?",
         [questionnaireToken]
       );
 
@@ -356,9 +451,9 @@ router.post("/login-user", async (req, res) => {
         // Inserisci nella tabella user_questionnaires se non esiste già
         await query(
           `INSERT IGNORE INTO user_questionnaires 
-           (external_user_id, questionnaire_id, accessed_via_token) 
-           VALUES (?, ?, ?)`,
-          [user.id, questionnaireId, questionnaireToken]
+           (external_user_id, questionnaire_id, assigned_at) 
+           VALUES (?, ?, NOW())`,
+          [user.id, questionnaireId]
         );
 
         console.log(
@@ -386,8 +481,8 @@ router.post("/login-user", async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        name: `${user.nome} ${user.cognome}`,
-        azienda: user.azienda,
+        name: `${user.name} ${user.surname}`,
+        company: user.company,
       },
       questionnaire_id: questionnaireId,
     });
@@ -453,8 +548,8 @@ router.post("/register-user", async (req, res) => {
     // Crea nuovo utente nella tabella external_users
     console.log("➕ Creazione nuovo utente");
     const result = await query(
-      `INSERT INTO external_users (email, password, nome, cognome, azienda, created_at, updated_at) 
-       VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
+      `INSERT INTO external_users (email, password, name, surname, company) 
+       VALUES (?, ?, ?, ?, ?)`,
       [email, hashedPassword, nome, cognome, azienda]
     );
 
@@ -464,7 +559,7 @@ router.post("/register-user", async (req, res) => {
     let questionnaireId = null;
     if (questionnaireToken) {
       const questionnaire = await query(
-        "SELECT id FROM questionnaires WHERE share_token = ? AND is_active = TRUE",
+        "SELECT id FROM questionnaires WHERE share_token = ?",
         [questionnaireToken]
       );
 
@@ -474,9 +569,9 @@ router.post("/register-user", async (req, res) => {
         // Inserisci nella tabella user_questionnaires
         await query(
           `INSERT INTO user_questionnaires 
-           (external_user_id, questionnaire_id, accessed_via_token) 
-           VALUES (?, ?, ?)`,
-          [userId, questionnaireId, questionnaireToken]
+           (external_user_id, questionnaire_id, assigned_at) 
+           VALUES (?, ?, NOW())`,
+          [userId, questionnaireId]
         );
 
         console.log(
@@ -505,7 +600,7 @@ router.post("/register-user", async (req, res) => {
         id: userId,
         email: email,
         name: `${nome} ${cognome}`,
-        azienda: azienda,
+        company: azienda,
       },
       questionnaire_id: questionnaireId,
     });
@@ -513,6 +608,98 @@ router.post("/register-user", async (req, res) => {
     console.error("Errore registrazione utente:", error);
     res.status(500).json({
       error: "Errore nella registrazione dell'utente",
+    });
+  }
+});
+
+// GET /api/shared/:token/my-responses - Ottieni le risposte dell'utente per un questionario specifico
+router.get("/:token/my-responses", async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    // Verifica token JWT dell'utente
+    const authToken = req.headers.authorization?.replace("Bearer ", "");
+    if (!authToken) {
+      return res.status(401).json({ error: "Token utente richiesto" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(
+        authToken,
+        process.env.JWT_SECRET || "fallback-secret"
+      );
+    } catch (error) {
+      return res.status(401).json({ error: "Token non valido" });
+    }
+
+    if (decoded.type !== "external_user") {
+      return res.status(403).json({ error: "Accesso non autorizzato" });
+    }
+
+    console.log(
+      `📋 Caricamento risposte per utente ${
+        decoded.userId
+      } e token ${token.substring(0, 10)}...`
+    );
+
+    // Trova il questionario dal token di condivisione
+    const questionnaires = await query(
+      `SELECT id FROM questionnaires WHERE share_token = ?`,
+      [token]
+    );
+
+    if (questionnaires.length === 0) {
+      return res.status(404).json({ error: "Questionario non trovato" });
+    }
+
+    const questionnaireId = questionnaires[0].id;
+
+    // Trova la risposta dell'utente per questo questionario
+    const responses = await query(
+      `SELECT id, respondent_name, respondent_email, submitted_at 
+       FROM responses 
+       WHERE questionnaire_id = ? AND external_user_id = ?`,
+      [questionnaireId, decoded.userId]
+    );
+
+    if (responses.length === 0) {
+      return res.status(404).json({ error: "Nessuna risposta trovata" });
+    }
+
+    const response = responses[0];
+
+    // Ottieni tutte le risposte alle singole domande
+    const answers = await query(
+      `SELECT a.question_id, a.answer_value, q.question_text, q.question_type
+       FROM answers a
+       JOIN questions q ON a.question_id = q.id
+       WHERE a.response_id = ?
+       ORDER BY q.order_index`,
+      [response.id]
+    );
+
+    console.log(`✅ Trovate ${answers.length} risposte per l'utente`);
+
+    res.json({
+      message: "Risposte caricate con successo",
+      response: {
+        id: response.id,
+        respondent_name: response.respondent_name,
+        respondent_email: response.respondent_email,
+        submitted_at: response.submitted_at,
+      },
+      answers: answers.map((answer) => ({
+        question_id: answer.question_id,
+        question_text: answer.question_text,
+        question_type: answer.question_type,
+        answer_value: answer.answer_value,
+      })),
+    });
+  } catch (error) {
+    console.error("Errore caricamento risposte utente:", error);
+    res.status(500).json({
+      error: "Errore nel caricamento delle risposte",
     });
   }
 });

@@ -29,6 +29,10 @@ function SharedQuestionnaire() {
     email: "",
   });
 
+  // Gestione risposte esistenti
+  const [existingResponses, setExistingResponses] = useState(null);
+  const [isViewingCompleted, setIsViewingCompleted] = useState(false);
+
   useEffect(() => {
     // Controlla se siamo su HTTPS su localhost (possibile redirect da WhatsApp)
     if (
@@ -39,8 +43,53 @@ function SharedQuestionnaire() {
       return;
     }
 
+    // Controlla se l'utente è già loggato come utente esterno
+    const externalUserToken = localStorage.getItem("external_user_token");
+    if (externalUserToken) {
+      try {
+        const payload = JSON.parse(atob(externalUserToken.split(".")[1]));
+        if (payload.type === "external_user" && payload.email) {
+          console.log("🔑 Utente già loggato:", payload.email);
+          setUserIdentified(true);
+          setRespondentInfo({
+            name: `Utente ${payload.email}`,
+            email: payload.email,
+          });
+
+          // Prova a caricare le risposte esistenti
+          loadExistingResponses();
+        }
+      } catch (error) {
+        console.error("Token non valido:", error);
+        localStorage.removeItem("external_user_token");
+      }
+    }
+
     loadQuestionnaire();
   }, [token]);
+
+  const loadExistingResponses = async () => {
+    try {
+      console.log("🔍 Verifica risposte esistenti...");
+      const response = await shared.getMyResponses(token);
+      console.log("✅ Risposte esistenti trovate:", response);
+
+      setExistingResponses(response);
+      setIsViewingCompleted(true);
+      setSubmitted(true); // Il questionario è già stato completato
+
+      // Converte le risposte in formato per il form (se serve)
+      const answersMap = {};
+      response.answers.forEach((answer) => {
+        answersMap[answer.question_id] = answer.answer_value;
+      });
+      setAnswers(answersMap);
+    } catch (error) {
+      console.log("📝 Nessuna risposta esistente trovata, questionario nuovo");
+      // Se non ci sono risposte esistenti, procedi normalmente
+    }
+  };
+
   const loadQuestionnaire = async () => {
     try {
       setLoading(true);
@@ -196,7 +245,52 @@ function SharedQuestionnaire() {
     }
   };
 
+  const renderCompletedResponse = (question) => {
+    const answerData = existingResponses?.answers.find(
+      (a) => a.question_id === question.id
+    );
+    const answerValue = answerData?.answer_value || "Nessuna risposta";
+
+    return (
+      <div
+        style={{
+          backgroundColor: "#f8f9fa",
+          padding: "15px",
+          borderRadius: "6px",
+          border: "1px solid #dee2e6",
+        }}
+      >
+        <div
+          style={{
+            fontWeight: "bold",
+            marginBottom: "8px",
+            color: "#495057",
+          }}
+        >
+          La tua risposta:
+        </div>
+        <div
+          style={{
+            backgroundColor: "white",
+            padding: "12px",
+            borderRadius: "4px",
+            border: "1px solid #ced4da",
+            minHeight: "40px",
+            color: "#212529",
+          }}
+        >
+          {Array.isArray(answerValue) ? answerValue.join(", ") : answerValue}
+        </div>
+      </div>
+    );
+  };
+
   const renderQuestion = (question) => {
+    // Se stiamo visualizzando un questionario completato, mostra le risposte esistenti
+    if (isViewingCompleted && existingResponses) {
+      return renderCompletedResponse(question);
+    }
+
     const answer = answers[question.id] || "";
 
     switch (question.question_type) {
@@ -414,7 +508,10 @@ function SharedQuestionnaire() {
     );
   }
 
-  if (submitted) {
+  // Messaggio di ringraziamento per nuovo completamento (non per visualizzazione)
+  if (submitted && !isViewingCompleted) {
+    const hasExternalUserToken = localStorage.getItem("external_user_token");
+
     return (
       <div
         style={{
@@ -441,6 +538,30 @@ function SharedQuestionnaire() {
             Risposte inviate il {new Date().toLocaleDateString("it-IT")}
           </p>
         </div>
+
+        {/* Link all'area personale per utenti esterni loggati */}
+        {hasExternalUserToken && (
+          <div style={{ marginTop: "30px" }}>
+            <p style={{ marginBottom: "15px", color: "#666" }}>
+              Vuoi vedere tutti i tuoi questionari?
+            </p>
+            <a
+              href="/user-area"
+              style={{
+                display: "inline-block",
+                backgroundColor: "#007bff",
+                color: "white",
+                padding: "12px 24px",
+                textDecoration: "none",
+                borderRadius: "6px",
+                fontWeight: "bold",
+                fontSize: "16px",
+              }}
+            >
+              🏠 Vai alla tua Area Personale
+            </a>
+          </div>
+        )}
       </div>
     );
   }
@@ -795,6 +916,38 @@ function SharedQuestionnaire() {
         </div>
       )}
 
+      {/* Header per questionari completati */}
+      {isViewingCompleted && existingResponses && (
+        <div
+          style={{
+            backgroundColor: "#d1ecf1",
+            color: "#0c5460",
+            padding: "15px",
+            borderRadius: "8px",
+            marginBottom: "20px",
+            border: "1px solid #bee5eb",
+            textAlign: "center",
+          }}
+        >
+          <h3 style={{ margin: "0 0 10px 0" }}>📋 Questionario Completato</h3>
+          <p style={{ margin: "0", fontSize: "14px" }}>
+            Hai completato questo questionario il{" "}
+            {existingResponses?.response?.submitted_at
+              ? new Date(
+                  existingResponses.response.submitted_at
+                ).toLocaleDateString("it-IT", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "N/A"}
+            . Le tue risposte sono mostrate di seguito in modalità sola lettura.
+          </p>
+        </div>
+      )}
+
       {/* Form del questionario */}
       <form onSubmit={handleSubmit}>
         {questionnaire.questions.map((question, index) => (
@@ -826,22 +979,48 @@ function SharedQuestionnaire() {
 
         {/* Pulsante di invio */}
         <div style={{ textAlign: "center", marginTop: "40px" }}>
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{
-              padding: "15px 40px",
-              backgroundColor: submitting ? "#6c757d" : "#28a745",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              fontSize: "16px",
-              fontWeight: "bold",
-              cursor: submitting ? "not-allowed" : "pointer",
-            }}
-          >
-            {submitting ? "Invio in corso..." : "Invia Risposte"}
-          </button>
+          {/* Pulsante submit solo se non in modalità visualizzazione */}
+          {!isViewingCompleted && (
+            <div style={{ textAlign: "center", marginTop: "30px" }}>
+              <button
+                type="submit"
+                disabled={submitting}
+                style={{
+                  padding: "15px 40px",
+                  backgroundColor: submitting ? "#6c757d" : "#28a745",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  cursor: submitting ? "not-allowed" : "pointer",
+                }}
+              >
+                {submitting ? "Invio in corso..." : "Invia Risposte"}
+              </button>
+            </div>
+          )}
+
+          {/* Link per tornare all'area personale quando in modalità visualizzazione */}
+          {isViewingCompleted && (
+            <div style={{ textAlign: "center", marginTop: "30px" }}>
+              <a
+                href="/user-area"
+                style={{
+                  display: "inline-block",
+                  backgroundColor: "#007bff",
+                  color: "white",
+                  padding: "12px 24px",
+                  textDecoration: "none",
+                  borderRadius: "6px",
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                }}
+              >
+                🏠 Torna alla tua Area Personale
+              </a>
+            </div>
+          )}
         </div>
       </form>
     </div>

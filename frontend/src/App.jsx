@@ -8,6 +8,9 @@ import {
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import SharedQuestionnaire from "./components/SharedQuestionnaire";
+import UserArea from "./components/UserArea";
+import HomePage from "./components/HomePage";
+import UserLogin from "./components/UserLogin";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -39,27 +42,38 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Homepage con opzioni di login */}
+        <Route path="/" element={<HomePage />} />
+
         {/* Rotta pubblica per i questionari condivisi */}
         <Route path="/share/:token" element={<SharedQuestionnaire />} />
 
-        {/* Rotte autenticate */}
+        {/* Login utenti esterni */}
+        <Route path="/user-login" element={<UserLogin />} />
+
+        {/* Area personale utenti esterni */}
+        <Route path="/user-area" element={<UserArea />} />
+
+        {/* Login amministratore/relatore */}
         <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <Dashboard onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/login"
+          path="/admin-login"
           element={
             !isAuthenticated ? (
               <Login onLogin={handleLogin} />
             ) : (
-              <Navigate to="/" replace />
+              <Navigate to="/dashboard" replace />
+            )
+          }
+        />
+
+        {/* Dashboard amministratore/relatore */}
+        <Route
+          path="/dashboard"
+          element={
+            isAuthenticated ? (
+              <Dashboard onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/admin-login" replace />
             )
           }
         />
