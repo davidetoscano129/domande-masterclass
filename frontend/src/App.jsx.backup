@@ -1156,7 +1156,7 @@ function ResponsesViewer({ questionario, onClose }) {
   const [loading, setLoading] = useState(true);
   const [statistics, setStatistics] = useState(null);
   const [analysis, setAnalysis] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState('overview'); // overview, details, analysis
 
   useEffect(() => {
     fetchResponses();
@@ -1208,8 +1208,10 @@ function ResponsesViewer({ questionario, onClose }) {
       : questionario.domande
   );
 
-  const formatDate = (dateString) =>
-    new Date(dateString).toLocaleString("it-IT");
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString("it-IT");
+  };
+
   const formatTime = (seconds) => {
     if (!seconds) return "N/A";
     const minutes = Math.floor(seconds / 60);
@@ -1245,55 +1247,52 @@ function ResponsesViewer({ questionario, onClose }) {
           </button>
         </div>
 
+        {/* Tabs Navigation */}
         <div className="tabs-navigation">
-          <button
-            className={`tab-button ${activeTab === "overview" ? "active" : ""}`}
-            onClick={() => setActiveTab("overview")}
+          <button 
+            className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+            onClick={() => setActiveTab('overview')}
           >
             📈 Panoramica
           </button>
-          <button
-            className={`tab-button ${activeTab === "analysis" ? "active" : ""}`}
-            onClick={() => setActiveTab("analysis")}
+          <button 
+            className={`tab-button ${activeTab === 'analysis' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analysis')}
           >
             📊 Analisi Dettagliata
           </button>
-          <button
-            className={`tab-button ${activeTab === "details" ? "active" : ""}`}
-            onClick={() => setActiveTab("details")}
+          <button 
+            className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
+            onClick={() => setActiveTab('details')}
           >
             📋 Risposte Individuali
           </button>
         </div>
 
         <div className="modal-body">
-          {activeTab === "overview" && (
+          {/* Tab Content */}
+          {activeTab === 'overview' && statistics && (
             <div className="tab-content">
-              {statistics && (
-                <div className="statistics-section">
-                  <h3>📈 Statistiche Generali</h3>
-                  <div className="stats-grid">
-                    <div className="stat-card">
-                      <span className="stat-number">
-                        {statistics.totale_risposte}
-                      </span>
-                      <span className="stat-label">Risposte Totali</span>
-                    </div>
-                    <div className="stat-card">
-                      <span className="stat-number">
-                        {statistics.risposte_completate}
-                      </span>
-                      <span className="stat-label">Completate</span>
-                    </div>
-                    <div className="stat-card">
-                      <span className="stat-number">
-                        {formatTime(statistics.tempo_medio)}
-                      </span>
-                      <span className="stat-label">Tempo Medio</span>
-                    </div>
+              {/* Statistiche Generali */}
+              <div className="statistics-section">
+                <h3>📈 Statistiche Generali</h3>
+                <div className="stats-grid">
+                  <div className="stat-card">
+                    <span className="stat-number">{statistics.totale_risposte}</span>
+                    <span className="stat-label">Risposte Totali</span>
+                  </div>
+                  <div className="stat-card">
+                    <span className="stat-number">{statistics.risposte_completate}</span>
+                    <span className="stat-label">Completate</span>
+                  </div>
+                  <div className="stat-card">
+                    <span className="stat-number">{formatTime(statistics.tempo_medio)}</span>
+                    <span className="stat-label">Tempo Medio</span>
                   </div>
                 </div>
-              )}
+              </div>
+
+              {/* Panoramica Rapida */}
               {analysis && (
                 <div className="quick-overview">
                   <h3>🔍 Panoramica Rapida</h3>
@@ -1303,17 +1302,14 @@ function ResponsesViewer({ questionario, onClose }) {
                         <h4>{q.question}</h4>
                         <div className="overview-stats">
                           <span className="response-rate">
-                            📊 {q.responseRate}% di risposta (
-                            {q.answeredResponses}/{q.totalResponses})
+                            📊 {q.responseRate}% di risposta ({q.answeredResponses}/{q.totalResponses})
                           </span>
-                          {q.type === "multiple_choice" &&
-                            q.analysis.distribution[0] && (
-                              <span className="top-answer">
-                                🥇 "{q.analysis.distribution[0].choice}" (
-                                {q.analysis.distribution[0].percentage}%)
-                              </span>
-                            )}
-                          {q.type === "rating" && (
+                          {q.type === 'multiple_choice' && q.analysis.distribution[0] && (
+                            <span className="top-answer">
+                              🥇 "{q.analysis.distribution[0].choice}" ({q.analysis.distribution[0].percentage}%)
+                            </span>
+                          )}
+                          {q.type === 'rating' && (
                             <span className="average-rating">
                               ⭐ Media: {q.analysis.average}/10
                             </span>
@@ -1327,59 +1323,48 @@ function ResponsesViewer({ questionario, onClose }) {
             </div>
           )}
 
-          {activeTab === "analysis" && analysis && (
+          {activeTab === 'analysis' && analysis && (
             <div className="tab-content">
               <div className="detailed-analysis">
                 <h3>📊 Analisi Dettagliata per Domanda</h3>
                 {analysis.questions.map((questionData) => (
-                  <div
-                    key={questionData.questionId}
-                    className="question-analysis"
-                  >
+                  <div key={questionData.questionId} className="question-analysis">
                     <div className="question-header">
                       <h4>{questionData.question}</h4>
                       <div className="question-meta">
-                        <span className="question-type">
-                          {questionData.type}
-                        </span>
+                        <span className="question-type">{questionData.type}</span>
                         <span className="response-rate">
-                          {questionData.responseRate}% risposto
+                          {questionData.responseRate}% risposto ({questionData.answeredResponses}/{questionData.totalResponses})
                         </span>
                       </div>
                     </div>
+
                     <div className="analysis-content">
-                      {questionData.type === "multiple_choice" && (
+                      {questionData.type === 'multiple_choice' && (
                         <div className="choice-analysis">
                           <h5>Distribuzione Scelte:</h5>
-                          {questionData.analysis.distribution.map(
-                            (item, index) => (
-                              <div key={index} className="choice-bar">
-                                <div className="choice-info">
-                                  <span className="choice-text">
-                                    {item.choice}
-                                  </span>
-                                  <span className="choice-stats">
-                                    {item.count} voti ({item.percentage}%)
-                                  </span>
-                                </div>
-                                <div className="progress-bar">
-                                  <div
-                                    className="progress-fill"
-                                    style={{ width: `${item.percentage}%` }}
-                                  ></div>
-                                </div>
+                          {questionData.analysis.distribution.map((item, index) => (
+                            <div key={index} className="choice-bar">
+                              <div className="choice-info">
+                                <span className="choice-text">{item.choice}</span>
+                                <span className="choice-stats">{item.count} voti ({item.percentage}%)</span>
                               </div>
-                            )
-                          )}
+                              <div className="progress-bar">
+                                <div 
+                                  className="progress-fill" 
+                                  style={{width: `${item.percentage}%`}}
+                                ></div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
-                      {questionData.type === "rating" && (
+
+                      {questionData.type === 'rating' && (
                         <div className="rating-analysis">
                           <div className="rating-summary">
                             <div className="avg-rating">
-                              <span className="rating-number">
-                                {questionData.analysis.average}
-                              </span>
+                              <span className="rating-number">{questionData.analysis.average}</span>
                               <span className="rating-label">Media</span>
                             </div>
                           </div>
@@ -1387,46 +1372,32 @@ function ResponsesViewer({ questionario, onClose }) {
                           {questionData.analysis.distribution.map((item) => (
                             <div key={item.rating} className="rating-bar">
                               <div className="rating-info">
-                                <span className="rating-value">
-                                  {item.rating} ⭐
-                                </span>
-                                <span className="rating-stats">
-                                  {item.count} voti ({item.percentage}%)
-                                </span>
+                                <span className="rating-value">{item.rating} ⭐</span>
+                                <span className="rating-stats">{item.count} voti ({item.percentage}%)</span>
                               </div>
                               <div className="progress-bar">
-                                <div
-                                  className="progress-fill"
-                                  style={{ width: `${item.percentage}%` }}
+                                <div 
+                                  className="progress-fill" 
+                                  style={{width: `${item.percentage}%`}}
                                 ></div>
                               </div>
                             </div>
                           ))}
                         </div>
                       )}
-                      {(questionData.type === "text" ||
-                        questionData.type === "textarea") && (
+
+                      {(questionData.type === 'text' || questionData.type === 'textarea') && (
                         <div className="text-analysis">
                           <div className="text-stats">
-                            <span>
-                              📝 {questionData.analysis.responses} risposte
-                              testuali
-                            </span>
-                            <span>
-                              📏 Lunghezza media:{" "}
-                              {questionData.analysis.averageLength} caratteri
-                            </span>
+                            <span>📝 {questionData.analysis.responses} risposte testuali</span>
+                            <span>📏 Lunghezza media: {questionData.analysis.averageLength} caratteri</span>
                           </div>
                           {questionData.analysis.samples.length > 0 && (
                             <div className="text-samples">
                               <h5>Esempi di risposte:</h5>
-                              {questionData.analysis.samples.map(
-                                (sample, index) => (
-                                  <div key={index} className="sample-text">
-                                    "{sample}"
-                                  </div>
-                                )
-                              )}
+                              {questionData.analysis.samples.map((sample, index) => (
+                                <div key={index} className="sample-text">"{sample}"</div>
+                              ))}
                             </div>
                           )}
                         </div>
@@ -1438,14 +1409,17 @@ function ResponsesViewer({ questionario, onClose }) {
             </div>
           )}
 
-          {activeTab === "details" && (
+          )}
+            </div>
+          )}
+
+          {activeTab === 'details' && (
             <div className="tab-content">
               <div className="responses-section">
                 <h3>📝 Risposte Individuali ({responses.length})</h3>
+                
                 {responses.length === 0 ? (
-                  <p className="no-responses">
-                    Nessuna risposta ancora ricevuta.
-                  </p>
+                  <p className="no-responses">Nessuna risposta ancora ricevuta.</p>
                 ) : (
                   <div className="responses-list">
                     {responses.map((response) => (
@@ -1454,25 +1428,18 @@ function ResponsesViewer({ questionario, onClose }) {
                           <h4>👤 {response.utente_nome}</h4>
                           <div className="response-meta">
                             <span>📅 {formatDate(response.submitted_at)}</span>
-                            <span>
-                              ⏱️ {formatTime(response.tempo_impiegato)}
-                            </span>
-                            <span
-                              className={`status ${
-                                response.completata ? "completed" : "incomplete"
-                              }`}
-                            >
-                              {response.completata
-                                ? "✅ Completata"
-                                : "⏳ Incompleta"}
+                            <span>⏱️ {formatTime(response.tempo_impiegato)}</span>
+                            <span className={`status ${response.completata ? 'completed' : 'incomplete'}`}>
+                              {response.completata ? '✅ Completata' : '⏳ Incompleta'}
                             </span>
                           </div>
                         </div>
+                        
                         <div className="response-answers">
                           {config.questions.map((question) => {
-                            const risposteData =
-                              typeof response.risposte === "string"
-                                ? JSON.parse(response.risposte)
+                            const risposteData = 
+                              typeof response.risposte === 'string' 
+                                ? JSON.parse(response.risposte) 
                                 : response.risposte;
                             const answer = risposteData[question.id];
                             return (
@@ -1494,6 +1461,13 @@ function ResponsesViewer({ questionario, onClose }) {
               </div>
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
         </div>
       </div>
     </div>
