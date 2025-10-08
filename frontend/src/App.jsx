@@ -305,6 +305,32 @@ function LezioniTab({ lezioni, user, onUpdate }) {
     setLezioneQuestionari([]);
   };
 
+  const handleDeleteLezione = async (id, event) => {
+    // Previeni il click sulla card
+    event.stopPropagation();
+
+    if (
+      confirm(
+        "Sei sicuro di voler eliminare questa lezione? Questa azione è irreversibile."
+      )
+    ) {
+      try {
+        const response = await fetch(`${API_BASE}/lezioni/${id}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          onUpdate(); // Ricarica la lista delle lezioni
+        } else {
+          alert("Errore durante l'eliminazione della lezione");
+        }
+      } catch (error) {
+        console.error("Errore eliminazione lezione:", error);
+        alert("Errore durante l'eliminazione della lezione");
+      }
+    }
+  };
+
   return (
     <div>
       <div className="section-header">
@@ -361,7 +387,16 @@ function LezioniTab({ lezioni, user, onUpdate }) {
               className="item-card lezione-card clickable"
               onClick={() => handleLezioneClick(lezione)}
             >
-              <h3>{lezione.titolo}</h3>
+              <div className="card-header">
+                <h3>{lezione.titolo}</h3>
+                <button
+                  onClick={(e) => handleDeleteLezione(lezione.id, e)}
+                  className="btn-small btn-delete"
+                  title="Elimina lezione"
+                >
+                  🗑️
+                </button>
+              </div>
               <p>{lezione.descrizione}</p>
               <small>
                 Creata: {new Date(lezione.created_at).toLocaleDateString()}

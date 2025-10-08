@@ -284,6 +284,36 @@ body {
   font-size: 0.85rem;
 }
 
+/* Header delle card con pulsante di eliminazione */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.card-header h3 {
+  margin: 0;
+  flex: 1;
+}
+
+.card-header .btn-delete {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  border-radius: 10px;
+  margin: 0;
+}
+
+.item-card:hover .card-header .btn-delete {
+  opacity: 1;
+}
+
+.card-header .btn-delete:hover {
+  transform: scale(1.1);
+}
+
 /* Lezioni cliccabili */
 .lezione-card.clickable {
   cursor: pointer;
