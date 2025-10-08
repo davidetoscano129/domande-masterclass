@@ -255,7 +255,14 @@ function RelatoreDashboard({ user, onLogout }) {
 // Tab Lezioni
 function LezioniTab({ lezioni, user, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ titolo: "", descrizione: "" });
+  const [formData, setFormData] = useState({
+    titolo: "",
+    descrizione: "",
+    numero: "",
+  });
+  const [selectedLezione, setSelectedLezione] = useState(null);
+  const [lezioneQuestionari, setLezioneQuestionari] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -267,13 +274,35 @@ function LezioniTab({ lezioni, user, onUpdate }) {
       });
 
       if (response.ok) {
-        setFormData({ titolo: "", descrizione: "" });
+        setFormData({ titolo: "", descrizione: "", numero: "" });
         setShowForm(false);
         onUpdate();
       }
     } catch (error) {
       console.error("Errore creazione lezione:", error);
     }
+  };
+
+  const handleLezioneClick = async (lezione) => {
+    setSelectedLezione(lezione);
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${API_BASE}/questionari/lezione/${lezione.id}`
+      );
+      const data = await response.json();
+      setLezioneQuestionari(data);
+    } catch (error) {
+      console.error("Errore nel caricamento questionari:", error);
+      setLezioneQuestionari([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBackToLezioni = () => {
+    setSelectedLezione(null);
+    setLezioneQuestionari([]);
   };
 
   return (
@@ -287,15 +316,29 @@ function LezioniTab({ lezioni, user, onUpdate }) {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="form-card">
-          <input
-            type="text"
-            placeholder="Titolo lezione"
-            value={formData.titolo}
-            onChange={(e) =>
-              setFormData({ ...formData, titolo: e.target.value })
-            }
-            required
-          />
+          <div className="form-row">
+            <input
+              type="number"
+              placeholder="Numero lezione (es. 1, 2, 3...)"
+              value={formData.numero}
+              onChange={(e) =>
+                setFormData({ ...formData, numero: e.target.value })
+              }
+              min="1"
+              required
+              className="numero-input"
+            />
+            <input
+              type="text"
+              placeholder="Titolo lezione"
+              value={formData.titolo}
+              onChange={(e) =>
+                setFormData({ ...formData, titolo: e.target.value })
+              }
+              required
+              className="titolo-input"
+            />
+          </div>
           <textarea
             placeholder="Descrizione"
             value={formData.descrizione}
@@ -310,17 +353,158 @@ function LezioniTab({ lezioni, user, onUpdate }) {
         </form>
       )}
 
-      <div className="items-grid">
-        {lezioni.map((lezione) => (
-          <div key={lezione.id} className="item-card">
-            <h3>{lezione.titolo}</h3>
-            <p>{lezione.descrizione}</p>
-            <small>
-              Creata: {new Date(lezione.created_at).toLocaleDateString()}
-            </small>
-          </div>
-        ))}
+      {!selectedLezione ? (
+        <div className="items-grid">
+          {lezioni.map((lezione) => (
+            <div
+              key={lezione.id}
+              className="item-card lezione-card clickable"
+              onClick={() => handleLezioneClick(lezione)}
+            >
+              <h3>{lezione.titolo}</h3>
+              <p>{lezione.descrizione}</p>
+              <small>
+                Creata: {new Date(lezione.created_at).toLocaleDateString()}
+              </small>
+              <div className="click-hint">
+                👆 Clicca per vedere i questionari
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <LezioneDetailView
+          lezione={selectedLezione}
+          questionari={lezioneQuestionari}
+          loading={loading}
+          user={user}
+          onBack={handleBackToLezioni}
+        />
+      )}
+    </div>
+  );
+}
+
+// Componente per la vista dettaglio di una lezione
+function LezioneDetailView({ lezione, questionari, loading, user, onBack }) {
+  const [showResponses, setShowResponses] = useState(false);
+  const [selectedQuestionario, setSelectedQuestionario] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareData, setShareData] = useState(null);
+
+  const handleViewResponses = (questionario) => {
+    setSelectedQuestionario(questionario);
+    setShowResponses(true);
+  };
+
+  const handleCloseResponses = () => {
+    setShowResponses(false);
+    setSelectedQuestionario(null);
+  };
+
+  const handleShare = async (questionario) => {
+    try {
+      const response = await fetch(
+        `${API_BASE}/questionari/${questionario.id}/condividi`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ relatore_id: user.relatore.id }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setShareData({
+          ...data,
+          questionario: questionario,
+        });
+        setShowShareModal(true);
+      } else {
+        alert("Errore nella generazione del link di condivisione");
+      }
+    } catch (error) {
+      console.error("Errore condivisione:", error);
+      alert("Errore nella generazione del link di condivisione");
+    }
+  };
+
+  const handleCloseShare = () => {
+    setShowShareModal(false);
+    setShareData(null);
+  };
+
+  return (
+    <div className="lezione-detail">
+      <div className="back-button-container">
+        <button onClick={onBack} className="btn-back-prominent">
+          ← Torna alle lezioni
+        </button>
       </div>
+
+      <div className="lezione-header">
+        <div className="lezione-info">
+          <h2>📚 {lezione.titolo}</h2>
+          <p>{lezione.descrizione}</p>
+          <small>
+            Creata: {new Date(lezione.created_at).toLocaleDateString()}
+          </small>
+        </div>
+      </div>
+
+      <div className="questionari-section">
+        <h3>📝 Questionari associati ({questionari.length})</h3>
+
+        {loading ? (
+          <div className="loading-message">
+            <p>⏳ Caricamento questionari...</p>
+          </div>
+        ) : questionari.length === 0 ? (
+          <div className="empty-state">
+            <p>📭 Nessun questionario associato a questa lezione.</p>
+            <p>Vai nella sezione "Questionari" per crearne uno nuovo.</p>
+          </div>
+        ) : (
+          <div className="questionari-grid">
+            {questionari.map((questionario) => (
+              <div key={questionario.id} className="questionario-card">
+                <h4>{questionario.titolo}</h4>
+                <p>{questionario.descrizione}</p>
+                <small>
+                  Creato:{" "}
+                  {new Date(questionario.created_at).toLocaleDateString()}
+                </small>
+
+                <div className="questionario-actions">
+                  <button
+                    onClick={() => handleViewResponses(questionario)}
+                    className="btn-small btn-responses"
+                  >
+                    📊 Risposte
+                  </button>
+                  <button
+                    onClick={() => handleShare(questionario)}
+                    className="btn-small btn-share"
+                  >
+                    🔗 Condividi
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {showResponses && selectedQuestionario && (
+        <ResponsesViewer
+          questionario={selectedQuestionario}
+          onClose={handleCloseResponses}
+        />
+      )}
+
+      {showShareModal && shareData && (
+        <ShareModal shareData={shareData} onClose={handleCloseShare} />
+      )}
     </div>
   );
 }

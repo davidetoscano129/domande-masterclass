@@ -40,6 +40,36 @@ async function initDatabase() {
       )
     `);
 
+    // Aggiungi colonna numero alla tabella lezioni se non esiste
+    try {
+      const [columns] = await db.execute(
+        "SHOW COLUMNS FROM lezioni LIKE 'numero'"
+      );
+      if (columns.length === 0) {
+        await db.execute(`
+          ALTER TABLE lezioni 
+          ADD COLUMN numero INT DEFAULT 0 
+          AFTER id
+        `);
+
+        // Aggiorna i record esistenti con numeri progressivi
+        const [lezioni] = await db.execute(
+          "SELECT id FROM lezioni ORDER BY id"
+        );
+        for (let i = 0; i < lezioni.length; i++) {
+          await db.execute("UPDATE lezioni SET numero = ? WHERE id = ?", [
+            i + 1,
+            lezioni[i].id,
+          ]);
+        }
+        console.log(
+          `✅ Colonna numero aggiunta e ${lezioni.length} lezioni aggiornate`
+        );
+      }
+    } catch (err) {
+      console.log("ℹ️ Colonna numero già presente o errore:", err.message);
+    }
+
     // Crea gli indici se non esistono
     try {
       await db.execute(
@@ -173,7 +203,7 @@ app.get("/api/lezioni", async (req, res) => {
       SELECT l.*, r.nome as relatore_nome 
       FROM lezioni l
       JOIN relatori r ON l.relatore_id = r.id
-      ORDER BY l.created_at DESC
+      ORDER BY l.numero ASC, l.created_at DESC
     `);
     res.json(rows);
   } catch (error) {
@@ -191,7 +221,7 @@ app.get("/api/lezioni/relatore/:relatore_id", async (req, res) => {
       FROM lezioni l
       JOIN relatori r ON l.relatore_id = r.id
       WHERE l.relatore_id = ?
-      ORDER BY l.created_at DESC
+      ORDER BY l.numero ASC, l.created_at DESC
     `,
       [relatore_id]
     );
@@ -204,10 +234,10 @@ app.get("/api/lezioni/relatore/:relatore_id", async (req, res) => {
 // Crea nuova lezione
 app.post("/api/lezioni", async (req, res) => {
   try {
-    const { titolo, descrizione, relatore_id } = req.body;
+    const { titolo, descrizione, numero, relatore_id } = req.body;
     const [result] = await db.execute(
-      "INSERT INTO lezioni (titolo, descrizione, relatore_id) VALUES (?, ?, ?)",
-      [titolo, descrizione, relatore_id]
+      "INSERT INTO lezioni (titolo, descrizione, numero, relatore_id) VALUES (?, ?, ?, ?)",
+      [titolo, descrizione, numero || 0, relatore_id]
     );
 
     const [rows] = await db.execute(
