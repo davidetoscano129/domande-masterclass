@@ -1887,9 +1887,9 @@ function SharedQuestionnaireViewer({
           </p>
           <h3>"{questionario.titolo}"</h3>
           <p>Le tue risposte sono state salvate correttamente.</p>
-          <button onClick={onBack} className="btn-secondary">
-            Seleziona un altro utente
-          </button>
+          <p className="completion-note">
+            🎉 La compilazione è stata completata. Puoi chiudere questa pagina.
+          </p>
         </div>
       </div>
     );
@@ -1945,6 +1945,29 @@ function SharedQuestionnaireViewer({
                     handleResponseChange(question.id, e.target.value)
                   }
                   placeholder="Inserisci la tua risposta..."
+                  className="text-input"
+                />
+              )}
+
+              {question.type === "email" && (
+                <input
+                  type="email"
+                  value={responses[question.id] || ""}
+                  onChange={(e) =>
+                    handleResponseChange(question.id, e.target.value)
+                  }
+                  placeholder="inserisci@email.com"
+                  className="text-input"
+                />
+              )}
+
+              {question.type === "date" && (
+                <input
+                  type="date"
+                  value={responses[question.id] || ""}
+                  onChange={(e) =>
+                    handleResponseChange(question.id, e.target.value)
+                  }
                   className="text-input"
                 />
               )}
