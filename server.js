@@ -22,6 +22,50 @@ const db = mysql.createPool({
   queueLimit: 0,
 });
 
+// Inizializzazione database
+async function initDatabase() {
+  try {
+    // Crea la tabella condivisioni se non esiste
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS condivisioni (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        questionario_id INT NOT NULL,
+        relatore_id INT NOT NULL,
+        share_token VARCHAR(64) UNIQUE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NULL,
+        FOREIGN KEY (questionario_id) REFERENCES questionari(id) ON DELETE CASCADE,
+        FOREIGN KEY (relatore_id) REFERENCES relatori(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_questionario_relatore (questionario_id, relatore_id)
+      )
+    `);
+
+    // Crea gli indici se non esistono
+    try {
+      await db.execute(
+        "CREATE INDEX idx_share_token ON condivisioni(share_token)"
+      );
+    } catch (err) {
+      if (err.code !== "ER_DUP_KEYNAME") throw err;
+    }
+
+    try {
+      await db.execute(
+        "CREATE INDEX idx_expires_at ON condivisioni(expires_at)"
+      );
+    } catch (err) {
+      if (err.code !== "ER_DUP_KEYNAME") throw err;
+    }
+
+    console.log("✅ Database inizializzato correttamente");
+  } catch (error) {
+    console.error("❌ Errore inizializzazione database:", error);
+  }
+}
+
+// Inizializza il database all'avvio
+initDatabase();
+
 // ==========================================
 // AUTH ROUTES
 // ==========================================
@@ -693,6 +737,186 @@ app.get("/api/analisi/questionario/:id", async (req, res) => {
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
+// ==========================================
+// CONDIVISIONE QUESTIONARI
+// ==========================================
+
+// Genera link di condivisione per un questionario
+app.post("/api/questionari/:id/condividi", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { relatore_id } = req.body;
+
+    // Verifica che il questionario esista e appartenga al relatore
+    const [questionario] = await db.execute(
+      "SELECT * FROM questionari WHERE id = ? AND relatore_id = ?",
+      [id, relatore_id]
+    );
+
+    if (questionario.length === 0) {
+      return res.status(404).json({ error: "Questionario non trovato" });
+    }
+
+    // Genera un token unico per la condivisione
+    const shareToken = require("crypto").randomBytes(32).toString("hex");
+    const shareLink = `http://localhost:5173/shared/${shareToken}`;
+
+    // Salva il token di condivisione nel database
+    await db.execute(
+      `INSERT INTO condivisioni (questionario_id, relatore_id, share_token, created_at, expires_at) 
+       VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY))
+       ON DUPLICATE KEY UPDATE 
+       share_token = VALUES(share_token), 
+       created_at = NOW(), 
+       expires_at = DATE_ADD(NOW(), INTERVAL 30 DAY)`,
+      [id, relatore_id, shareToken]
+    );
+
+    res.json({
+      success: true,
+      shareToken,
+      shareLink,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+  } catch (error) {
+    console.error("Errore generazione link condivisione:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Ottieni informazioni del questionario tramite token di condivisione
+app.get("/api/shared/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    // Verifica che il token sia valido e non scaduto
+    const [condivisione] = await db.execute(
+      `SELECT c.*, q.titolo, q.domande, r.nome as relatore_nome 
+       FROM condivisioni c 
+       JOIN questionari q ON c.questionario_id = q.id 
+       JOIN relatori r ON c.relatore_id = r.id 
+       WHERE c.share_token = ? AND c.expires_at > NOW()`,
+      [token]
+    );
+
+    if (condivisione.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "Link di condivisione non valido o scaduto" });
+    }
+
+    const questionario = condivisione[0];
+
+    res.json({
+      success: true,
+      questionario: {
+        id: questionario.questionario_id,
+        titolo: questionario.titolo,
+        domande: questionario.domande,
+        relatore_nome: questionario.relatore_nome,
+        shareToken: token,
+      },
+    });
+  } catch (error) {
+    console.error("Errore recupero questionario condiviso:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Ottieni lista utenti per questionario condiviso
+app.get("/api/shared/:token/utenti", async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    // Verifica che il token sia valido
+    const [condivisione] = await db.execute(
+      `SELECT c.relatore_id FROM condivisioni c 
+       WHERE c.share_token = ? AND c.expires_at > NOW()`,
+      [token]
+    );
+
+    if (condivisione.length === 0) {
+      return res.status(404).json({ error: "Link di condivisione non valido" });
+    }
+
+    // Ottieni tutti gli utenti per permettere la selezione
+    const [utenti] = await db.execute(
+      "SELECT id, nome FROM utenti ORDER BY nome"
+    );
+
+    res.json({
+      success: true,
+      utenti,
+    });
+  } catch (error) {
+    console.error("Errore recupero utenti:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Sottometti risposta per questionario condiviso
+app.post("/api/shared/:token/submit", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { utente_id, risposte, tempo_impiegato } = req.body;
+
+    // Verifica che il token sia valido
+    const [condivisione] = await db.execute(
+      `SELECT c.questionario_id FROM condivisioni c 
+       WHERE c.share_token = ? AND c.expires_at > NOW()`,
+      [token]
+    );
+
+    if (condivisione.length === 0) {
+      return res.status(404).json({ error: "Link di condivisione non valido" });
+    }
+
+    const questionario_id = condivisione[0].questionario_id;
+
+    // Verifica che l'utente non abbia già risposto
+    const [existing] = await db.execute(
+      "SELECT id FROM compilazioni WHERE questionario_id = ? AND utente_id = ?",
+      [questionario_id, utente_id]
+    );
+
+    if (existing.length > 0) {
+      return res
+        .status(409)
+        .json({ error: "Hai già compilato questo questionario" });
+    }
+
+    // Salva la risposta
+    await db.execute(
+      `INSERT INTO compilazioni (questionario_id, utente_id, risposte, completata, submitted_at, tempo_impiegato) 
+       VALUES (?, ?, ?, true, NOW(), ?)`,
+      [
+        questionario_id,
+        utente_id,
+        JSON.stringify(risposte),
+        tempo_impiegato || 0,
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: "Risposta salvata con successo!",
+    });
+  } catch (error) {
+    console.error("Errore salvataggio risposta condivisa:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==========================================
+// REDIRECT ROUTE PER LINK CONDIVISI
+// ==========================================
+
+// Redirect per link condivisi dal backend al frontend
+app.get("/shared/:token", (req, res) => {
+  const { token } = req.params;
+  res.redirect(`http://localhost:5173/shared/${token}`);
 });
 
 // Error handling middleware
