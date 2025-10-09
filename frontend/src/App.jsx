@@ -1009,6 +1009,45 @@ function QuestionEditor({
 
 // Tab Utenti
 function UtentiTab({ utenti }) {
+  const [selectedUtente, setSelectedUtente] = useState(null);
+  const [utenteRisposte, setUtenteRisposte] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleVediRisposte = async (utente) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/utenti/${utente.id}/risposte`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Dati ricevuti per utente", utente.id, ":", data);
+      setUtenteRisposte(data);
+      setSelectedUtente(utente);
+    } catch (error) {
+      console.error("Errore nel caricamento risposte utente:", error);
+      alert(`Errore nel caricamento delle risposte: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBackToUtenti = () => {
+    setSelectedUtente(null);
+    setUtenteRisposte([]);
+  };
+
+  if (selectedUtente) {
+    return (
+      <UtenteRisposteView
+        utente={selectedUtente}
+        risposte={utenteRisposte}
+        loading={loading}
+        onBack={handleBackToUtenti}
+      />
+    );
+  }
+
   return (
     <div>
       <h2>👥 Lista Utenti</h2>
@@ -1016,10 +1055,211 @@ function UtentiTab({ utenti }) {
         {utenti.map((utente) => (
           <div key={utente.id} className="user-card">
             <strong>{utente.nome}</strong>
-            <button className="btn-small">Vedi Risposte</button>
+            <button
+              className="btn-small"
+              onClick={() => handleVediRisposte(utente)}
+              disabled={loading}
+            >
+              {loading ? "Caricamento..." : "Vedi Risposte"}
+            </button>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// Componente per visualizzare le risposte di un utente specifico
+function UtenteRisposteView({ utente, risposte, loading, onBack }) {
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <p>Caricamento risposte...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="utente-risposte">
+      <div className="back-button-container">
+        <button onClick={onBack} className="btn-back-prominent">
+          ← Torna alla lista utenti
+        </button>
+      </div>
+
+      <div className="utente-header">
+        <h2>📊 Risposte di {utente.nome}</h2>
+        <p className="total-risposte">
+          Totale questionari compilati: <strong>{risposte.length}</strong>
+        </p>
+      </div>
+
+      {risposte.length === 0 ? (
+        <div className="no-responses">
+          <p>🤷‍♂️ Questo utente non ha ancora compilato nessun questionario.</p>
+        </div>
+      ) : (
+        <div className="risposte-list">
+          {risposte.map((risposta) => (
+            <div key={risposta.id} className="risposta-card">
+              <div className="risposta-header">
+                <h3>{risposta.questionario_titolo}</h3>
+                <div className="risposta-meta">
+                  <span className="lezione">📚 {risposta.lezione_titolo}</span>
+                  <span className="relatore">👨‍🏫 {risposta.relatore_nome}</span>
+                  <span className="data">
+                    📅 {new Date(risposta.submitted_at).toLocaleString("it-IT")}
+                  </span>
+                  {risposta.tempo_impiegato && (
+                    <span className="tempo">
+                      ⏱️ {Math.round(risposta.tempo_impiegato / 60)} minuti
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="risposta-content">
+                {risposta.completata ? (
+                  <div className="status completata">✅ Completato</div>
+                ) : (
+                  <div className="status incompleta">⏳ In corso</div>
+                )}
+
+                <div className="risposte-details">
+                  <h4>📝 Risposte:</h4>
+                  {(() => {
+                    try {
+                      let risposteData;
+
+                      // Controlla se risposte è già un oggetto o una stringa JSON
+                      if (typeof risposta.risposte === "string") {
+                        try {
+                          risposteData = JSON.parse(risposta.risposte);
+                        } catch (parseError) {
+                          console.error(
+                            "Errore parsing JSON string:",
+                            parseError
+                          );
+                          console.log("Contenuto stringa:", risposta.risposte);
+                          return (
+                            <div className="error">
+                              <p>Errore nel formato JSON delle risposte</p>
+                              <details>
+                                <summary>Dettagli errore</summary>
+                                <pre>{parseError.message}</pre>
+                                <pre>
+                                  {String(risposta.risposte).substring(0, 200)}
+                                  ...
+                                </pre>
+                              </details>
+                            </div>
+                          );
+                        }
+                      } else if (
+                        typeof risposta.risposte === "object" &&
+                        risposta.risposte !== null
+                      ) {
+                        risposteData = risposta.risposte;
+                      } else {
+                        console.log(
+                          "Tipo risposte sconosciuto:",
+                          typeof risposta.risposte,
+                          risposta.risposte
+                        );
+                        return (
+                          <p className="error">
+                            Formato risposte non riconosciuto
+                          </p>
+                        );
+                      }
+
+                      if (!risposteData || typeof risposteData !== "object") {
+                        return (
+                          <p className="error">Nessuna risposta disponibile</p>
+                        );
+                      }
+
+                      const entries = Object.entries(risposteData);
+                      if (entries.length === 0) {
+                        return (
+                          <p className="error">Nessuna risposta trovata</p>
+                        );
+                      }
+
+                      return (
+                        <div className="answers-grid">
+                          {entries.map(([questionId, answer], index) => (
+                            <div key={questionId} className="answer-item">
+                              <span className="question-id">
+                                Domanda {index + 1}:
+                              </span>
+                              <span className="answer-text">
+                                {(() => {
+                                  try {
+                                    if (Array.isArray(answer)) {
+                                      return answer.length > 0
+                                        ? answer.join(", ")
+                                        : "Nessuna selezione";
+                                    }
+                                    if (
+                                      answer === null ||
+                                      answer === undefined ||
+                                      answer === ""
+                                    ) {
+                                      return "Nessuna risposta";
+                                    }
+                                    // Converti sempre in stringa e gestisci caratteri speciali
+                                    const cleanAnswer = String(answer)
+                                      .replace(/\n/g, " ")
+                                      .replace(/\r/g, "")
+                                      .trim();
+
+                                    return cleanAnswer || "Risposta vuota";
+                                  } catch (e) {
+                                    console.error(
+                                      "Errore nel processare la risposta:",
+                                      answer,
+                                      e
+                                    );
+                                    return `Errore formato: ${typeof answer}`;
+                                  }
+                                })()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    } catch (error) {
+                      console.error("Errore generale parsing risposte:", error);
+                      console.log("Dati risposte completi:", risposta.risposte);
+                      console.log("Tipo dati:", typeof risposta.risposte);
+                      return (
+                        <div className="error">
+                          <p>Errore nel parsing delle risposte</p>
+                          <details>
+                            <summary>
+                              Dettagli errore (click per espandere)
+                            </summary>
+                            <pre>{String(error.message)}</pre>
+                            <pre>Tipo: {typeof risposta.risposte}</pre>
+                            <pre>
+                              {String(risposta.risposte || "").substring(
+                                0,
+                                300
+                              )}
+                              ...
+                            </pre>
+                          </details>
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
