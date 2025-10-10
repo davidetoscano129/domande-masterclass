@@ -760,6 +760,101 @@ app.get("/api/analisi/questionario/:id", async (req, res) => {
   }
 });
 
+// Get risposte dettagliate con utenti per analisi
+app.get("/api/questionari/:id/risposte-dettagliate", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Ottieni tutte le risposte del questionario con i nomi degli utenti
+    const [rows] = await db.execute(
+      `
+      SELECT c.risposte, u.nome as utente_nome, u.id as utente_id,
+             c.submitted_at, c.tempo_impiegato, c.completata
+      FROM compilazioni c
+      JOIN utenti u ON c.utente_id = u.id
+      WHERE c.questionario_id = ? AND c.completata = 1
+      ORDER BY c.submitted_at DESC
+      `,
+      [id]
+    );
+
+    // Ottieni la configurazione del questionario per avere le domande
+    const [questionarioRows] = await db.execute(
+      "SELECT domande FROM questionari WHERE id = ?",
+      [id]
+    );
+
+    if (questionarioRows.length === 0) {
+      return res.status(404).json({ error: "Questionario non trovato" });
+    }
+
+    const questionario = questionarioRows[0];
+    const config = questionario.domande; // È già un oggetto
+
+    // Organizza le risposte per domanda
+    const rispostePerDomanda = {};
+
+    // Inizializza la struttura per ogni domanda
+    if (config && config.questions) {
+      config.questions.forEach((question, index) => {
+        rispostePerDomanda[question.id || index] = {
+          question: question.question,
+          type: question.type,
+          risposte: [],
+        };
+      });
+    }
+
+    // Processa ogni risposta
+    rows.forEach((row, index) => {
+      console.log(
+        `Processando row ${index}:`,
+        typeof row.risposte,
+        row.risposte
+      );
+      try {
+        let risposte;
+        // Gestisci il caso in cui risposte sia già un oggetto o una stringa JSON
+        if (typeof row.risposte === "string") {
+          console.log("Parsing string JSON...");
+          risposte = JSON.parse(row.risposte);
+        } else if (typeof row.risposte === "object" && row.risposte !== null) {
+          console.log("Usando oggetto direttamente...");
+          risposte = row.risposte;
+        } else {
+          console.log(
+            "Formato risposte non riconosciuto:",
+            typeof row.risposte
+          );
+          return;
+        }
+
+        Object.entries(risposte).forEach(([questionId, answer]) => {
+          if (rispostePerDomanda[questionId]) {
+            rispostePerDomanda[questionId].risposte.push({
+              utente_nome: row.utente_nome,
+              utente_id: row.utente_id,
+              risposta: answer,
+              timestamp: row.submitted_at,
+              tempo_impiegato: row.tempo_impiegato,
+            });
+          }
+        });
+      } catch (error) {
+        console.error("Errore parsing risposta:", error, "Row:", row);
+      }
+    });
+
+    res.json({
+      totalResponses: rows.length,
+      rispostePerDomanda,
+    });
+  } catch (error) {
+    console.error("Errore recupero risposte dettagliate:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ==========================================
 // UTILITY ROUTES
 // ==========================================

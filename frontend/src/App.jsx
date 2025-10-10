@@ -1668,6 +1668,9 @@ function ResponsesViewer({ questionario, onClose }) {
   const [loading, setLoading] = useState(true);
   const [statistics, setStatistics] = useState(null);
   const [analysis, setAnalysis] = useState(null);
+  const [detailedResponses, setDetailedResponses] = useState(null);
+  const [showDetailedView, setShowDetailedView] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
@@ -1712,6 +1715,31 @@ function ResponsesViewer({ questionario, onClose }) {
     } catch (error) {
       console.error("Errore nel caricamento analisi:", error);
     }
+  };
+
+  const fetchDetailedResponses = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE}/questionari/${questionario.id}/risposte-dettagliate`
+      );
+      const data = await response.json();
+      setDetailedResponses(data);
+    } catch (error) {
+      console.error("Errore nel caricamento risposte dettagliate:", error);
+    }
+  };
+
+  const handleShowUserResponses = async (questionId) => {
+    if (!detailedResponses) {
+      await fetchDetailedResponses();
+    }
+    setSelectedQuestion(questionId);
+    setShowDetailedView(true);
+  };
+
+  const handleBackToAnalysis = () => {
+    setShowDetailedView(false);
+    setSelectedQuestion(null);
   };
 
   const config = normalizeConfig(
@@ -1841,36 +1869,78 @@ function ResponsesViewer({ questionario, onClose }) {
 
           {activeTab === "analysis" && analysis && (
             <div className="tab-content">
-              <div className="detailed-analysis">
-                <h3>📊 Analisi Dettagliata per Domanda</h3>
-                {analysis.questions.map((questionData) => (
-                  <div
-                    key={questionData.questionId}
-                    className="question-analysis"
-                  >
-                    <div className="question-header">
-                      <h4>{questionData.question}</h4>
-                      <div className="question-meta">
-                        <span className="question-type">
-                          {questionData.type}
-                        </span>
-                        <span className="response-rate">
-                          {questionData.responseRate}% risposto
-                        </span>
+              {!showDetailedView ? (
+                <div className="detailed-analysis">
+                  <h3>📊 Analisi Dettagliata per Domanda</h3>
+                  {analysis.questions.map((questionData) => (
+                    <div
+                      key={questionData.questionId}
+                      className="question-analysis"
+                    >
+                      <div className="question-header">
+                        <h4>{questionData.question}</h4>
+                        <div className="question-meta">
+                          <span className="question-type">
+                            {questionData.type}
+                          </span>
+                          <span className="response-rate">
+                            {questionData.responseRate}% risposto
+                          </span>
+                          <button
+                            className="btn-small btn-users"
+                            onClick={() =>
+                              handleShowUserResponses(questionData.questionId)
+                            }
+                            title="Vedi chi ha risposto cosa"
+                          >
+                            👥 Dettagli utenti
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="analysis-content">
-                      {questionData.type === "multiple_choice" && (
-                        <div className="choice-analysis">
-                          <h5>Distribuzione Scelte:</h5>
-                          {questionData.analysis.distribution.map(
-                            (item, index) => (
-                              <div key={index} className="choice-bar">
-                                <div className="choice-info">
-                                  <span className="choice-text">
-                                    {item.choice}
+                      <div className="analysis-content">
+                        {questionData.type === "multiple_choice" && (
+                          <div className="choice-analysis">
+                            <h5>Distribuzione Scelte:</h5>
+                            {questionData.analysis.distribution.map(
+                              (item, index) => (
+                                <div key={index} className="choice-bar">
+                                  <div className="choice-info">
+                                    <span className="choice-text">
+                                      {item.choice}
+                                    </span>
+                                    <span className="choice-stats">
+                                      {item.count} voti ({item.percentage}%)
+                                    </span>
+                                  </div>
+                                  <div className="progress-bar">
+                                    <div
+                                      className="progress-fill"
+                                      style={{ width: `${item.percentage}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        )}
+                        {questionData.type === "rating" && (
+                          <div className="rating-analysis">
+                            <div className="rating-summary">
+                              <div className="avg-rating">
+                                <span className="rating-number">
+                                  {questionData.analysis.average}
+                                </span>
+                                <span className="rating-label">Media</span>
+                              </div>
+                            </div>
+                            <h5>Distribuzione Voti:</h5>
+                            {questionData.analysis.distribution.map((item) => (
+                              <div key={item.rating} className="rating-bar">
+                                <div className="rating-info">
+                                  <span className="rating-value">
+                                    {item.rating} ⭐
                                   </span>
-                                  <span className="choice-stats">
+                                  <span className="rating-stats">
                                     {item.count} voti ({item.percentage}%)
                                   </span>
                                 </div>
@@ -1881,72 +1951,47 @@ function ResponsesViewer({ questionario, onClose }) {
                                   ></div>
                                 </div>
                               </div>
-                            )
-                          )}
-                        </div>
-                      )}
-                      {questionData.type === "rating" && (
-                        <div className="rating-analysis">
-                          <div className="rating-summary">
-                            <div className="avg-rating">
-                              <span className="rating-number">
-                                {questionData.analysis.average}
+                            ))}
+                          </div>
+                        )}
+                        {(questionData.type === "text" ||
+                          questionData.type === "textarea") && (
+                          <div className="text-analysis">
+                            <div className="text-stats">
+                              <span>
+                                📝 {questionData.analysis.responses} risposte
+                                testuali
                               </span>
-                              <span className="rating-label">Media</span>
+                              <span>
+                                📏 Lunghezza media:{" "}
+                                {questionData.analysis.averageLength} caratteri
+                              </span>
                             </div>
-                          </div>
-                          <h5>Distribuzione Voti:</h5>
-                          {questionData.analysis.distribution.map((item) => (
-                            <div key={item.rating} className="rating-bar">
-                              <div className="rating-info">
-                                <span className="rating-value">
-                                  {item.rating} ⭐
-                                </span>
-                                <span className="rating-stats">
-                                  {item.count} voti ({item.percentage}%)
-                                </span>
+                            {questionData.analysis.samples.length > 0 && (
+                              <div className="text-samples">
+                                <h5>Esempi di risposte:</h5>
+                                {questionData.analysis.samples.map(
+                                  (sample, index) => (
+                                    <div key={index} className="sample-text">
+                                      "{sample}"
+                                    </div>
+                                  )
+                                )}
                               </div>
-                              <div className="progress-bar">
-                                <div
-                                  className="progress-fill"
-                                  style={{ width: `${item.percentage}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {(questionData.type === "text" ||
-                        questionData.type === "textarea") && (
-                        <div className="text-analysis">
-                          <div className="text-stats">
-                            <span>
-                              📝 {questionData.analysis.responses} risposte
-                              testuali
-                            </span>
-                            <span>
-                              📏 Lunghezza media:{" "}
-                              {questionData.analysis.averageLength} caratteri
-                            </span>
+                            )}
                           </div>
-                          {questionData.analysis.samples.length > 0 && (
-                            <div className="text-samples">
-                              <h5>Esempi di risposte:</h5>
-                              {questionData.analysis.samples.map(
-                                (sample, index) => (
-                                  <div key={index} className="sample-text">
-                                    "{sample}"
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <DetailedResponseView
+                  questionId={selectedQuestion}
+                  detailedResponses={detailedResponses}
+                  onBack={handleBackToAnalysis}
+                />
+              )}
             </div>
           )}
 
@@ -2007,6 +2052,92 @@ function ResponsesViewer({ questionario, onClose }) {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Componente per visualizzare risposte dettagliate per utente
+function DetailedResponseView({ questionId, detailedResponses, onBack }) {
+  if (!detailedResponses || !detailedResponses.rispostePerDomanda) {
+    return (
+      <div className="loading-container">
+        <p>Caricamento risposte dettagliate...</p>
+      </div>
+    );
+  }
+
+  const questionData = detailedResponses.rispostePerDomanda[questionId];
+  if (!questionData) {
+    return (
+      <div className="error">
+        <p>Domanda non trovata</p>
+        <button onClick={onBack} className="btn-secondary">
+          ← Torna indietro
+        </button>
+      </div>
+    );
+  }
+
+  // Raggruppa le risposte per valore
+  const groupedResponses = {};
+  questionData.risposte.forEach((resp) => {
+    const key = Array.isArray(resp.risposta)
+      ? resp.risposta.join(", ")
+      : String(resp.risposta);
+    if (!groupedResponses[key]) {
+      groupedResponses[key] = [];
+    }
+    groupedResponses[key].push(resp);
+  });
+
+  return (
+    <div className="detailed-response-view">
+      <div className="back-button-container">
+        <button onClick={onBack} className="btn-back-prominent">
+          ← Torna all'analisi
+        </button>
+      </div>
+
+      <div className="question-detail-header">
+        <h3>👥 Chi ha risposto cosa</h3>
+        <h4>{questionData.question}</h4>
+        <p className="response-summary">
+          Tipo: <span className="question-type">{questionData.type}</span> |
+          Totale risposte: <strong>{questionData.risposte.length}</strong>
+        </p>
+      </div>
+
+      <div className="grouped-responses">
+        {Object.entries(groupedResponses).map(([answer, users]) => (
+          <div key={answer} className="response-group">
+            <div className="response-group-header">
+              <div className="answer-display">
+                <span className="answer-text">{answer}</span>
+                <span className="user-count">
+                  {users.length} utent{users.length === 1 ? "e" : "i"}
+                </span>
+              </div>
+            </div>
+            <div className="users-list">
+              {users.map((user, index) => (
+                <div key={index} className="user-response-item">
+                  <div className="user-info">
+                    <span className="user-name">👤 {user.utente_nome}</span>
+                    <span className="timestamp">
+                      📅 {new Date(user.timestamp).toLocaleString("it-IT")}
+                    </span>
+                    {user.tempo_impiegato && (
+                      <span className="time-taken">
+                        ⏱️ {Math.round(user.tempo_impiegato / 60)} min
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

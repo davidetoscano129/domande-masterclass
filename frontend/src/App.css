@@ -2373,3 +2373,151 @@ body {
     text-align: center;
   }
 }
+
+/* Stili per visualizzazione risposte dettagliate */
+.btn-users {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-users:hover {
+  background: #138496;
+}
+
+.detailed-response-view {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+}
+
+.question-detail-header {
+  margin-bottom: 30px;
+  border-bottom: 2px solid #f8f9fa;
+  padding-bottom: 20px;
+}
+
+.question-detail-header h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.question-detail-header h4 {
+  margin: 0 0 15px 0;
+  color: #667eea;
+  font-size: 1.3rem;
+}
+
+.response-summary {
+  color: #666;
+  margin: 0;
+}
+
+.grouped-responses {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.response-group {
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.response-group-header {
+  background: white;
+  padding: 15px 20px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.answer-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.answer-text {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.user-count {
+  background: #667eea;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.users-list {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-response-item {
+  background: white;
+  border-radius: 8px;
+  padding: 12px 15px;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.user-response-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.user-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.timestamp {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.time-taken {
+  font-size: 0.85rem;
+  color: #28a745;
+}
+
+/* Responsive per vista dettagliata risposte */
+@media (max-width: 768px) {
+  .detailed-response-view {
+    padding: 20px;
+  }
+
+  .answer-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .question-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-users {
+    margin-top: 10px;
+  }
+}
