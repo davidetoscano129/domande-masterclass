@@ -1330,42 +1330,97 @@ function UtenteDashboard({ user, onLogout }) {
           <p>Caricamento...</p>
         ) : (
           <div className="questionari-by-lesson">
-            {questionari.map((questionario) => (
-              <div key={questionario.id} className="questionario-card">
-                <div className="questionario-status">
-                  {questionario.hasAnswered ? (
-                    <span className="status completed">✅ Completato</span>
-                  ) : (
-                    <span className="status pending">⏳ Da completare</span>
-                  )}
-                </div>
+            {(() => {
+              // Raggruppa i questionari per lezione
+              const questionariPerLezione = questionari.reduce(
+                (acc, questionario) => {
+                  const lezioneKey = questionario.lezione_id;
+                  if (!acc[lezioneKey]) {
+                    acc[lezioneKey] = {
+                      lezione_id: questionario.lezione_id,
+                      lezione_titolo: questionario.lezione_titolo,
+                      lezione_numero: questionario.lezione_numero || 0,
+                      relatore_nome: questionario.relatore_nome,
+                      questionari: [],
+                    };
+                  }
+                  acc[lezioneKey].questionari.push(questionario);
+                  return acc;
+                },
+                {}
+              );
 
-                <h3>{questionario.titolo}</h3>
-                <p>{questionario.descrizione}</p>
-                <small>
-                  Lezione: {questionario.lezione_titolo} -{" "}
-                  {questionario.relatore_nome}
-                </small>
+              // Ordina le lezioni per numero
+              const lezioniOrdinate = Object.values(questionariPerLezione).sort(
+                (a, b) => a.lezione_numero - b.lezione_numero
+              );
 
-                <div className="questionario-actions">
-                  {questionario.hasAnswered ? (
-                    <button
-                      onClick={() => setActiveQuestionario(questionario)}
-                      className="btn-secondary"
-                    >
-                      👁️ Rivedi Risposte
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setActiveQuestionario(questionario)}
-                      className="btn-primary"
-                    >
-                      📝 Compila Questionario
-                    </button>
-                  )}
+              return lezioniOrdinate.map((lezione) => (
+                <div key={lezione.lezione_id} className="lesson-section">
+                  <div className="lesson-header">
+                    <h3>
+                      📚 {lezione.lezione_titolo}
+                      {lezione.lezione_numero > 0 && (
+                        <span className="lesson-number">
+                          #{lezione.lezione_numero}
+                        </span>
+                      )}
+                    </h3>
+                    <p className="lesson-instructor">
+                      👨‍🏫 {lezione.relatore_nome}
+                    </p>
+                    <div className="lesson-stats">
+                      {lezione.questionari.length} questionari •{" "}
+                      {lezione.questionari.filter((q) => q.hasAnswered).length}{" "}
+                      completati
+                    </div>
+                  </div>
+
+                  <div className="lesson-questionari">
+                    {lezione.questionari.map((questionario) => (
+                      <div key={questionario.id} className="questionario-card">
+                        <div className="questionario-status">
+                          {questionario.hasAnswered ? (
+                            <span className="status completed">
+                              ✅ Completato
+                            </span>
+                          ) : (
+                            <span className="status pending">
+                              ⏳ Da completare
+                            </span>
+                          )}
+                        </div>
+
+                        <h4>{questionario.titolo}</h4>
+                        <p>{questionario.descrizione}</p>
+
+                        <div className="questionario-actions">
+                          {questionario.hasAnswered ? (
+                            <button
+                              onClick={() =>
+                                setActiveQuestionario(questionario)
+                              }
+                              className="btn-secondary"
+                            >
+                              👁️ Rivedi Risposte
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() =>
+                                setActiveQuestionario(questionario)
+                              }
+                              className="btn-primary"
+                            >
+                              📝 Compila Questionario
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ));
+            })()}
           </div>
         )}
       </main>

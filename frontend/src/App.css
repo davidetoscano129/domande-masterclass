@@ -2521,3 +2521,157 @@ body {
     margin-top: 10px;
   }
 }
+
+/* Stili per questionari organizzati per lezione */
+.questionari-by-lesson {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.lesson-section {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+}
+
+.lesson-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.lesson-header h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lesson-number {
+  background: #667eea;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.lesson-instructor {
+  margin: 5px 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.lesson-stats {
+  color: #888;
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+.lesson-questionari {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.questionario-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.questionario-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+}
+
+.questionario-card h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.questionario-card p {
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.questionario-status {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+.status {
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.questionario-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.questionario-actions button {
+  flex: 1;
+  margin: 0;
+}
+
+/* Responsive per questionari per lezione */
+@media (max-width: 768px) {
+  .questionari-by-lesson {
+    gap: 20px;
+  }
+
+  .lesson-section {
+    padding: 20px;
+  }
+
+  .lesson-header h3 {
+    font-size: 1.2rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .lesson-questionari {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .questionario-card {
+    padding: 15px;
+  }
+
+  .questionario-status {
+    position: static;
+    margin-bottom: 10px;
+  }
+
+  .questionario-actions {
+    flex-direction: column;
+  }
+}

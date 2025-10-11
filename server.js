@@ -302,11 +302,11 @@ app.delete("/api/lezioni/:id", async (req, res) => {
 app.get("/api/questionari", async (req, res) => {
   try {
     const [rows] = await db.execute(`
-      SELECT q.*, l.titolo as lezione_titolo, r.nome as relatore_nome
+      SELECT q.*, l.titolo as lezione_titolo, l.numero as lezione_numero, r.nome as relatore_nome
       FROM questionari q
       JOIN lezioni l ON q.lezione_id = l.id
       JOIN relatori r ON q.relatore_id = r.id
-      ORDER BY q.created_at DESC
+      ORDER BY l.numero ASC, q.created_at DESC
     `);
     res.json(rows);
   } catch (error) {
