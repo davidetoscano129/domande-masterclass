@@ -176,7 +176,7 @@ app.get("/api/utenti/:id/risposte", async (req, res) => {
     const { id } = req.params;
     const [rows] = await db.execute(
       `
-      SELECT c.*, q.titolo as questionario_titolo, l.titolo as lezione_titolo, rel.nome as relatore_nome
+      SELECT c.*, q.titolo as questionario_titolo, q.domande, l.titolo as lezione_titolo, rel.nome as relatore_nome
       FROM compilazioni c
       JOIN questionari q ON c.questionario_id = q.id
       JOIN lezioni l ON q.lezione_id = l.id

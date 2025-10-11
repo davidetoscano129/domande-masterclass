@@ -1071,6 +1071,8 @@ function UtentiTab({ utenti }) {
 
 // Componente per visualizzare le risposte di un utente specifico
 function UtenteRisposteView({ utente, risposte, loading, onBack }) {
+  const [viewMode, setViewMode] = useState("categorized"); // 'categorized' o 'global'
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -1078,6 +1080,92 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
       </div>
     );
   }
+
+  // Funzione per creare la vista globale di tutte le risposte
+  const getGlobalResponses = () => {
+    const allResponses = [];
+
+    risposte.forEach((risposta) => {
+      try {
+        let risposteData;
+        let domandeData;
+
+        if (typeof risposta.risposte === "string") {
+          try {
+            risposteData = JSON.parse(risposta.risposte);
+          } catch (parseError) {
+            console.error("Errore parsing JSON:", parseError);
+            return;
+          }
+        } else if (
+          typeof risposta.risposte === "object" &&
+          risposta.risposte !== null
+        ) {
+          risposteData = risposta.risposte;
+        } else {
+          return;
+        }
+
+        // Parse delle domande
+        if (typeof risposta.domande === "string") {
+          try {
+            domandeData = JSON.parse(risposta.domande);
+          } catch (parseError) {
+            console.error("Errore parsing domande JSON:", parseError);
+            domandeData = null;
+          }
+        } else if (
+          typeof risposta.domande === "object" &&
+          risposta.domande !== null
+        ) {
+          domandeData = risposta.domande;
+        }
+
+        if (risposteData && typeof risposteData === "object") {
+          Object.entries(risposteData).forEach(
+            ([questionId, answer], index) => {
+              // Trova la domanda corrispondente
+              let questionText = `Domanda ${index + 1}`;
+              let questionType = "text";
+
+              if (domandeData && domandeData.questions) {
+                const question = domandeData.questions.find(
+                  (q) =>
+                    (q.id && q.id === questionId) ||
+                    domandeData.questions.indexOf(q) === index
+                );
+                if (question) {
+                  questionText = question.question || questionText;
+                  questionType = question.type || questionType;
+                }
+              }
+
+              allResponses.push({
+                questionario: risposta.questionario_titolo,
+                lezione: risposta.lezione_titolo,
+                relatore: risposta.relatore_nome,
+                data: risposta.submitted_at,
+                questionId: questionId,
+                questionNumber: index + 1,
+                questionText: questionText,
+                questionType: questionType,
+                answer: answer,
+                completata: risposta.completata,
+                tempo_impiegato: risposta.tempo_impiegato,
+              });
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Errore nel processare risposta:", error);
+      }
+    });
+
+    // Ordina per data decrescente
+    return allResponses.sort((a, b) => new Date(b.data) - new Date(a.data));
+  };
+
+  const globalResponses = getGlobalResponses();
 
   return (
     <div className="utente-risposte">
@@ -1092,13 +1180,32 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
         <p className="total-risposte">
           Totale questionari compilati: <strong>{risposte.length}</strong>
         </p>
+
+        {/* Toggle per modalità visualizzazione */}
+        <div className="view-mode-toggle">
+          <button
+            className={`toggle-btn ${
+              viewMode === "categorized" ? "active" : ""
+            }`}
+            onClick={() => setViewMode("categorized")}
+          >
+            📋 Per Questionario
+          </button>
+          <button
+            className={`toggle-btn ${viewMode === "global" ? "active" : ""}`}
+            onClick={() => setViewMode("global")}
+          >
+            🌐 Tutte le Risposte
+          </button>
+        </div>
       </div>
 
       {risposte.length === 0 ? (
         <div className="no-responses">
           <p>🤷‍♂️ Questo utente non ha ancora compilato nessun questionario.</p>
         </div>
-      ) : (
+      ) : viewMode === "categorized" ? (
+        // Vista categorizzata per questionario (esistente)
         <div className="risposte-list">
           {risposte.map((risposta) => (
             <div key={risposta.id} className="risposta-card">
@@ -1179,6 +1286,25 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
                         );
                       }
 
+                      // Parse delle domande del questionario
+                      let domandeData;
+                      if (typeof risposta.domande === "string") {
+                        try {
+                          domandeData = JSON.parse(risposta.domande);
+                        } catch (parseError) {
+                          console.error(
+                            "Errore parsing domande JSON:",
+                            parseError
+                          );
+                          domandeData = null;
+                        }
+                      } else if (
+                        typeof risposta.domande === "object" &&
+                        risposta.domande !== null
+                      ) {
+                        domandeData = risposta.domande;
+                      }
+
                       const entries = Object.entries(risposteData);
                       if (entries.length === 0) {
                         return (
@@ -1188,45 +1314,77 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
 
                       return (
                         <div className="answers-grid">
-                          {entries.map(([questionId, answer], index) => (
-                            <div key={questionId} className="answer-item">
-                              <span className="question-id">
-                                Domanda {index + 1}:
-                              </span>
-                              <span className="answer-text">
-                                {(() => {
-                                  try {
-                                    if (Array.isArray(answer)) {
-                                      return answer.length > 0
-                                        ? answer.join(", ")
-                                        : "Nessuna selezione";
-                                    }
-                                    if (
-                                      answer === null ||
-                                      answer === undefined ||
-                                      answer === ""
-                                    ) {
-                                      return "Nessuna risposta";
-                                    }
-                                    // Converti sempre in stringa e gestisci caratteri speciali
-                                    const cleanAnswer = String(answer)
-                                      .replace(/\n/g, " ")
-                                      .replace(/\r/g, "")
-                                      .trim();
+                          {entries.map(([questionId, answer], index) => {
+                            // Trova la domanda corrispondente
+                            let questionText = `Domanda ${index + 1}`;
+                            let questionType = "text";
 
-                                    return cleanAnswer || "Risposta vuota";
-                                  } catch (e) {
-                                    console.error(
-                                      "Errore nel processare la risposta:",
-                                      answer,
-                                      e
-                                    );
-                                    return `Errore formato: ${typeof answer}`;
-                                  }
-                                })()}
-                              </span>
-                            </div>
-                          ))}
+                            if (domandeData && domandeData.questions) {
+                              const question = domandeData.questions.find(
+                                (q) =>
+                                  (q.id && q.id === questionId) ||
+                                  domandeData.questions.indexOf(q) === index
+                              );
+                              if (question) {
+                                questionText =
+                                  question.question || questionText;
+                                questionType = question.type || questionType;
+                              }
+                            }
+
+                            return (
+                              <div key={questionId} className="answer-item">
+                                <div className="question-section">
+                                  <span className="question-number">
+                                    {index + 1}.
+                                  </span>
+                                  <span className="question-text">
+                                    {questionText}
+                                  </span>
+                                  <span className="question-type">
+                                    ({questionType})
+                                  </span>
+                                </div>
+                                <div className="answer-section">
+                                  <span className="answer-label">
+                                    Risposta:
+                                  </span>
+                                  <span className="answer-text">
+                                    {(() => {
+                                      try {
+                                        if (Array.isArray(answer)) {
+                                          return answer.length > 0
+                                            ? answer.join(", ")
+                                            : "Nessuna selezione";
+                                        }
+                                        if (
+                                          answer === null ||
+                                          answer === undefined ||
+                                          answer === ""
+                                        ) {
+                                          return "Nessuna risposta";
+                                        }
+                                        // Converti sempre in stringa e gestisci caratteri speciali
+                                        const cleanAnswer = String(answer)
+                                          .replace(/\n/g, " ")
+                                          .replace(/\r/g, "")
+                                          .trim();
+
+                                        return cleanAnswer || "Risposta vuota";
+                                      } catch (e) {
+                                        console.error(
+                                          "Errore nel processare la risposta:",
+                                          answer,
+                                          e
+                                        );
+                                        return `Errore formato: ${typeof answer}`;
+                                      }
+                                    })()}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       );
                     } catch (error) {
@@ -1258,6 +1416,101 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
               </div>
             </div>
           ))}
+        </div>
+      ) : (
+        // Vista globale di tutte le risposte
+        <div className="global-responses">
+          <div className="global-responses-header">
+            <h3>🌐 Tutte le risposte ({globalResponses.length} totali)</h3>
+            <p className="global-description">
+              Vista unificata di tutte le risposte fornite dall'utente, ordinate
+              per data più recente.
+            </p>
+          </div>
+
+          {globalResponses.length === 0 ? (
+            <div className="no-responses">
+              <p>Nessuna risposta trovata.</p>
+            </div>
+          ) : (
+            <div className="global-responses-list">
+              {globalResponses.map((response, index) => (
+                <div
+                  key={`${response.questionario}-${response.questionId}-${index}`}
+                  className="global-response-item"
+                >
+                  <div className="response-context">
+                    <div className="context-info">
+                      <span className="questionario-ref">
+                        📋 {response.questionario}
+                      </span>
+                      <span className="lezione-ref">📚 {response.lezione}</span>
+                      <span className="relatore-ref">
+                        👨‍🏫 {response.relatore}
+                      </span>
+                      <span className="data-ref">
+                        📅 {new Date(response.data).toLocaleString("it-IT")}
+                      </span>
+                      {response.completata ? (
+                        <span className="status-ref completata">✅</span>
+                      ) : (
+                        <span className="status-ref incompleta">⏳</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="response-content">
+                    <div className="question-section-global">
+                      <div className="question-number">
+                        Domanda {response.questionNumber}:
+                      </div>
+                      <div className="question-text-global">
+                        {response.questionText}
+                      </div>
+                      <div className="question-type-global">
+                        Tipo: {response.questionType}
+                      </div>
+                    </div>
+                    <div className="answer-section-global">
+                      <div className="answer-label-global">Risposta:</div>
+                      <div className="answer-text">
+                        {(() => {
+                          try {
+                            if (Array.isArray(response.answer)) {
+                              return response.answer.length > 0
+                                ? response.answer.join(", ")
+                                : "Nessuna selezione";
+                            }
+                            if (
+                              response.answer === null ||
+                              response.answer === undefined ||
+                              response.answer === ""
+                            ) {
+                              return "Nessuna risposta";
+                            }
+
+                            const cleanAnswer = String(response.answer)
+                              .replace(/\n/g, " ")
+                              .replace(/\r/g, "")
+                              .trim();
+
+                            return cleanAnswer || "Risposta vuota";
+                          } catch (e) {
+                            console.error(
+                              "Errore nel processare risposta globale:",
+                              response.answer,
+                              e
+                            );
+                            return `Errore formato: ${typeof response.answer}`;
+                          }
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
