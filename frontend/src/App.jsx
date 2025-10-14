@@ -1521,6 +1521,7 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
 function UtenteDashboard({ user, onLogout }) {
   const [questionari, setQuestionari] = useState([]);
   const [activeQuestionario, setActiveQuestionario] = useState(null);
+  const [selectedRelatore, setSelectedRelatore] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -1554,6 +1555,54 @@ function UtenteDashboard({ user, onLogout }) {
     setLoading(false);
   };
 
+  // Raggruppa questionari per relatore
+  const getQuestionariPerRelatore = () => {
+    const questionariPerRelatore = questionari.reduce((acc, questionario) => {
+      const relatoreKey = questionario.relatore_id;
+      if (!acc[relatoreKey]) {
+        acc[relatoreKey] = {
+          relatore_id: questionario.relatore_id,
+          relatore_nome: questionario.relatore_nome,
+          questionari: [],
+        };
+      }
+      acc[relatoreKey].questionari.push(questionario);
+      return acc;
+    }, {});
+
+    return Object.values(questionariPerRelatore);
+  };
+
+  // Raggruppa questionari per lezione di un relatore specifico
+  const getQuestionariPerLezioneDelRelatore = (relatoreId) => {
+    const questionariDelRelatore = questionari.filter(
+      (q) => q.relatore_id === relatoreId
+    );
+
+    const questionariPerLezione = questionariDelRelatore.reduce(
+      (acc, questionario) => {
+        const lezioneKey = questionario.lezione_id;
+        if (!acc[lezioneKey]) {
+          acc[lezioneKey] = {
+            lezione_id: questionario.lezione_id,
+            lezione_titolo: questionario.lezione_titolo,
+            lezione_numero: questionario.lezione_numero || 0,
+            relatore_nome: questionario.relatore_nome,
+            questionari: [],
+          };
+        }
+        acc[lezioneKey].questionari.push(questionario);
+        return acc;
+      },
+      {}
+    );
+
+    // Ordina le lezioni per numero
+    return Object.values(questionariPerLezione).sort(
+      (a, b) => a.lezione_numero - b.lezione_numero
+    );
+  };
+
   if (activeQuestionario) {
     return (
       <QuestionarioViewer
@@ -1578,37 +1627,85 @@ function UtenteDashboard({ user, onLogout }) {
       </header>
 
       <main className="dashboard-content">
-        <h2>📝 Questionari Disponibili</h2>
-        {loading ? (
-          <p>Caricamento...</p>
+        {!selectedRelatore ? (
+          // Vista iniziale: lista dei relatori
+          <>
+            <h2>�‍🏫 Seleziona un Relatore</h2>
+            {loading ? (
+              <p>Caricamento...</p>
+            ) : (
+              <div className="relatori-grid">
+                {getQuestionariPerRelatore().map((relatore) => {
+                  const totalQuestionari = relatore.questionari.length;
+                  const completedQuestionari = relatore.questionari.filter(
+                    (q) => q.hasAnswered
+                  ).length;
+                  const progressPercentage =
+                    totalQuestionari > 0
+                      ? Math.round(
+                          (completedQuestionari / totalQuestionari) * 100
+                        )
+                      : 0;
+
+                  return (
+                    <div
+                      key={relatore.relatore_id}
+                      className="relatore-card"
+                      onClick={() => setSelectedRelatore(relatore)}
+                    >
+                      <div className="relatore-header">
+                        <h3>👨‍🏫 {relatore.relatore_nome}</h3>
+                        <div className="relatore-stats">
+                          <span className="total-questionari">
+                            {totalQuestionari} questionari disponibili
+                          </span>
+                          <span className="completed-questionari">
+                            {completedQuestionari} completati
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="relatore-progress">
+                        <div className="progress-bar">
+                          <div
+                            className="progress-fill"
+                            style={{ width: `${progressPercentage}%` }}
+                          ></div>
+                        </div>
+                        <span className="progress-text">
+                          {progressPercentage}%
+                        </span>
+                      </div>
+
+                      <div className="relatore-action">
+                        <span className="action-text">
+                          Clicca per vedere i questionari →
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         ) : (
-          <div className="questionari-by-lesson">
-            {(() => {
-              // Raggruppa i questionari per lezione
-              const questionariPerLezione = questionari.reduce(
-                (acc, questionario) => {
-                  const lezioneKey = questionario.lezione_id;
-                  if (!acc[lezioneKey]) {
-                    acc[lezioneKey] = {
-                      lezione_id: questionario.lezione_id,
-                      lezione_titolo: questionario.lezione_titolo,
-                      lezione_numero: questionario.lezione_numero || 0,
-                      relatore_nome: questionario.relatore_nome,
-                      questionari: [],
-                    };
-                  }
-                  acc[lezioneKey].questionari.push(questionario);
-                  return acc;
-                },
-                {}
-              );
+          // Vista questionari del relatore selezionato
+          <>
+            <div className="back-button-container">
+              <button
+                onClick={() => setSelectedRelatore(null)}
+                className="btn-back-prominent"
+              >
+                ← Torna ai Relatori
+              </button>
+            </div>
 
-              // Ordina le lezioni per numero
-              const lezioniOrdinate = Object.values(questionariPerLezione).sort(
-                (a, b) => a.lezione_numero - b.lezione_numero
-              );
+            <h2>📝 Questionari di {selectedRelatore.relatore_nome}</h2>
 
-              return lezioniOrdinate.map((lezione) => (
+            <div className="questionari-by-lesson">
+              {getQuestionariPerLezioneDelRelatore(
+                selectedRelatore.relatore_id
+              ).map((lezione) => (
                 <div key={lezione.lezione_id} className="lesson-section">
                   <div className="lesson-header">
                     <h3>
@@ -1638,9 +1735,7 @@ function UtenteDashboard({ user, onLogout }) {
                               ✅ Completato
                             </span>
                           ) : (
-                            <span className="status pending">
-                              ⏳ Da completare
-                            </span>
+                            <span className="status pending">⏳ Da fare</span>
                           )}
                         </div>
 
@@ -1664,7 +1759,7 @@ function UtenteDashboard({ user, onLogout }) {
                               }
                               className="btn-primary"
                             >
-                              📝 Compila Questionario
+                              ▶️ Inizia
                             </button>
                           )}
                         </div>
@@ -1672,9 +1767,9 @@ function UtenteDashboard({ user, onLogout }) {
                     ))}
                   </div>
                 </div>
-              ));
-            })()}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </main>
     </div>

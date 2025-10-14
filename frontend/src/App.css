@@ -3228,3 +3228,134 @@ body {
     font-size: 1.3rem;
   }
 }
+
+/* Stili per la griglia dei relatori */
+.relatori-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.relatore-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  border-radius: 24px;
+  padding: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.relatore-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #1e3a8a, #3b82f6, #fbbf24);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.relatore-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px rgba(30, 58, 138, 0.2);
+  border-color: #3b82f6;
+}
+
+.relatore-card:hover::before {
+  transform: scaleX(1);
+}
+
+.relatore-header h3 {
+  color: #1e3a8a;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.relatore-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.relatore-stats span {
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.total-questionari {
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.completed-questionari {
+  color: #059669;
+  font-weight: 600;
+}
+
+.relatore-progress {
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  background: rgba(226, 232, 240, 0.7);
+  border-radius: 10px;
+  height: 12px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #1e3a8a, #3b82f6, #fbbf24);
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.relatore-action {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.action-text {
+  color: #3b82f6;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.relatore-card:hover .action-text {
+  color: #1e3a8a;
+}
+
+/* Responsive per la griglia relatori */
+@media (max-width: 768px) {
+  .relatori-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .relatore-card {
+    padding: 25px;
+  }
+
+  .relatore-header h3 {
+    font-size: 1.2rem;
+  }
+}
