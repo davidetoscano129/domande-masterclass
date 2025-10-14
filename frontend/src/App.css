@@ -3359,3 +3359,164 @@ body {
     font-size: 1.2rem;
   }
 }
+
+/* Stili per i bottoni di esportazione */
+.export-section {
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 16px;
+  border: 2px solid rgba(59, 130, 246, 0.1);
+}
+
+.export-section h5 {
+  color: #1e3a8a;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-export {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-export::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.3s ease;
+}
+
+.btn-export:hover::before {
+  left: 100%;
+}
+
+.btn-export:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-word {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.btn-word:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}
+
+.btn-excel {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.btn-excel:hover {
+  background: linear-gradient(135deg, #047857, #065f46);
+}
+
+.btn-csv {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+}
+
+.btn-csv:hover {
+  background: linear-gradient(135deg, #6d28d9, #5b21b6);
+}
+
+.btn-pdf {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.btn-pdf:hover {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+}
+
+.btn-json {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.btn-json:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+/* Stili per l'header della vista dettagliata con esportazione */
+.question-detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.header-content h3 {
+  color: #1e3a8a;
+  margin-bottom: 10px;
+}
+
+.header-content h4 {
+  color: #374151;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+.response-summary {
+  color: #64748b;
+  margin: 0;
+}
+
+.question-type {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Responsive per esportazione */
+@media (max-width: 768px) {
+  .export-options {
+    flex-direction: column;
+  }
+  
+  .btn-export {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .question-detail-header {
+    padding: 20px;
+  }
+  
+  .export-section {
+    padding: 15px;
+  }
+  
+  .export-section h5 {
+    font-size: 0.9rem;
+  }
+}

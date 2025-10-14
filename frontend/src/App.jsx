@@ -8,6 +8,22 @@ import {
 } from "react-router-dom";
 import "./App.css";
 
+// Import per esportazione
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+} from "docx";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+
 // Configurazione API
 const API_BASE = "http://localhost:3000/api";
 
@@ -1073,6 +1089,134 @@ function UtentiTab({ utenti }) {
 function UtenteRisposteView({ utente, risposte, loading, onBack }) {
   const [viewMode, setViewMode] = useState("categorized"); // 'categorized' o 'global'
 
+  // Funzione per preparare i dati per l'esportazione utente
+  const prepareUserExportData = () => {
+    const exportData = [];
+
+    risposte.forEach((risposta) => {
+      try {
+        let risposteData;
+        let domandeData;
+
+        // Parse delle risposte
+        if (typeof risposta.risposte === "string") {
+          try {
+            risposteData = JSON.parse(risposta.risposte);
+          } catch (parseError) {
+            console.error("Errore parsing risposte JSON:", parseError);
+            return;
+          }
+        } else if (
+          typeof risposta.risposte === "object" &&
+          risposta.risposte !== null
+        ) {
+          risposteData = risposta.risposte;
+        } else {
+          return;
+        }
+
+        // Parse delle domande
+        if (typeof risposta.domande === "string") {
+          try {
+            domandeData = JSON.parse(risposta.domande);
+          } catch (parseError) {
+            console.error("Errore parsing domande JSON:", parseError);
+            domandeData = null;
+          }
+        } else if (
+          typeof risposta.domande === "object" &&
+          risposta.domande !== null
+        ) {
+          domandeData = risposta.domande;
+        }
+
+        if (risposteData && typeof risposteData === "object") {
+          Object.entries(risposteData).forEach(
+            ([questionId, answer], index) => {
+              let questionText = `Domanda ${index + 1}`;
+              let questionType = "text";
+
+              if (domandeData && domandeData.questions) {
+                const question = domandeData.questions.find(
+                  (q) =>
+                    (q.id && q.id === questionId) ||
+                    domandeData.questions.indexOf(q) === index
+                );
+                if (question) {
+                  questionText = question.question || questionText;
+                  questionType = question.type || questionType;
+                }
+              }
+
+              const answerText = (() => {
+                if (Array.isArray(answer)) {
+                  return answer.length > 0
+                    ? answer.join(", ")
+                    : "Nessuna selezione";
+                }
+                if (answer === null || answer === undefined || answer === "") {
+                  return "Nessuna risposta";
+                }
+                return (
+                  String(answer)
+                    .replace(/\n/g, " ")
+                    .replace(/\r/g, "")
+                    .trim() || "Risposta vuota"
+                );
+              })();
+
+              exportData.push({
+                question: questionText,
+                type: questionType,
+                answer: answerText,
+                user: utente.nome,
+                date: new Date(risposta.submitted_at).toLocaleString("it-IT"),
+                questionario: risposta.questionario_titolo,
+                lezione: risposta.lezione_titolo,
+                relatore: risposta.relatore_nome,
+                completata: risposta.completata ? "Sì" : "No",
+                tempo_impiegato: risposta.tempo_impiegato
+                  ? `${Math.round(risposta.tempo_impiegato / 60)} minuti`
+                  : "",
+              });
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Errore nel processare risposta per export:", error);
+      }
+    });
+
+    return exportData;
+  };
+
+  const handleUserExport = (format) => {
+    const data = prepareUserExportData();
+    const fileName = `risposte_${utente.nome
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase()}`;
+
+    switch (format) {
+      case "word":
+        exportToWord(data, fileName);
+        break;
+      case "excel":
+        exportToExcel(data, fileName);
+        break;
+      case "csv":
+        exportToCSV(data, fileName);
+        break;
+      case "pdf":
+        exportToPDF("utente-risposte-content", fileName);
+        break;
+      case "json":
+        exportToJSON(data, fileName);
+        break;
+      default:
+        alert("Formato non supportato");
+    }
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -1181,6 +1325,48 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
           Totale questionari compilati: <strong>{risposte.length}</strong>
         </p>
 
+        {/* Bottoni di esportazione */}
+        <div className="export-section">
+          <h5>📤 Esporta tutte le risposte:</h5>
+          <div className="export-options">
+            <button
+              onClick={() => handleUserExport("word")}
+              className="btn-export btn-word"
+              title="Esporta in formato Word"
+            >
+              📄 Word
+            </button>
+            <button
+              onClick={() => handleUserExport("excel")}
+              className="btn-export btn-excel"
+              title="Esporta in formato Excel"
+            >
+              📊 Excel
+            </button>
+            <button
+              onClick={() => handleUserExport("csv")}
+              className="btn-export btn-csv"
+              title="Esporta in formato CSV"
+            >
+              📋 CSV
+            </button>
+            <button
+              onClick={() => handleUserExport("pdf")}
+              className="btn-export btn-pdf"
+              title="Esporta in formato PDF"
+            >
+              📑 PDF
+            </button>
+            <button
+              onClick={() => handleUserExport("json")}
+              className="btn-export btn-json"
+              title="Esporta in formato JSON"
+            >
+              🔧 JSON
+            </button>
+          </div>
+        </div>
+
         {/* Toggle per modalità visualizzazione */}
         <div className="view-mode-toggle">
           <button
@@ -1206,7 +1392,7 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
         </div>
       ) : viewMode === "categorized" ? (
         // Vista categorizzata per questionario (esistente)
-        <div className="risposte-list">
+        <div id="utente-risposte-content" className="risposte-list">
           {risposte.map((risposta) => (
             <div key={risposta.id} className="risposta-card">
               <div className="risposta-header">
@@ -2460,6 +2646,204 @@ function ResponsesViewer({ questionario, onClose }) {
   );
 }
 
+// Funzioni per l'esportazione dei dati
+const exportToWord = async (data, fileName = "risposte") => {
+  try {
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Report Risposte Questionario",
+                  bold: true,
+                  size: 28,
+                }),
+              ],
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Generato il: ${new Date().toLocaleDateString(
+                    "it-IT"
+                  )}`,
+                  italics: true,
+                }),
+              ],
+            }),
+            new Paragraph({ text: "" }), // Spazio vuoto
+            ...data.flatMap((item) => [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Domanda: ${item.question}`,
+                    bold: true,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Tipo: ${item.type}`,
+                    italics: true,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Risposta: ${item.answer}`,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Utente: ${item.user}`,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Data: ${item.date}`,
+                  }),
+                ],
+              }),
+              new Paragraph({ text: "" }), // Spazio tra domande
+            ]),
+          ],
+        },
+      ],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `${fileName}.docx`);
+  } catch (error) {
+    console.error("Errore nell'esportazione Word:", error);
+    alert("Errore nell'esportazione Word");
+  }
+};
+
+const exportToExcel = (data, fileName = "risposte") => {
+  try {
+    const ws = XLSX.utils.json_to_sheet(
+      data.map((item) => ({
+        Domanda: item.question,
+        Tipo: item.type,
+        Risposta: item.answer,
+        Utente: item.user,
+        Data: item.date,
+        Questionario: item.questionario || "",
+        Lezione: item.lezione || "",
+      }))
+    );
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Risposte");
+
+    XLSX.writeFile(wb, `${fileName}.xlsx`);
+  } catch (error) {
+    console.error("Errore nell'esportazione Excel:", error);
+    alert("Errore nell'esportazione Excel");
+  }
+};
+
+const exportToCSV = (data, fileName = "risposte") => {
+  try {
+    const csvContent = [
+      [
+        "Domanda",
+        "Tipo",
+        "Risposta",
+        "Utente",
+        "Data",
+        "Questionario",
+        "Lezione",
+      ],
+      ...data.map((item) => [
+        item.question,
+        item.type,
+        item.answer,
+        item.user,
+        item.date,
+        item.questionario || "",
+        item.lezione || "",
+      ]),
+    ]
+      .map((row) =>
+        row.map((field) => `"${String(field).replace(/"/g, '""')}"`).join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    saveAs(blob, `${fileName}.csv`);
+  } catch (error) {
+    console.error("Errore nell'esportazione CSV:", error);
+    alert("Errore nell'esportazione CSV");
+  }
+};
+
+const exportToPDF = async (elementId, fileName = "risposte") => {
+  try {
+    const element = document.getElementById(elementId);
+    if (!element) {
+      alert("Elemento non trovato per l'esportazione PDF");
+      return;
+    }
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF();
+    const imgWidth = 210;
+    const pageHeight = 295;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+
+    let position = 0;
+
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`${fileName}.pdf`);
+  } catch (error) {
+    console.error("Errore nell'esportazione PDF:", error);
+    alert("Errore nell'esportazione PDF");
+  }
+};
+
+const exportToJSON = (data, fileName = "risposte") => {
+  try {
+    const jsonData = {
+      exportDate: new Date().toISOString(),
+      totalResponses: data.length,
+      responses: data,
+    };
+
+    const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+      type: "application/json;charset=utf-8;",
+    });
+    saveAs(blob, `${fileName}.json`);
+  } catch (error) {
+    console.error("Errore nell'esportazione JSON:", error);
+    alert("Errore nell'esportazione JSON");
+  }
+};
+
 // Componente per visualizzare risposte dettagliate per utente
 function DetailedResponseView({ questionId, detailedResponses, onBack }) {
   if (!detailedResponses || !detailedResponses.rispostePerDomanda) {
@@ -2494,6 +2878,54 @@ function DetailedResponseView({ questionId, detailedResponses, onBack }) {
     groupedResponses[key].push(resp);
   });
 
+  // Prepara i dati per l'esportazione
+  const prepareExportData = () => {
+    const exportData = [];
+
+    Object.entries(groupedResponses).forEach(([answer, users]) => {
+      users.forEach((user) => {
+        exportData.push({
+          question: questionData.question,
+          type: questionData.type,
+          answer: answer,
+          user: user.utente_nome,
+          date: new Date(user.timestamp).toLocaleString("it-IT"),
+          questionario: "", // Aggiungere se disponibile
+          lezione: "", // Aggiungere se disponibile
+        });
+      });
+    });
+
+    return exportData;
+  };
+
+  const handleExport = (format) => {
+    const data = prepareExportData();
+    const fileName = `risposte_${questionData.question
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase()}`;
+
+    switch (format) {
+      case "word":
+        exportToWord(data, fileName);
+        break;
+      case "excel":
+        exportToExcel(data, fileName);
+        break;
+      case "csv":
+        exportToCSV(data, fileName);
+        break;
+      case "pdf":
+        exportToPDF("detailed-response-content", fileName);
+        break;
+      case "json":
+        exportToJSON(data, fileName);
+        break;
+      default:
+        alert("Formato non supportato");
+    }
+  };
+
   return (
     <div className="detailed-response-view">
       <div className="back-button-container">
@@ -2503,15 +2935,58 @@ function DetailedResponseView({ questionId, detailedResponses, onBack }) {
       </div>
 
       <div className="question-detail-header">
-        <h3>👥 Chi ha risposto cosa</h3>
-        <h4>{questionData.question}</h4>
-        <p className="response-summary">
-          Tipo: <span className="question-type">{questionData.type}</span> |
-          Totale risposte: <strong>{questionData.risposte.length}</strong>
-        </p>
+        <div className="header-content">
+          <h3>👥 Chi ha risposto cosa</h3>
+          <h4>{questionData.question}</h4>
+          <p className="response-summary">
+            Tipo: <span className="question-type">{questionData.type}</span> |
+            Totale risposte: <strong>{questionData.risposte.length}</strong>
+          </p>
+        </div>
+
+        <div className="export-buttons">
+          <h5>📤 Esporta Risposte:</h5>
+          <div className="export-options">
+            <button
+              onClick={() => handleExport("word")}
+              className="btn-export btn-word"
+              title="Esporta in formato Word"
+            >
+              📄 Word
+            </button>
+            <button
+              onClick={() => handleExport("excel")}
+              className="btn-export btn-excel"
+              title="Esporta in formato Excel"
+            >
+              📊 Excel
+            </button>
+            <button
+              onClick={() => handleExport("csv")}
+              className="btn-export btn-csv"
+              title="Esporta in formato CSV"
+            >
+              📋 CSV
+            </button>
+            <button
+              onClick={() => handleExport("pdf")}
+              className="btn-export btn-pdf"
+              title="Esporta in formato PDF"
+            >
+              📑 PDF
+            </button>
+            <button
+              onClick={() => handleExport("json")}
+              className="btn-export btn-json"
+              title="Esporta in formato JSON"
+            >
+              🔧 JSON
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="grouped-responses">
+      <div id="detailed-response-content" className="grouped-responses">
         {Object.entries(groupedResponses).map(([answer, users]) => (
           <div key={answer} className="response-group">
             <div className="response-group-header">
