@@ -3534,6 +3534,47 @@ body {
   background: linear-gradient(135deg, #d97706, #b45309);
 }
 
+/* Stili per pulsanti export piccoli */
+.btn-export.btn-small {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  min-width: 40px;
+  border-radius: 8px;
+}
+
+/* Stili per export utente specifico nelle response cards */
+.user-export-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(249, 250, 251, 0.8);
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+
+.export-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 600;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.response-header {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.response-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
 /* Stili per l'header della vista dettagliata con esportazione */
 .question-detail-header {
   display: flex;
@@ -3576,6 +3617,27 @@ body {
 @media (max-width: 768px) {
   .export-options {
     flex-direction: column;
+  }
+
+  .user-export-buttons {
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .export-label {
+    font-size: 0.75rem;
+  }
+
+  .btn-export.btn-small {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    min-width: 35px;
+  }
+
+  .response-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 
   .btn-export {

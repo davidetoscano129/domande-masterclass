@@ -2378,6 +2378,35 @@ function ResponsesViewer({ questionario, onClose }) {
     }
   };
 
+  // Funzione per gestire l'export di un singolo utente per questo questionario
+  const handleUserQuestionnaireExport = (userResponse, format) => {
+    const data = prepareUserQuestionnaireExportData(questionario, userResponse);
+    const fileName = `${userResponse.utente_nome}_${questionario.titolo}`
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase();
+
+    switch (format) {
+      case "word":
+        exportToWord(data, fileName);
+        break;
+      case "excel":
+        exportToExcel(data, fileName);
+        break;
+      case "csv":
+        exportToCSV(data, fileName);
+        break;
+      case "pdf":
+        // Creo un ID temporaneo per il contenuto dell'utente specifico
+        exportToPDF(`user-response-${userResponse.id}`, fileName);
+        break;
+      case "json":
+        exportToJSON(data, fileName);
+        break;
+      default:
+        alert("Formato non supportato");
+    }
+  };
+
   if (loading) {
     return (
       <div className="modal-overlay">
@@ -2687,6 +2716,56 @@ function ResponsesViewer({ questionario, onClose }) {
                                 : "⏳ Incompleta"}
                             </span>
                           </div>
+
+                          {/* Pulsanti export per utente specifico */}
+                          <div className="user-export-buttons">
+                            <span className="export-label">📤 Export:</span>
+                            <button
+                              onClick={() =>
+                                handleUserQuestionnaireExport(response, "word")
+                              }
+                              className="btn-export btn-word btn-small"
+                              title="Esporta risposte di questo utente in Word"
+                            >
+                              📄
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleUserQuestionnaireExport(response, "excel")
+                              }
+                              className="btn-export btn-excel btn-small"
+                              title="Esporta risposte di questo utente in Excel"
+                            >
+                              📊
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleUserQuestionnaireExport(response, "csv")
+                              }
+                              className="btn-export btn-csv btn-small"
+                              title="Esporta risposte di questo utente in CSV"
+                            >
+                              📋
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleUserQuestionnaireExport(response, "pdf")
+                              }
+                              className="btn-export btn-pdf btn-small"
+                              title="Esporta risposte di questo utente in PDF"
+                            >
+                              📑
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleUserQuestionnaireExport(response, "json")
+                              }
+                              className="btn-export btn-json btn-small"
+                              title="Esporta risposte di questo utente in JSON"
+                            >
+                              🔧
+                            </button>
+                          </div>
                         </div>
                         <div className="response-answers">
                           {config.questions.map((question) => {
@@ -2791,6 +2870,74 @@ const prepareQuestionnaireExportData = (questionario, responses, analysis) => {
     });
   } catch (error) {
     console.error("Errore nella preparazione dati export questionario:", error);
+  }
+
+  return exportData;
+};
+
+// Funzione per preparare i dati di export di un utente specifico per un questionario specifico
+const prepareUserQuestionnaireExportData = (questionario, userResponse) => {
+  const exportData = [];
+
+  try {
+    // Parse delle domande del questionario
+    let questionsConfig;
+    if (typeof questionario.domande === "string") {
+      questionsConfig = JSON.parse(questionario.domande);
+    } else {
+      questionsConfig = questionario.domande;
+    }
+
+    if (!questionsConfig || !questionsConfig.questions) {
+      return exportData;
+    }
+
+    // Parse delle risposte dell'utente
+    let risposteData;
+    if (typeof userResponse.risposte === "string") {
+      risposteData = JSON.parse(userResponse.risposte);
+    } else {
+      risposteData = userResponse.risposte;
+    }
+
+    // Per ogni domanda del questionario
+    questionsConfig.questions.forEach((question, index) => {
+      const questionId = question.id || `question_${index}`;
+      const answer = risposteData[questionId];
+
+      const answerText = (() => {
+        if (Array.isArray(answer)) {
+          return answer.length > 0 ? answer.join(", ") : "Nessuna selezione";
+        }
+        if (answer === null || answer === undefined || answer === "") {
+          return "Nessuna risposta";
+        }
+        return (
+          String(answer).replace(/\n/g, " ").replace(/\r/g, "").trim() ||
+          "Risposta vuota"
+        );
+      })();
+
+      exportData.push({
+        question: question.question,
+        type: question.type,
+        answer: answerText,
+        user: userResponse.utente_nome,
+        date: new Date(userResponse.submitted_at).toLocaleString("it-IT"),
+        questionario: questionario.titolo,
+        lezione: questionario.lezione_titolo,
+        relatore: questionario.relatore_nome,
+        completata: userResponse.completata ? "Sì" : "No",
+        tempo_impiegato: userResponse.tempo_impiegato
+          ? `${Math.round(userResponse.tempo_impiegato / 60)} minuti`
+          : "",
+      });
+    });
+  } catch (error) {
+    console.error(
+      "Errore nella preparazione dati export utente-questionario:",
+      error
+    );
   }
 
   return exportData;
