@@ -2346,6 +2346,38 @@ function ResponsesViewer({ questionario, onClose }) {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
+  // Funzione per gestire l'export del questionario
+  const handleQuestionnaireExport = (format) => {
+    const data = prepareQuestionnaireExportData(
+      questionario,
+      responses,
+      analysis
+    );
+    const fileName = `questionario_${questionario.titolo
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase()}`;
+
+    switch (format) {
+      case "word":
+        exportToWord(data, fileName);
+        break;
+      case "excel":
+        exportToExcel(data, fileName);
+        break;
+      case "csv":
+        exportToCSV(data, fileName);
+        break;
+      case "pdf":
+        exportToPDF("responses-modal", fileName);
+        break;
+      case "json":
+        exportToJSON(data, fileName);
+        break;
+      default:
+        alert("Formato non supportato");
+    }
+  };
+
   if (loading) {
     return (
       <div className="modal-overlay">
@@ -2369,9 +2401,51 @@ function ResponsesViewer({ questionario, onClose }) {
       <div className="modal-content responses-modal">
         <div className="modal-header">
           <h2>📊 Risposte - {questionario.titolo}</h2>
-          <button onClick={onClose} className="btn-close">
-            ×
-          </button>
+          <div className="header-actions">
+            <div className="export-section">
+              <h4>📤 Esporta Risposte Questionario</h4>
+              <div className="export-buttons">
+                <button
+                  onClick={() => handleQuestionnaireExport("word")}
+                  className="btn-export btn-word"
+                  title="Esporta in formato Word"
+                >
+                  📄 Word
+                </button>
+                <button
+                  onClick={() => handleQuestionnaireExport("excel")}
+                  className="btn-export btn-excel"
+                  title="Esporta in formato Excel"
+                >
+                  📊 Excel
+                </button>
+                <button
+                  onClick={() => handleQuestionnaireExport("csv")}
+                  className="btn-export btn-csv"
+                  title="Esporta in formato CSV"
+                >
+                  📋 CSV
+                </button>
+                <button
+                  onClick={() => handleQuestionnaireExport("pdf")}
+                  className="btn-export btn-pdf"
+                  title="Esporta in formato PDF"
+                >
+                  📑 PDF
+                </button>
+                <button
+                  onClick={() => handleQuestionnaireExport("json")}
+                  className="btn-export btn-json"
+                  title="Esporta in formato JSON"
+                >
+                  🔧 JSON
+                </button>
+              </div>
+            </div>
+            <button onClick={onClose} className="btn-close">
+              ×
+            </button>
+          </div>
         </div>
 
         <div className="tabs-navigation">
@@ -2645,6 +2719,82 @@ function ResponsesViewer({ questionario, onClose }) {
     </div>
   );
 }
+
+// Funzione per preparare i dati di export di un questionario specifico
+const prepareQuestionnaireExportData = (questionario, responses, analysis) => {
+  const exportData = [];
+
+  try {
+    // Parse delle domande del questionario
+    let questionsConfig;
+    if (typeof questionario.domande === "string") {
+      questionsConfig = JSON.parse(questionario.domande);
+    } else {
+      questionsConfig = questionario.domande;
+    }
+
+    if (!questionsConfig || !questionsConfig.questions) {
+      return exportData;
+    }
+
+    // Per ogni risposta al questionario
+    responses.forEach((response) => {
+      try {
+        let risposteData;
+        if (typeof response.risposte === "string") {
+          risposteData = JSON.parse(response.risposte);
+        } else {
+          risposteData = response.risposte;
+        }
+
+        // Per ogni domanda del questionario
+        questionsConfig.questions.forEach((question, index) => {
+          const questionId = question.id || `question_${index}`;
+          const answer = risposteData[questionId];
+
+          const answerText = (() => {
+            if (Array.isArray(answer)) {
+              return answer.length > 0
+                ? answer.join(", ")
+                : "Nessuna selezione";
+            }
+            if (answer === null || answer === undefined || answer === "") {
+              return "Nessuna risposta";
+            }
+            return (
+              String(answer).replace(/\n/g, " ").replace(/\r/g, "").trim() ||
+              "Risposta vuota"
+            );
+          })();
+
+          exportData.push({
+            question: question.question,
+            type: question.type,
+            answer: answerText,
+            user: response.utente_nome,
+            date: new Date(response.submitted_at).toLocaleString("it-IT"),
+            questionario: questionario.titolo,
+            lezione: questionario.lezione_titolo,
+            relatore: questionario.relatore_nome,
+            completata: response.completata ? "Sì" : "No",
+            tempo_impiegato: response.tempo_impiegato
+              ? `${Math.round(response.tempo_impiegato / 60)} minuti`
+              : "",
+          });
+        });
+      } catch (error) {
+        console.error(
+          "Errore nel processare risposta per export questionario:",
+          error
+        );
+      }
+    });
+  } catch (error) {
+    console.error("Errore nella preparazione dati export questionario:", error);
+  }
+
+  return exportData;
+};
 
 // Funzioni per l'esportazione dei dati
 const exportToWord = async (data, fileName = "risposte") => {
