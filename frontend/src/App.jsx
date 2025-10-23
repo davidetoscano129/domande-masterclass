@@ -1706,12 +1706,17 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
 // Dashboard Utente con compilazione questionari
 function UtenteDashboard({ user, onLogout }) {
   const [questionari, setQuestionari] = useState([]);
+  const [relatori, setRelatori] = useState([]);
   const [activeQuestionario, setActiveQuestionario] = useState(null);
   const [selectedRelatore, setSelectedRelatore] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingQuestionari, setLoadingQuestionari] = useState(true);
+  const [loadingRelatori, setLoadingRelatori] = useState(true);
+
+  const loading = loadingQuestionari || loadingRelatori;
 
   useEffect(() => {
     fetchQuestionari();
+    fetchRelatori();
   }, []);
 
   const fetchQuestionari = async () => {
@@ -1738,11 +1743,23 @@ function UtenteDashboard({ user, onLogout }) {
     } catch (error) {
       console.error("Errore nel caricamento questionari:", error);
     }
-    setLoading(false);
+    setLoadingQuestionari(false);
   };
 
-  // Raggruppa questionari per relatore
+  const fetchRelatori = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/relatori`);
+      const data = await response.json();
+      setRelatori(data);
+    } catch (error) {
+      console.error("Errore nel caricamento relatori:", error);
+    }
+    setLoadingRelatori(false);
+  };
+
+  // Raggruppa questionari per relatore - include tutti i relatori
   const getQuestionariPerRelatore = () => {
+    // Prima raggruppa i questionari per relatore
     const questionariPerRelatore = questionari.reduce((acc, questionario) => {
       const relatoreKey = questionario.relatore_id;
       if (!acc[relatoreKey]) {
@@ -1755,6 +1772,17 @@ function UtenteDashboard({ user, onLogout }) {
       acc[relatoreKey].questionari.push(questionario);
       return acc;
     }, {});
+
+    // Poi aggiungi tutti i relatori che non hanno questionari
+    relatori.forEach((relatore) => {
+      if (!questionariPerRelatore[relatore.id]) {
+        questionariPerRelatore[relatore.id] = {
+          relatore_id: relatore.id,
+          relatore_nome: relatore.nome,
+          questionari: [],
+        };
+      }
+    });
 
     return Object.values(questionariPerRelatore);
   };

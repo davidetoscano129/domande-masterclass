@@ -469,3 +469,6 @@ npm run dev
 - `GET /api/shared/my-questionnaires` - Questionari assegnati all'utente
 - `GET /api/shared/:token` - Accesso pubblico ai questionari
 - `POST /api/shared/:token/responses` - Invio risposte
+
+Credenziali -> codice fiscale
+Web design
