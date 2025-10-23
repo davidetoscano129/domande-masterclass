@@ -70,6 +70,111 @@ async function initDatabase() {
       console.log("ℹ️ Colonna numero già presente o errore:", err.message);
     }
 
+    // Aggiungi colonna codice_fiscale alla tabella relatori se non esiste
+    try {
+      const [columns] = await db.execute(
+        "SHOW COLUMNS FROM relatori LIKE 'codice_fiscale'"
+      );
+      if (columns.length === 0) {
+        await db.execute(`
+          ALTER TABLE relatori 
+          ADD COLUMN codice_fiscale VARCHAR(16) UNIQUE 
+          AFTER nome
+        `);
+
+        // Aggiorna i relatori esistenti con codici fiscali fittizi
+        const codiciRelatori = [
+          "RLTMRA85M10H501A",
+          "RLTLGI80C15F205B",
+          "RLTFNC75H20L736C",
+          "RLTGPP90S25A662D",
+          "RLTMRC70D30B123E",
+        ];
+
+        const [relatori] = await db.execute(
+          "SELECT id FROM relatori ORDER BY id"
+        );
+        for (let i = 0; i < relatori.length && i < codiciRelatori.length; i++) {
+          await db.execute(
+            "UPDATE relatori SET codice_fiscale = ? WHERE id = ?",
+            [codiciRelatori[i], relatori[i].id]
+          );
+        }
+        console.log(
+          `✅ Colonna codice_fiscale aggiunta a relatori e ${relatori.length} record aggiornati`
+        );
+      }
+    } catch (err) {
+      console.log(
+        "ℹ️ Colonna codice_fiscale relatori già presente o errore:",
+        err.message
+      );
+    }
+
+    // Aggiungi colonna codice_fiscale alla tabella utenti se non esiste
+    try {
+      const [columns] = await db.execute(
+        "SHOW COLUMNS FROM utenti LIKE 'codice_fiscale'"
+      );
+      if (columns.length === 0) {
+        await db.execute(`
+          ALTER TABLE utenti 
+          ADD COLUMN codice_fiscale VARCHAR(16) UNIQUE 
+          AFTER nome
+        `);
+
+        // Aggiorna gli utenti esistenti con codici fiscali fittizi
+        const codiciUtenti = [
+          "UTNMRA90A01H501A",
+          "UTNLGI85B02F205B",
+          "UTNFNC80C03L736C",
+          "UTNGPP75D04A662D",
+          "UTNMRC70E05B123E",
+          "UTNLRA88F06H501F",
+          "UTNMRO83G07F205G",
+          "UTNFCO78H08L736H",
+          "UTNGLA92I09A662I",
+          "UTNMTT87L10B123L",
+          "UTNLSA84M11H501M",
+          "UTNMDO81N12F205N",
+          "UTNFLA79O13L736O",
+          "UTNGVN94P14A662P",
+          "UTNMCO89Q15B123Q",
+          "UTNLBA86R16H501R",
+          "UTNMEO82S17F205S",
+          "UTNFTO77T18L736T",
+          "UTNGNO93U19A662U",
+          "UTNMSO91V20B123V",
+          "UTNLDO88Z21H501Z",
+          "UTNMAO85A22F205A",
+          "UTNFBO80B23L736B",
+          "UTNGCO76C24A662C",
+          "UTNMDO71D25B123D",
+          "UTNLEO89E26H501E",
+          "UTNMFO84F27F205F",
+          "UTNFGO79G28L736G",
+          "UTNGHO95H29A662H",
+          "UTNMIO92I30B123I",
+        ];
+
+        const [utenti] = await db.execute("SELECT id FROM utenti ORDER BY id");
+        for (let i = 0; i < utenti.length && i < codiciUtenti.length; i++) {
+          await db.execute(
+            "UPDATE utenti SET codice_fiscale = ? WHERE id = ?",
+            [codiciUtenti[i], utenti[i].id]
+          );
+        }
+        console.log(
+          `✅ Colonna codice_fiscale aggiunta a utenti e ${utenti.length} record aggiornati`
+        );
+      }
+    } catch (err) {
+      console.log(
+        "ℹ️ Colonna codice_fiscale utenti già presente o errore:",
+        err.message
+      );
+    }
+
     // Crea gli indici se non esistono
     try {
       await db.execute(
@@ -103,10 +208,11 @@ initDatabase();
 // Login relatore
 app.post("/api/auth/relatore", async (req, res) => {
   try {
-    const { id } = req.body;
-    const [rows] = await db.execute("SELECT * FROM relatori WHERE id = ?", [
-      id,
-    ]);
+    const { codice_fiscale } = req.body;
+    const [rows] = await db.execute(
+      "SELECT * FROM relatori WHERE codice_fiscale = ?",
+      [codice_fiscale]
+    );
 
     if (rows.length === 0) {
       return res.status(401).json({ error: "Relatore non trovato" });
@@ -125,8 +231,11 @@ app.post("/api/auth/relatore", async (req, res) => {
 // Login utente
 app.post("/api/auth/utente", async (req, res) => {
   try {
-    const { id } = req.body;
-    const [rows] = await db.execute("SELECT * FROM utenti WHERE id = ?", [id]);
+    const { codice_fiscale } = req.body;
+    const [rows] = await db.execute(
+      "SELECT * FROM utenti WHERE codice_fiscale = ?",
+      [codice_fiscale]
+    );
 
     if (rows.length === 0) {
       return res.status(401).json({ error: "Utente non trovato" });

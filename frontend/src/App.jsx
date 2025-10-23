@@ -58,59 +58,50 @@ const normalizeConfig = (config) => {
 // Componente per il login iniziale
 function LoginPage({ onLogin }) {
   const [loginType, setLoginType] = useState("");
-  const [selectedId, setSelectedId] = useState("");
-  const [users, setUsers] = useState([]);
+  const [codiceFiscale, setCodiceFiscale] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (loginType === "relatore") {
-      fetchRelatori();
-    } else if (loginType === "utente") {
-      fetchUtenti();
-    }
-  }, [loginType]);
-
-  const fetchRelatori = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE}/relatori`);
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error("Errore nel caricamento relatori:", error);
-    }
-    setLoading(false);
-  };
-
-  const fetchUtenti = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE}/utenti`);
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error("Errore nel caricamento utenti:", error);
-    }
-    setLoading(false);
-  };
+  const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    if (!selectedId) return;
+    if (!codiceFiscale.trim()) {
+      setError("Inserisci il codice fiscale");
+      return;
+    }
+
+    // Validazione base del codice fiscale (16 caratteri)
+    if (codiceFiscale.length !== 16) {
+      setError("Il codice fiscale deve essere di 16 caratteri");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
 
     try {
       const response = await fetch(`${API_BASE}/auth/${loginType}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedId }),
+        body: JSON.stringify({ codice_fiscale: codiceFiscale.toUpperCase() }),
       });
 
       const data = await response.json();
       if (data.success) {
         onLogin(data);
+      } else {
+        setError(data.error || "Credenziali non valide");
       }
     } catch (error) {
       console.error("Errore login:", error);
+      setError("Errore di connessione");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleBack = () => {
+    setLoginType("");
+    setCodiceFiscale("");
+    setError("");
   };
 
   return (
@@ -137,39 +128,43 @@ function LoginPage({ onLogin }) {
 
       {loginType && (
         <div className="user-selection">
-          <h2>Seleziona {loginType}:</h2>
-          {loading ? (
-            <p>Caricamento...</p>
-          ) : (
-            <div className="users-grid">
-              {users.map((user) => (
-                <div
-                  key={user.id}
-                  className={`user-card ${
-                    selectedId == user.id ? "selected" : ""
-                  }`}
-                  onClick={() => setSelectedId(user.id)}
-                >
-                  <strong>
-                    {loginType === "relatore" ? user.nome : user.nome}
-                  </strong>
-                  {loginType === "relatore" && <small>{user.email}</small>}
-                </div>
-              ))}
-            </div>
-          )}
+          <h2>
+            {loginType === "relatore" ? "🏫 Login Relatore" : "🎓 Login Utente"}
+          </h2>
 
-          <div className="login-actions">
-            <button onClick={() => setLoginType("")} className="btn-secondary">
-              ← Indietro
-            </button>
-            <button
-              onClick={handleLogin}
-              disabled={!selectedId}
-              className="btn-primary"
-            >
-              Accedi
-            </button>
+          <div className="login-form">
+            <div className="input-group">
+              <label htmlFor="codiceFiscale">Codice Fiscale:</label>
+              <input
+                id="codiceFiscale"
+                type="text"
+                value={codiceFiscale}
+                onChange={(e) => setCodiceFiscale(e.target.value.toUpperCase())}
+                placeholder="Inserisci il tuo codice fiscale (16 caratteri)"
+                maxLength="16"
+                className="login-input"
+                disabled={loading}
+              />
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <div className="login-actions">
+              <button
+                onClick={handleBack}
+                className="btn-secondary"
+                disabled={loading}
+              >
+                ← Indietro
+              </button>
+              <button
+                onClick={handleLogin}
+                disabled={loading || !codiceFiscale.trim()}
+                className="btn-primary"
+              >
+                {loading ? "⏳ Accesso..." : "🔐 Accedi"}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -17,12 +17,14 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE relatori (
     id INT PRIMARY KEY,
     nome VARCHAR(50) NOT NULL,
+    codice_fiscale VARCHAR(16) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- Tabella utenti (30 utenti, numerati)
 CREATE TABLE utenti (
     id INT PRIMARY KEY,
     nome VARCHAR(50) NOT NULL,
+    codice_fiscale VARCHAR(16) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- Tabella lezioni (numerate per semplicità)
@@ -83,44 +85,44 @@ CREATE TABLE IF NOT EXISTS condivisioni (
     INDEX idx_expires_at (expires_at)
 );
 -- Step 4: Inserisci i 5 relatori (nomenclatura semplice)
-INSERT INTO relatori (id, nome)
-VALUES (1, 'Relatore 1'),
-    (2, 'Relatore 2'),
-    (3, 'Relatore 3'),
-    (4, 'Relatore 4'),
-    (5, 'Relatore 5');
+INSERT INTO relatori (id, nome, codice_fiscale)
+VALUES (1, 'Relatore 1', 'RLTMRA85M10H501A'),
+    (2, 'Relatore 2', 'RLTLGI80C15F205B'),
+    (3, 'Relatore 3', 'RLTFNC75H20L736C'),
+    (4, 'Relatore 4', 'RLTGPP90S25A662D'),
+    (5, 'Relatore 5', 'RLTMRC70D30B123E');
 -- Step 5: Inserisci i 30 utenti (nomenclatura semplice)
-INSERT INTO utenti (id, nome)
-VALUES (1, 'Utente 1'),
-    (2, 'Utente 2'),
-    (3, 'Utente 3'),
-    (4, 'Utente 4'),
-    (5, 'Utente 5'),
-    (6, 'Utente 6'),
-    (7, 'Utente 7'),
-    (8, 'Utente 8'),
-    (9, 'Utente 9'),
-    (10, 'Utente 10'),
-    (11, 'Utente 11'),
-    (12, 'Utente 12'),
-    (13, 'Utente 13'),
-    (14, 'Utente 14'),
-    (15, 'Utente 15'),
-    (16, 'Utente 16'),
-    (17, 'Utente 17'),
-    (18, 'Utente 18'),
-    (19, 'Utente 19'),
-    (20, 'Utente 20'),
-    (21, 'Utente 21'),
-    (22, 'Utente 22'),
-    (23, 'Utente 23'),
-    (24, 'Utente 24'),
-    (25, 'Utente 25'),
-    (26, 'Utente 26'),
-    (27, 'Utente 27'),
-    (28, 'Utente 28'),
-    (29, 'Utente 29'),
-    (30, 'Utente 30');
+INSERT INTO utenti (id, nome, codice_fiscale)
+VALUES (1, 'Utente 1', 'UTNMRA90A01H501A'),
+    (2, 'Utente 2', 'UTNLGI85B02F205B'),
+    (3, 'Utente 3', 'UTNFNC80C03L736C'),
+    (4, 'Utente 4', 'UTNGPP75D04A662D'),
+    (5, 'Utente 5', 'UTNMRC70E05B123E'),
+    (6, 'Utente 6', 'UTNLRA88F06H501F'),
+    (7, 'Utente 7', 'UTNMRO83G07F205G'),
+    (8, 'Utente 8', 'UTNFCO78H08L736H'),
+    (9, 'Utente 9', 'UTNGLA92I09A662I'),
+    (10, 'Utente 10', 'UTNMTT87L10B123L'),
+    (11, 'Utente 11', 'UTNLSA84M11H501M'),
+    (12, 'Utente 12', 'UTNMDO81N12F205N'),
+    (13, 'Utente 13', 'UTNFLA79O13L736O'),
+    (14, 'Utente 14', 'UTNGVN94P14A662P'),
+    (15, 'Utente 15', 'UTNMCO89Q15B123Q'),
+    (16, 'Utente 16', 'UTNLBA86R16H501R'),
+    (17, 'Utente 17', 'UTNMEO82S17F205S'),
+    (18, 'Utente 18', 'UTNFTO77T18L736T'),
+    (19, 'Utente 19', 'UTNGNO93U19A662U'),
+    (20, 'Utente 20', 'UTNMSO91V20B123V'),
+    (21, 'Utente 21', 'UTNLDO88Z21H501Z'),
+    (22, 'Utente 22', 'UTNMAO85A22F205A'),
+    (23, 'Utente 23', 'UTNFBO80B23L736B'),
+    (24, 'Utente 24', 'UTNGCO76C24A662C'),
+    (25, 'Utente 25', 'UTNMDO71D25B123D'),
+    (26, 'Utente 26', 'UTNLEO89E26H501E'),
+    (27, 'Utente 27', 'UTNMFO84F27F205F'),
+    (28, 'Utente 28', 'UTNFGO79G28L736G'),
+    (29, 'Utente 29', 'UTNGHO95H29A662H'),
+    (30, 'Utente 30', 'UTNMIO92I30B123I');
 -- Step 6: Inserisci lezioni (nomenclatura semplice)
 INSERT INTO lezioni (titolo, descrizione, relatore_id)
 VALUES ('Lezione 1', 'Prima lezione del corso', 1),
