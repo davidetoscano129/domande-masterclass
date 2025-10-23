@@ -68,6 +68,20 @@ CREATE TABLE compilazioni (
     INDEX idx_utente (utente_id),
     INDEX idx_data (submitted_at)
 );
+-- Tabella condivisioni (per gestire condivisioni questionari tra relatori)
+CREATE TABLE IF NOT EXISTS condivisioni (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    questionario_id INT NOT NULL,
+    relatore_id INT NOT NULL,
+    share_token VARCHAR(64) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NULL,
+    FOREIGN KEY (questionario_id) REFERENCES questionari(id) ON DELETE CASCADE,
+    FOREIGN KEY (relatore_id) REFERENCES relatori(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_questionario_relatore (questionario_id, relatore_id),
+    INDEX idx_share_token (share_token),
+    INDEX idx_expires_at (expires_at)
+);
 -- Step 4: Inserisci i 5 relatori (nomenclatura semplice)
 INSERT INTO relatori (id, nome)
 VALUES (1, 'Relatore 1'),
@@ -346,3 +360,5 @@ SELECT COUNT(*) as questionari
 FROM questionari;
 SELECT COUNT(*) as compilazioni
 FROM compilazioni;
+SELECT COUNT(*) as condivisioni
+FROM condivisioni;
