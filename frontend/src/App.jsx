@@ -106,22 +106,22 @@ function LoginPage({ onLogin }) {
 
   return (
     <div className="login-container">
-      <h1>🎓 App Questionari</h1>
+      <h1>Questionari</h1>
 
       {!loginType && (
         <div className="login-selection">
-          <h2>Seleziona il tipo di accesso:</h2>
+          <h2>Seleziona il tipo di accesso</h2>
           <button
             onClick={() => setLoginType("relatore")}
             className="btn-primary"
           >
-            👨‍🏫 Area Relatore
+            Area Relatore
           </button>
           <button
             onClick={() => setLoginType("utente")}
             className="btn-secondary"
           >
-            👨‍🎓 Area Utente
+            Area Utente
           </button>
         </div>
       )}
@@ -129,7 +129,7 @@ function LoginPage({ onLogin }) {
       {loginType && (
         <div className="user-selection">
           <h2>
-            {loginType === "relatore" ? "🏫 Login Relatore" : "🎓 Login Utente"}
+            {loginType === "relatore" ? "Login Relatore" : "Login Utente"}
           </h2>
 
           <div className="login-form">
@@ -155,14 +155,14 @@ function LoginPage({ onLogin }) {
                 className="btn-secondary"
                 disabled={loading}
               >
-                ← Indietro
+                Indietro
               </button>
               <button
                 onClick={handleLogin}
                 disabled={loading || !codiceFiscale.trim()}
                 className="btn-primary"
               >
-                {loading ? "⏳ Accesso..." : "🔐 Accedi"}
+                {loading ? "Accesso in corso..." : "Accedi"}
               </button>
             </div>
           </div>
@@ -213,7 +213,7 @@ function RelatoreDashboard({ user, onLogout }) {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>👨‍🏫 Dashboard {user.relatore.nome}</h1>
+        <h1>Dashboard {user.relatore.nome}</h1>
         <button onClick={onLogout} className="btn-secondary">
           Logout
         </button>
@@ -224,19 +224,19 @@ function RelatoreDashboard({ user, onLogout }) {
           className={activeTab === "lezioni" ? "active" : ""}
           onClick={() => setActiveTab("lezioni")}
         >
-          📚 Lezioni
+          Lezioni
         </button>
         <button
           className={activeTab === "questionari" ? "active" : ""}
           onClick={() => setActiveTab("questionari")}
         >
-          📝 Questionari
+          Questionari
         </button>
         <button
           className={activeTab === "utenti" ? "active" : ""}
           onClick={() => setActiveTab("utenti")}
         >
-          👥 Utenti
+          Utenti
         </button>
       </nav>
 
@@ -345,7 +345,7 @@ function LezioniTab({ lezioni, user, onUpdate }) {
   return (
     <div>
       <div className="section-header">
-        <h2>📚 Le mie Lezioni</h2>
+        <h2>Le mie Lezioni</h2>
         <button onClick={() => setShowForm(!showForm)} className="btn-primary">
           {showForm ? "Annulla" : "+ Nuova Lezione"}
         </button>
@@ -405,16 +405,14 @@ function LezioniTab({ lezioni, user, onUpdate }) {
                   className="btn-small btn-delete"
                   title="Elimina lezione"
                 >
-                  🗑️
+                  Elimina
                 </button>
               </div>
               <p>{lezione.descrizione}</p>
               <small>
                 Creata: {new Date(lezione.created_at).toLocaleDateString()}
               </small>
-              <div className="click-hint">
-                👆 Clicca per vedere i questionari
-              </div>
+              <div className="click-hint">Clicca per vedere i questionari</div>
             </div>
           ))}
         </div>
@@ -490,7 +488,7 @@ function LezioneDetailView({ lezione, questionari, loading, user, onBack }) {
 
       <div className="lezione-header">
         <div className="lezione-info">
-          <h2>📚 {lezione.titolo}</h2>
+          <h2>{lezione.titolo}</h2>
           <p>{lezione.descrizione}</p>
           <small>
             Creata: {new Date(lezione.created_at).toLocaleDateString()}
@@ -499,15 +497,15 @@ function LezioneDetailView({ lezione, questionari, loading, user, onBack }) {
       </div>
 
       <div className="questionari-section">
-        <h3>📝 Questionari associati ({questionari.length})</h3>
+        <h3>Questionari associati ({questionari.length})</h3>
 
         {loading ? (
           <div className="loading-message">
-            <p>⏳ Caricamento questionari...</p>
+            <p>Caricamento questionari...</p>
           </div>
         ) : questionari.length === 0 ? (
           <div className="empty-state">
-            <p>📭 Nessun questionario associato a questa lezione.</p>
+            <p>Nessun questionario associato a questa lezione.</p>
             <p>Vai nella sezione "Questionari" per crearne uno nuovo.</p>
           </div>
         ) : (
@@ -526,13 +524,13 @@ function LezioneDetailView({ lezione, questionari, loading, user, onBack }) {
                     onClick={() => handleViewResponses(questionario)}
                     className="btn-small btn-responses"
                   >
-                    📊 Risposte
+                    Risposte
                   </button>
                   <button
                     onClick={() => handleShare(questionario)}
                     className="btn-small btn-share"
                   >
-                    🔗 Condividi
+                    Condividi
                   </button>
                 </div>
               </div>
@@ -642,7 +640,7 @@ function QuestionariTab({ questionari, user, onUpdate }) {
   return (
     <div>
       <div className="section-header">
-        <h2>📝 I miei Questionari</h2>
+        <h2>I miei Questionari</h2>
         <button
           onClick={() => {
             setShowForm(!showForm);
@@ -686,25 +684,25 @@ function QuestionariTab({ questionari, user, onUpdate }) {
                 onClick={() => handleEdit(questionario)}
                 className="btn-small btn-edit"
               >
-                ✏️ Modifica
+                Modifica
               </button>
               <button
                 onClick={() => handleDelete(questionario.id)}
                 className="btn-small btn-delete"
               >
-                🗑️ Elimina
+                Elimina
               </button>
               <button
                 onClick={() => handleViewResponses(questionario)}
                 className="btn-small btn-responses"
               >
-                📊 Risposte
+                Risposte
               </button>
               <button
                 onClick={() => handleShare(questionario)}
                 className="btn-small btn-share"
               >
-                🔗 Condividi
+                Condividi
               </button>
             </div>
           </div>
@@ -952,7 +950,7 @@ function QuestionEditor({
           onClick={onDelete}
           className="btn-small btn-delete"
         >
-          🗑️
+          Elimina
         </button>
       </div>
 
@@ -1061,7 +1059,7 @@ function UtentiTab({ utenti }) {
 
   return (
     <div>
-      <h2>👥 Lista Utenti</h2>
+      <h2>Lista Utenti</h2>
       <div className="users-grid">
         {utenti.map((utente) => (
           <div key={utente.id} className="user-card">
@@ -1315,49 +1313,49 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
       </div>
 
       <div className="utente-header">
-        <h2>📊 Risposte di {utente.nome}</h2>
+        <h2>Risposte di {utente.nome}</h2>
         <p className="total-risposte">
           Totale questionari compilati: <strong>{risposte.length}</strong>
         </p>
 
         {/* Bottoni di esportazione */}
         <div className="export-section">
-          <h5>📤 Esporta tutte le risposte:</h5>
+          <h5>Esporta tutte le risposte:</h5>
           <div className="export-options">
             <button
               onClick={() => handleUserExport("word")}
               className="btn-export btn-word"
               title="Esporta in formato Word"
             >
-              📄 Word
+              Word
             </button>
             <button
               onClick={() => handleUserExport("excel")}
               className="btn-export btn-excel"
               title="Esporta in formato Excel"
             >
-              📊 Excel
+              Excel
             </button>
             <button
               onClick={() => handleUserExport("csv")}
               className="btn-export btn-csv"
               title="Esporta in formato CSV"
             >
-              📋 CSV
+              CSV
             </button>
             <button
               onClick={() => handleUserExport("pdf")}
               className="btn-export btn-pdf"
               title="Esporta in formato PDF"
             >
-              📑 PDF
+              PDF
             </button>
             <button
               onClick={() => handleUserExport("json")}
               className="btn-export btn-json"
               title="Esporta in formato JSON"
             >
-              🔧 JSON
+              JSON
             </button>
           </div>
         </div>
@@ -1370,20 +1368,20 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
             }`}
             onClick={() => setViewMode("categorized")}
           >
-            📋 Per Questionario
+            Per Questionario
           </button>
           <button
             className={`toggle-btn ${viewMode === "global" ? "active" : ""}`}
             onClick={() => setViewMode("global")}
           >
-            🌐 Tutte le Risposte
+            Tutte le Risposte
           </button>
         </div>
       </div>
 
       {risposte.length === 0 ? (
         <div className="no-responses">
-          <p>🤷‍♂️ Questo utente non ha ancora compilato nessun questionario.</p>
+          <p>Questo utente non ha ancora compilato nessun questionario.</p>
         </div>
       ) : viewMode === "categorized" ? (
         // Vista categorizzata per questionario (esistente)
@@ -1393,14 +1391,19 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
               <div className="risposta-header">
                 <h3>{risposta.questionario_titolo}</h3>
                 <div className="risposta-meta">
-                  <span className="lezione">📚 {risposta.lezione_titolo}</span>
-                  <span className="relatore">👨‍🏫 {risposta.relatore_nome}</span>
+                  <span className="lezione">
+                    Lezione: {risposta.lezione_titolo}
+                  </span>
+                  <span className="relatore">
+                    Relatore: {risposta.relatore_nome}
+                  </span>
                   <span className="data">
-                    📅 {new Date(risposta.submitted_at).toLocaleString("it-IT")}
+                    Data:{" "}
+                    {new Date(risposta.submitted_at).toLocaleString("it-IT")}
                   </span>
                   {risposta.tempo_impiegato && (
                     <span className="tempo">
-                      ⏱️ {Math.round(risposta.tempo_impiegato / 60)} minuti
+                      Tempo: {Math.round(risposta.tempo_impiegato / 60)} minuti
                     </span>
                   )}
                 </div>
@@ -1408,13 +1411,13 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
 
               <div className="risposta-content">
                 {risposta.completata ? (
-                  <div className="status completata">✅ Completato</div>
+                  <div className="status completata">Completato</div>
                 ) : (
-                  <div className="status incompleta">⏳ In corso</div>
+                  <div className="status incompleta">In corso</div>
                 )}
 
                 <div className="risposte-details">
-                  <h4>📝 Risposte:</h4>
+                  <h4>Risposte:</h4>
                   {(() => {
                     try {
                       let risposteData;
@@ -1602,7 +1605,7 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
         // Vista globale di tutte le risposte
         <div className="global-responses">
           <div className="global-responses-header">
-            <h3>🌐 Tutte le risposte ({globalResponses.length} totali)</h3>
+            <h3>Tutte le risposte ({globalResponses.length} totali)</h3>
             <p className="global-description">
               Vista unificata di tutte le risposte fornite dall'utente, ordinate
               per data più recente.
@@ -1623,19 +1626,23 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
                   <div className="response-context">
                     <div className="context-info">
                       <span className="questionario-ref">
-                        📋 {response.questionario}
+                        Questionario: {response.questionario}
                       </span>
-                      <span className="lezione-ref">📚 {response.lezione}</span>
+                      <span className="lezione-ref">
+                        Lezione: {response.lezione}
+                      </span>
                       <span className="relatore-ref">
-                        👨‍🏫 {response.relatore}
+                        Relatore: {response.relatore}
                       </span>
                       <span className="data-ref">
-                        📅 {new Date(response.data).toLocaleString("it-IT")}
+                        Data: {new Date(response.data).toLocaleString("it-IT")}
                       </span>
                       {response.completata ? (
-                        <span className="status-ref completata">✅</span>
+                        <span className="status-ref completata">
+                          Completato
+                        </span>
                       ) : (
-                        <span className="status-ref incompleta">⏳</span>
+                        <span className="status-ref incompleta">In corso</span>
                       )}
                     </div>
                   </div>
@@ -1829,7 +1836,7 @@ function UtenteDashboard({ user, onLogout }) {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>👨‍🎓 Area {user.utente.nome}</h1>
+        <h1>Area {user.utente.nome}</h1>
         <button onClick={onLogout} className="btn-secondary">
           Logout
         </button>
@@ -1837,63 +1844,125 @@ function UtenteDashboard({ user, onLogout }) {
 
       <main className="dashboard-content">
         {!selectedRelatore ? (
-          // Vista iniziale: lista dei relatori
+          // Vista iniziale: lista dei relatori con materie
           <>
-            <h2>�‍🏫 Seleziona un Relatore</h2>
+            <div className="tesori-header">
+              <h1>I TESORI DELL'IMPRESA</h1>
+            </div>
             {loading ? (
               <p>Caricamento...</p>
             ) : (
-              <div className="relatori-grid">
-                {getQuestionariPerRelatore().map((relatore) => {
-                  const totalQuestionari = relatore.questionari.length;
-                  const completedQuestionari = relatore.questionari.filter(
-                    (q) => q.hasAnswered
-                  ).length;
-                  const progressPercentage =
-                    totalQuestionari > 0
-                      ? Math.round(
-                          (completedQuestionari / totalQuestionari) * 100
-                        )
-                      : 0;
+              <div className="tesori-grid">
+                {(() => {
+                  // Mappa dei relatori con le loro materie e colori
+                  const relatoriMaterie = {
+                    "Relatore 1": {
+                      materia: "SVILUPPO DELL'IDEA PROGETTUALE",
+                      relatore: "Alessandro Cacciato",
+                      descrizione: "Dall'idea innovativa al progetto",
+                      color: "blue",
+                    },
+                    "Relatore 2": {
+                      materia: "PROGETTAZIONE E PIANIFICAZIONE FINANZIARIA",
+                      relatore: "Raffaele Di Giacomo",
+                      descrizione: "Progettazione e pianificazione finanziaria",
+                      color: "yellow",
+                    },
+                    "Relatore 3": {
+                      materia: "COMUNICAZIONE & MARKETING",
+                      relatore: "Gianluca Lo Stimolo",
+                      descrizione: "Comunicazione e marketing",
+                      color: "blue",
+                    },
+                    "Relatore 4": {
+                      materia: "GESTIONE DELLE EMOZIONI",
+                      relatore: "Matteo Maserati",
+                      descrizione: "La gestione delle emozioni",
+                      color: "yellow",
+                    },
+                    "Relatore 5": {
+                      materia: "INTELLIGENZA ARTIFICIALE",
+                      relatore: "Yuri Beccaria",
+                      descrizione: "Innovazione & AI",
+                      color: "blue",
+                    },
+                  }; // Special case for "L'ora dell'imprenditore"
+                  const oraImprenditore = {
+                    materia: "L'ORA DELL'IMPRENDITORE",
+                    descrizione: "L'ora dell'imprenditore",
+                    color: "yellow",
+                  };
+
+                  const relatoriConMaterie = getQuestionariPerRelatore().map(
+                    (relatore) => {
+                      const materiaInfo =
+                        relatoriMaterie[relatore.relatore_nome];
+                      const totalQuestionari = relatore.questionari.length;
+                      const completedQuestionari = relatore.questionari.filter(
+                        (q) => q.hasAnswered
+                      ).length;
+
+                      return {
+                        ...relatore,
+                        materiaInfo: materiaInfo || {
+                          materia: relatore.relatore_nome.toUpperCase(),
+                          relatore: relatore.relatore_nome,
+                          descrizione: relatore.relatore_nome,
+                          color: "blue",
+                        },
+                        totalQuestionari,
+                        completedQuestionari,
+                        progressPercentage:
+                          totalQuestionari > 0
+                            ? Math.round(
+                                (completedQuestionari / totalQuestionari) * 100
+                              )
+                            : 0,
+                      };
+                    }
+                  );
 
                   return (
-                    <div
-                      key={relatore.relatore_id}
-                      className="relatore-card"
-                      onClick={() => setSelectedRelatore(relatore)}
-                    >
-                      <div className="relatore-header">
-                        <h3>👨‍🏫 {relatore.relatore_nome}</h3>
-                        <div className="relatore-stats">
-                          <span className="total-questionari">
-                            {totalQuestionari} questionari disponibili
-                          </span>
-                          <span className="completed-questionari">
-                            {completedQuestionari} completati
-                          </span>
+                    <>
+                      {relatoriConMaterie.map((relatore) => (
+                        <div
+                          key={relatore.relatore_id}
+                          className={`tesoro-card tesoro-${relatore.materiaInfo.color}`}
+                          onClick={() => setSelectedRelatore(relatore)}
+                        >
+                          <div className="tesoro-content">
+                            <h2 className="tesoro-materia">
+                              {relatore.materiaInfo.materia}
+                            </h2>
+                            <p className="tesoro-relatore">
+                              {relatore.materiaInfo.relatore ||
+                                relatore.relatore_nome}
+                            </p>
+                            <div className="tesoro-stats">
+                              <span>
+                                {relatore.completedQuestionari}/
+                                {relatore.totalQuestionari} completati
+                              </span>
+                              <span>{relatore.progressPercentage}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Card speciale per "L'ora dell'imprenditore" */}
+                      <div
+                        className={`tesoro-card tesoro-${oraImprenditore.color}`}
+                      >
+                        <div className="tesoro-content">
+                          <h2 className="tesoro-materia">
+                            {oraImprenditore.materia}
+                          </h2>
+                          <div className="tesoro-coming-soon">In arrivo</div>
                         </div>
                       </div>
-
-                      <div className="relatore-progress">
-                        <div className="progress-bar">
-                          <div
-                            className="progress-fill"
-                            style={{ width: `${progressPercentage}%` }}
-                          ></div>
-                        </div>
-                        <span className="progress-text">
-                          {progressPercentage}%
-                        </span>
-                      </div>
-
-                      <div className="relatore-action">
-                        <span className="action-text">
-                          Clicca per vedere i questionari →
-                        </span>
-                      </div>
-                    </div>
+                    </>
                   );
-                })}
+                })()}
               </div>
             )}
           </>
@@ -1909,7 +1978,7 @@ function UtenteDashboard({ user, onLogout }) {
               </button>
             </div>
 
-            <h2>📝 Questionari di {selectedRelatore.relatore_nome}</h2>
+            <h2>Questionari di {selectedRelatore.relatore_nome}</h2>
 
             <div className="questionari-by-lesson">
               {getQuestionariPerLezioneDelRelatore(
@@ -1918,7 +1987,7 @@ function UtenteDashboard({ user, onLogout }) {
                 <div key={lezione.lezione_id} className="lesson-section">
                   <div className="lesson-header">
                     <h3>
-                      📚 {lezione.lezione_titolo}
+                      {lezione.lezione_titolo}
                       {lezione.lezione_numero > 0 && (
                         <span className="lesson-number">
                           #{lezione.lezione_numero}
@@ -1926,7 +1995,7 @@ function UtenteDashboard({ user, onLogout }) {
                       )}
                     </h3>
                     <p className="lesson-instructor">
-                      👨‍🏫 {lezione.relatore_nome}
+                      Relatore: {lezione.relatore_nome}
                     </p>
                     <div className="lesson-stats">
                       {lezione.questionari.length} questionari •{" "}
@@ -1940,11 +2009,9 @@ function UtenteDashboard({ user, onLogout }) {
                       <div key={questionario.id} className="questionario-card">
                         <div className="questionario-status">
                           {questionario.hasAnswered ? (
-                            <span className="status completed">
-                              ✅ Completato
-                            </span>
+                            <span className="status completed">Completato</span>
                           ) : (
-                            <span className="status pending">⏳ Da fare</span>
+                            <span className="status pending">Da fare</span>
                           )}
                         </div>
 
@@ -1959,7 +2026,7 @@ function UtenteDashboard({ user, onLogout }) {
                               }
                               className="btn-secondary"
                             >
-                              👁️ Rivedi Risposte
+                              Rivedi Risposte
                             </button>
                           ) : (
                             <button
@@ -1968,7 +2035,7 @@ function UtenteDashboard({ user, onLogout }) {
                               }
                               className="btn-primary"
                             >
-                              ▶️ Inizia
+                              Inizia
                             </button>
                           )}
                         </div>
@@ -2213,7 +2280,7 @@ function QuestionRenderer({ question, index, value, onChange, isReadOnly }) {
                   onChange={(e) => onChange(parseInt(e.target.value))}
                   disabled={isReadOnly}
                 />
-                <span className="rating-star">⭐</span>
+                <span className="rating-star">★</span>
                 {rating}
               </label>
             ))}
@@ -2435,7 +2502,7 @@ function ResponsesViewer({ questionario, onClose }) {
       <div className="modal-overlay">
         <div className="modal-content responses-modal">
           <div className="modal-header">
-            <h2>📊 Risposte - {questionario.titolo}</h2>
+            <h2>Risposte - {questionario.titolo}</h2>
             <button onClick={onClose} className="btn-close">
               ×
             </button>
@@ -2452,45 +2519,45 @@ function ResponsesViewer({ questionario, onClose }) {
     <div className="modal-overlay">
       <div className="modal-content responses-modal">
         <div className="modal-header">
-          <h2>📊 Risposte - {questionario.titolo}</h2>
+          <h2>Risposte - {questionario.titolo}</h2>
           <div className="header-actions">
             <div className="export-section">
-              <h4>📤 Esporta Risposte Questionario</h4>
+              <h4>Esporta Risposte Questionario</h4>
               <div className="export-buttons">
                 <button
                   onClick={() => handleQuestionnaireExport("word")}
                   className="btn-export btn-word"
                   title="Esporta in formato Word"
                 >
-                  📄 Word
+                  Word
                 </button>
                 <button
                   onClick={() => handleQuestionnaireExport("excel")}
                   className="btn-export btn-excel"
                   title="Esporta in formato Excel"
                 >
-                  📊 Excel
+                  Excel
                 </button>
                 <button
                   onClick={() => handleQuestionnaireExport("csv")}
                   className="btn-export btn-csv"
                   title="Esporta in formato CSV"
                 >
-                  📋 CSV
+                  CSV
                 </button>
                 <button
                   onClick={() => handleQuestionnaireExport("pdf")}
                   className="btn-export btn-pdf"
                   title="Esporta in formato PDF"
                 >
-                  📑 PDF
+                  PDF
                 </button>
                 <button
                   onClick={() => handleQuestionnaireExport("json")}
                   className="btn-export btn-json"
                   title="Esporta in formato JSON"
                 >
-                  🔧 JSON
+                  JSON
                 </button>
               </div>
             </div>
@@ -2505,19 +2572,19 @@ function ResponsesViewer({ questionario, onClose }) {
             className={`tab-button ${activeTab === "overview" ? "active" : ""}`}
             onClick={() => setActiveTab("overview")}
           >
-            📈 Panoramica
+            Panoramica
           </button>
           <button
             className={`tab-button ${activeTab === "analysis" ? "active" : ""}`}
             onClick={() => setActiveTab("analysis")}
           >
-            📊 Analisi Dettagliata
+            Analisi Dettagliata
           </button>
           <button
             className={`tab-button ${activeTab === "details" ? "active" : ""}`}
             onClick={() => setActiveTab("details")}
           >
-            📋 Risposte Individuali
+            Risposte Individuali
           </button>
         </div>
 
@@ -2526,7 +2593,7 @@ function ResponsesViewer({ questionario, onClose }) {
             <div className="tab-content">
               {statistics && (
                 <div className="statistics-section">
-                  <h3>📈 Statistiche Generali</h3>
+                  <h3>Statistiche Generali</h3>
                   <div className="stats-grid">
                     <div className="stat-card">
                       <span className="stat-number">
@@ -2551,26 +2618,26 @@ function ResponsesViewer({ questionario, onClose }) {
               )}
               {analysis && (
                 <div className="quick-overview">
-                  <h3>🔍 Panoramica Rapida</h3>
+                  <h3>Panoramica Rapida</h3>
                   <div className="overview-grid">
                     {analysis.questions.map((q) => (
                       <div key={q.questionId} className="overview-card">
                         <h4>{q.question}</h4>
                         <div className="overview-stats">
                           <span className="response-rate">
-                            📊 {q.responseRate}% di risposta (
-                            {q.answeredResponses}/{q.totalResponses})
+                            Risposte: {q.responseRate}% ({q.answeredResponses}/
+                            {q.totalResponses})
                           </span>
                           {q.type === "multiple_choice" &&
                             q.analysis.distribution[0] && (
                               <span className="top-answer">
-                                🥇 "{q.analysis.distribution[0].choice}" (
-                                {q.analysis.distribution[0].percentage}%)
+                                Più votata: "{q.analysis.distribution[0].choice}
+                                " ({q.analysis.distribution[0].percentage}%)
                               </span>
                             )}
                           {q.type === "rating" && (
                             <span className="average-rating">
-                              ⭐ Media: {q.analysis.average}/10
+                              Media: {q.analysis.average}/10
                             </span>
                           )}
                         </div>
@@ -2586,7 +2653,7 @@ function ResponsesViewer({ questionario, onClose }) {
             <div className="tab-content">
               {!showDetailedView ? (
                 <div className="detailed-analysis">
-                  <h3>📊 Analisi Dettagliata per Domanda</h3>
+                  <h3>Analisi Dettagliata per Domanda</h3>
                   {analysis.questions.map((questionData) => (
                     <div
                       key={questionData.questionId}
@@ -2608,7 +2675,7 @@ function ResponsesViewer({ questionario, onClose }) {
                             }
                             title="Vedi chi ha risposto cosa"
                           >
-                            👥 Dettagli utenti
+                            Dettagli utenti
                           </button>
                         </div>
                       </div>
@@ -2653,7 +2720,7 @@ function ResponsesViewer({ questionario, onClose }) {
                               <div key={item.rating} className="rating-bar">
                                 <div className="rating-info">
                                   <span className="rating-value">
-                                    {item.rating} ⭐
+                                    {item.rating} ★
                                   </span>
                                   <span className="rating-stats">
                                     {item.count} voti ({item.percentage}%)
@@ -2674,11 +2741,11 @@ function ResponsesViewer({ questionario, onClose }) {
                           <div className="text-analysis">
                             <div className="text-stats">
                               <span>
-                                📝 {questionData.analysis.responses} risposte
-                                testuali
+                                Risposte: {questionData.analysis.responses}{" "}
+                                risposte testuali
                               </span>
                               <span>
-                                📏 Lunghezza media:{" "}
+                                Lunghezza media:{" "}
                                 {questionData.analysis.averageLength} caratteri
                               </span>
                             </div>
@@ -2713,7 +2780,7 @@ function ResponsesViewer({ questionario, onClose }) {
           {activeTab === "details" && (
             <div className="tab-content">
               <div className="responses-section">
-                <h3>📝 Risposte Individuali ({responses.length})</h3>
+                <h3>Risposte Individuali ({responses.length})</h3>
                 {responses.length === 0 ? (
                   <p className="no-responses">
                     Nessuna risposta ancora ricevuta.
@@ -2723,11 +2790,13 @@ function ResponsesViewer({ questionario, onClose }) {
                     {responses.map((response) => (
                       <div key={response.id} className="response-card">
                         <div className="response-header">
-                          <h4>👤 {response.utente_nome}</h4>
+                          <h4>{response.utente_nome}</h4>
                           <div className="response-meta">
-                            <span>📅 {formatDate(response.submitted_at)}</span>
                             <span>
-                              ⏱️ {formatTime(response.tempo_impiegato)}
+                              Data: {formatDate(response.submitted_at)}
+                            </span>
+                            <span>
+                              Tempo: {formatTime(response.tempo_impiegato)}
                             </span>
                             <span
                               className={`status ${
@@ -2735,14 +2804,14 @@ function ResponsesViewer({ questionario, onClose }) {
                               }`}
                             >
                               {response.completata
-                                ? "✅ Completata"
-                                : "⏳ Incompleta"}
+                                ? "Completata"
+                                : "Incompleta"}
                             </span>
                           </div>
 
                           {/* Pulsanti export per utente specifico */}
                           <div className="user-export-buttons">
-                            <span className="export-label">📤 Export:</span>
+                            <span className="export-label">Export:</span>
                             <button
                               onClick={() =>
                                 handleUserQuestionnaireExport(response, "word")
@@ -2750,7 +2819,7 @@ function ResponsesViewer({ questionario, onClose }) {
                               className="btn-export btn-word btn-small"
                               title="Esporta risposte di questo utente in Word"
                             >
-                              📄
+                              Word
                             </button>
                             <button
                               onClick={() =>
@@ -2759,7 +2828,7 @@ function ResponsesViewer({ questionario, onClose }) {
                               className="btn-export btn-excel btn-small"
                               title="Esporta risposte di questo utente in Excel"
                             >
-                              📊
+                              Excel
                             </button>
                             <button
                               onClick={() =>
@@ -2768,7 +2837,7 @@ function ResponsesViewer({ questionario, onClose }) {
                               className="btn-export btn-csv btn-small"
                               title="Esporta risposte di questo utente in CSV"
                             >
-                              📋
+                              CSV
                             </button>
                             <button
                               onClick={() =>
@@ -2777,7 +2846,7 @@ function ResponsesViewer({ questionario, onClose }) {
                               className="btn-export btn-pdf btn-small"
                               title="Esporta risposte di questo utente in PDF"
                             >
-                              📑
+                              PDF
                             </button>
                             <button
                               onClick={() =>
@@ -2786,7 +2855,7 @@ function ResponsesViewer({ questionario, onClose }) {
                               className="btn-export btn-json btn-small"
                               title="Esporta risposte di questo utente in JSON"
                             >
-                              🔧
+                              JSON
                             </button>
                           </div>
                         </div>
@@ -3256,7 +3325,7 @@ function DetailedResponseView({ questionId, detailedResponses, onBack }) {
 
       <div className="question-detail-header">
         <div className="header-content">
-          <h3>👥 Chi ha risposto cosa</h3>
+          <h3>Chi ha risposto cosa</h3>
           <h4>{questionData.question}</h4>
           <p className="response-summary">
             Tipo: <span className="question-type">{questionData.type}</span> |
@@ -3265,42 +3334,42 @@ function DetailedResponseView({ questionId, detailedResponses, onBack }) {
         </div>
 
         <div className="export-buttons">
-          <h5>📤 Esporta Risposte:</h5>
+          <h5>Esporta Risposte:</h5>
           <div className="export-options">
             <button
               onClick={() => handleExport("word")}
               className="btn-export btn-word"
               title="Esporta in formato Word"
             >
-              📄 Word
+              Word
             </button>
             <button
               onClick={() => handleExport("excel")}
               className="btn-export btn-excel"
               title="Esporta in formato Excel"
             >
-              📊 Excel
+              Excel
             </button>
             <button
               onClick={() => handleExport("csv")}
               className="btn-export btn-csv"
               title="Esporta in formato CSV"
             >
-              📋 CSV
+              CSV
             </button>
             <button
               onClick={() => handleExport("pdf")}
               className="btn-export btn-pdf"
               title="Esporta in formato PDF"
             >
-              📑 PDF
+              PDF
             </button>
             <button
               onClick={() => handleExport("json")}
               className="btn-export btn-json"
               title="Esporta in formato JSON"
             >
-              🔧 JSON
+              JSON
             </button>
           </div>
         </div>
@@ -3321,13 +3390,13 @@ function DetailedResponseView({ questionId, detailedResponses, onBack }) {
               {users.map((user, index) => (
                 <div key={index} className="user-response-item">
                   <div className="user-info">
-                    <span className="user-name">👤 {user.utente_nome}</span>
+                    <span className="user-name">{user.utente_nome}</span>
                     <span className="timestamp">
-                      📅 {new Date(user.timestamp).toLocaleString("it-IT")}
+                      Data: {new Date(user.timestamp).toLocaleString("it-IT")}
                     </span>
                     {user.tempo_impiegato && (
                       <span className="time-taken">
-                        ⏱️ {Math.round(user.tempo_impiegato / 60)} min
+                        Tempo: {Math.round(user.tempo_impiegato / 60)} min
                       </span>
                     )}
                   </div>
@@ -3385,7 +3454,7 @@ function ShareModal({ shareData, onClose }) {
     <div className="modal-overlay">
       <div className="modal-content share-modal">
         <div className="modal-header">
-          <h2>🔗 Condividi Questionario</h2>
+          <h2>Condividi Questionario</h2>
           <button onClick={onClose} className="btn-close">
             ×
           </button>
@@ -3394,7 +3463,7 @@ function ShareModal({ shareData, onClose }) {
         <div className="modal-body">
           <div className="share-content">
             <div className="questionario-info">
-              <h3>📝 {shareData.questionario.titolo}</h3>
+              <h3>{shareData.questionario.titolo}</h3>
               <p>
                 Gli utenti potranno compilare questo questionario tramite il
                 link o scansionando il QR code.
@@ -3403,7 +3472,7 @@ function ShareModal({ shareData, onClose }) {
 
             <div className="share-methods">
               <div className="share-link-section">
-                <h4>🔗 Link di condivisione</h4>
+                <h4>Link di condivisione</h4>
                 <div className="link-container">
                   <input
                     type="text"
@@ -3415,13 +3484,13 @@ function ShareModal({ shareData, onClose }) {
                     onClick={copyToClipboard}
                     className={`btn-copy ${copied ? "copied" : ""}`}
                   >
-                    {copied ? "✅ Copiato!" : "📋 Copia"}
+                    {copied ? "Copiato!" : "Copia"}
                   </button>
                 </div>
               </div>
 
               <div className="qr-code-section">
-                <h4>📱 QR Code</h4>
+                <h4>QR Code</h4>
                 <div className="qr-container">
                   {qrCodeDataUrl ? (
                     <img
@@ -3448,7 +3517,7 @@ function ShareModal({ shareData, onClose }) {
                 </span>
               </div>
               <div className="info-item">
-                <span className="info-label">🔑 Token:</span>
+                <span className="info-label">Token:</span>
                 <span className="info-value">
                   {shareData.shareToken.substring(0, 8)}...
                 </span>
@@ -3456,7 +3525,7 @@ function ShareModal({ shareData, onClose }) {
             </div>
 
             <div className="usage-instructions">
-              <h4>📋 Istruzioni per gli utenti</h4>
+              <h4>Istruzioni per gli utenti</h4>
               <ol>
                 <li>Accedere al link o scansionare il QR code</li>
                 <li>Selezionare il proprio nome dalla lista</li>
@@ -3546,7 +3615,7 @@ function SharedQuestionairePage() {
       <div className="shared-page">
         <div className="shared-container">
           <div className="error-message">
-            <h2>❌ Errore</h2>
+            <h2>Errore</h2>
             <p>{error}</p>
             <button
               onClick={() => (window.location.href = "/")}
@@ -3566,7 +3635,7 @@ function SharedQuestionairePage() {
         <div className="shared-container">
           <div className="user-selection-section">
             <div className="header">
-              <h1>📝 Compilazione Questionario</h1>
+              <h1>Compilazione Questionario</h1>
               <h2>{questionario.titolo}</h2>
               <p>
                 Relatore: <strong>{questionario.relatore_nome}</strong>
@@ -3574,7 +3643,7 @@ function SharedQuestionairePage() {
             </div>
 
             <div className="user-selection">
-              <h3>👥 Seleziona il tuo nome per iniziare:</h3>
+              <h3>Seleziona il tuo nome per iniziare:</h3>
               <div className="users-grid">
                 {utenti.map((user) => (
                   <div
@@ -3582,7 +3651,7 @@ function SharedQuestionairePage() {
                     className="user-card"
                     onClick={() => handleUserSelection(user)}
                   >
-                    <div className="user-avatar">👤</div>
+                    <div className="user-avatar">•</div>
                     <span className="user-name">{user.nome}</span>
                   </div>
                 ))}
@@ -3668,7 +3737,7 @@ function SharedQuestionnaireViewer({
     return (
       <div className="submission-success">
         <div className="success-content">
-          <h2>✅ Questionario completato!</h2>
+          <h2>Questionario completato!</h2>
           <p>
             Grazie <strong>{selectedUser.nome}</strong> per aver compilato il
             questionario:
@@ -3690,7 +3759,7 @@ function SharedQuestionnaireViewer({
           ← Indietro
         </button>
         <div className="header-info">
-          <h2>📝 {questionario.titolo}</h2>
+          <h2>{questionario.titolo}</h2>
           <p>
             Utente: <strong>{selectedUser.nome}</strong>
           </p>
@@ -3847,7 +3916,7 @@ function SharedQuestionnaireViewer({
 
         <div className="submit-section">
           <button type="submit" disabled={submitting} className="btn-submit">
-            {submitting ? "⏳ Invio in corso..." : "📤 Invia Risposte"}
+            {submitting ? "Invio in corso..." : "Invia Risposte"}
           </button>
         </div>
       </form>
