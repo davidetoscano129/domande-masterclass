@@ -43,21 +43,43 @@ function UtentiTab({ utenti }) {
   }
 
   return (
-    <div>
-      <h2>Lista Utenti</h2>
-      <div className="users-grid">
-        {utenti.map((utente) => (
-          <div key={utente.id} className="user-card">
-            <strong>{utente.nome}</strong>
-            <button
-              className="btn-small"
-              onClick={() => handleVediRisposte(utente)}
-              disabled={loading}
-            >
-              {loading ? "Caricamento..." : "Vedi Risposte"}
-            </button>
+    <div className="tab-section-modern">
+      <div className="section-header-modern">
+        <div className="header-content">
+          <h2>Lista Utenti</h2>
+          <p className="section-subtitle">
+            Visualizza e gestisci gli utenti registrati
+          </p>
+        </div>
+      </div>
+
+      <div className="content-section-modern">
+        {utenti.length === 0 ? (
+          <div className="empty-state-modern">
+            <h3>Nessun utente registrato</h3>
+            <p>Non ci sono ancora utenti nel sistema</p>
           </div>
-        ))}
+        ) : (
+          <div className="users-grid-modern">
+            {utenti.map((utente) => (
+              <div key={utente.id} className="user-card-modern">
+                <div className="user-info">
+                  <h3 className="user-name">{utente.nome}</h3>
+                  <p className="user-id">ID: {utente.id}</p>
+                </div>
+                <div className="user-actions">
+                  <button
+                    className="btn-primary-modern"
+                    onClick={() => handleVediRisposte(utente)}
+                    disabled={loading}
+                  >
+                    {loading ? "Caricamento..." : "Vedi Risposte"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

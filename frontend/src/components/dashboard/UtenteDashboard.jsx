@@ -139,7 +139,6 @@ function UtenteDashboard({ user, onLogout }) {
           </p>
         </div>
         <button onClick={onLogout} className="btn-logout-modern">
-          <span className="logout-icon">👤</span>
           Logout
         </button>
       </header>
@@ -290,7 +289,7 @@ function UtenteDashboard({ user, onLogout }) {
                       >
                         <div className="tesoro-card-inner">
                           <div className="tesoro-instructor-image">
-                            <div className="instructor-placeholder">📈</div>
+                            <div className="instructor-placeholder">OI</div>
                           </div>
                           <div className="tesoro-content-modern">
                             <h2 className="tesoro-title-modern">
@@ -321,7 +320,6 @@ function UtenteDashboard({ user, onLogout }) {
                 onClick={() => setSelectedRelatore(null)}
                 className="btn-back-modern"
               >
-                <span className="back-arrow">←</span>
                 Torna ai Relatori
               </button>
             </div>
@@ -405,7 +403,6 @@ function UtenteDashboard({ user, onLogout }) {
                                 }
                                 className="btn-secondary-modern"
                               >
-                                <span className="btn-icon">👁️</span>
                                 Rivedi Risposte
                               </button>
                             ) : (
@@ -415,7 +412,6 @@ function UtenteDashboard({ user, onLogout }) {
                                 }
                                 className="btn-primary-modern"
                               >
-                                <span className="btn-icon">▶️</span>
                                 Inizia
                               </button>
                             )}

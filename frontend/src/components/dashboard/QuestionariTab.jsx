@@ -88,17 +88,24 @@ function QuestionariTab({ questionari, user, onUpdate }) {
   };
 
   return (
-    <div>
-      <div className="section-header">
-        <h2>I miei Questionari</h2>
+    <div className="tab-section-modern">
+      <div className="section-header-modern">
+        <div className="header-content">
+          <h2>I miei Questionari</h2>
+          <p className="section-subtitle">
+            Crea e gestisci i questionari per le tue lezioni
+          </p>
+        </div>
         <button
           onClick={() => {
             setShowForm(!showForm);
             setEditingQuestionario(null);
           }}
-          className="btn-primary"
+          className={`btn-action-modern ${
+            showForm ? "btn-cancel" : "btn-create"
+          }`}
         >
-          {showForm ? "Annulla" : "+ Nuovo Questionario"}
+          {showForm ? "Annulla" : "Nuovo Questionario"}
         </button>
       </div>
 
@@ -119,44 +126,69 @@ function QuestionariTab({ questionari, user, onUpdate }) {
         />
       )}
 
-      <div className="items-grid">
-        {questionari.map((questionario) => (
-          <div key={questionario.id} className="item-card questionario-item">
-            <h3>{questionario.titolo}</h3>
-            <p>{questionario.descrizione}</p>
-            <small>Lezione: {questionario.lezione_titolo}</small>
-            <small>
-              Creato: {new Date(questionario.created_at).toLocaleDateString()}
-            </small>
-
-            <div className="item-actions">
-              <button
-                onClick={() => handleEdit(questionario)}
-                className="btn-small btn-edit"
-              >
-                Modifica
-              </button>
-              <button
-                onClick={() => handleDelete(questionario.id)}
-                className="btn-small btn-delete"
-              >
-                Elimina
-              </button>
-              <button
-                onClick={() => handleViewResponses(questionario)}
-                className="btn-small btn-responses"
-              >
-                Risposte
-              </button>
-              <button
-                onClick={() => handleShare(questionario)}
-                className="btn-small btn-share"
-              >
-                Condividi
-              </button>
-            </div>
+      <div className="content-section-modern">
+        {questionari.length === 0 ? (
+          <div className="empty-state-modern">
+            <h3>Nessun questionario creato</h3>
+            <p>
+              Inizia creando il tuo primo questionario usando il pulsante "Nuovo
+              Questionario"
+            </p>
           </div>
-        ))}
+        ) : (
+          <div className="items-grid-modern">
+            {questionari.map((questionario) => (
+              <div
+                key={questionario.id}
+                className="item-card-modern questionario-card-modern"
+              >
+                <div className="card-content-modern">
+                  <h3 className="questionario-title">{questionario.titolo}</h3>
+                  <p className="questionario-description">
+                    {questionario.descrizione}
+                  </p>
+                  <div className="questionario-meta">
+                    <span className="lesson-badge">
+                      Lezione: {questionario.lezione_titolo}
+                    </span>
+                    <span className="creation-date">
+                      {new Date(questionario.created_at).toLocaleDateString(
+                        "it-IT"
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="questionario-actions">
+                  <button
+                    onClick={() => handleEdit(questionario)}
+                    className="btn-secondary-modern btn-small-modern"
+                  >
+                    Modifica
+                  </button>
+                  <button
+                    onClick={() => handleDelete(questionario.id)}
+                    className="btn-delete-modern btn-small-modern"
+                  >
+                    Elimina
+                  </button>
+                  <button
+                    onClick={() => handleViewResponses(questionario)}
+                    className="btn-primary-modern btn-small-modern"
+                  >
+                    Risposte
+                  </button>
+                  <button
+                    onClick={() => handleShare(questionario)}
+                    className="btn-action-modern btn-small-modern"
+                  >
+                    Condividi
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {showResponses && selectedQuestionario && (

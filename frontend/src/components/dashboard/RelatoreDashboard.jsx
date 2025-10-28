@@ -42,53 +42,76 @@ function RelatoreDashboard({ user, onLogout }) {
   };
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>Dashboard {user.relatore.nome}</h1>
-        <button onClick={onLogout} className="btn-secondary">
+    <div className="dashboard-modern relatore-dashboard">
+      <header className="dashboard-header-modern relatore-header">
+        <div className="dashboard-user-info">
+          <h1>Dashboard Relatore</h1>
+          <p className="user-subtitle">
+            <span className="relatore-name">{user.relatore.nome}</span> - I
+            TESORI dell'IMPRESA
+          </p>
+        </div>
+        <button onClick={onLogout} className="btn-logout-modern">
           Logout
         </button>
       </header>
 
-      <nav className="dashboard-nav">
-        <button
-          className={activeTab === "lezioni" ? "active" : ""}
-          onClick={() => setActiveTab("lezioni")}
-        >
-          Lezioni
-        </button>
-        <button
-          className={activeTab === "questionari" ? "active" : ""}
-          onClick={() => setActiveTab("questionari")}
-        >
-          Questionari
-        </button>
-        <button
-          className={activeTab === "utenti" ? "active" : ""}
-          onClick={() => setActiveTab("utenti")}
-        >
-          Utenti
-        </button>
+      <nav className="dashboard-nav-modern">
+        <div className="nav-container">
+          <button
+            className={`nav-btn-modern ${
+              activeTab === "lezioni" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("lezioni")}
+          >
+            <span className="nav-text">Lezioni</span>
+          </button>
+          <button
+            className={`nav-btn-modern ${
+              activeTab === "questionari" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("questionari")}
+          >
+            <span className="nav-text">Questionari</span>
+          </button>
+          <button
+            className={`nav-btn-modern ${
+              activeTab === "utenti" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("utenti")}
+          >
+            <span className="nav-text">Utenti</span>
+          </button>
+        </div>
       </nav>
 
-      <main className="dashboard-content">
-        {loading ? (
-          <p>Caricamento...</p>
-        ) : (
-          <div>
-            {activeTab === "lezioni" && (
-              <LezioniTab lezioni={lezioni} user={user} onUpdate={fetchData} />
-            )}
-            {activeTab === "questionari" && (
-              <QuestionariTab
-                questionari={questionari}
-                user={user}
-                onUpdate={fetchData}
-              />
-            )}
-            {activeTab === "utenti" && <UtentiTab utenti={utenti} />}
-          </div>
-        )}
+      <main className="dashboard-content-modern relatore-content">
+        <div className="content-wrapper-modern">
+          {loading ? (
+            <div className="loading-modern">
+              <div className="loading-spinner"></div>
+              <p>Caricamento...</p>
+            </div>
+          ) : (
+            <div className="tab-content-modern">
+              {activeTab === "lezioni" && (
+                <LezioniTab
+                  lezioni={lezioni}
+                  user={user}
+                  onUpdate={fetchData}
+                />
+              )}
+              {activeTab === "questionari" && (
+                <QuestionariTab
+                  questionari={questionari}
+                  user={user}
+                  onUpdate={fetchData}
+                />
+              )}
+              {activeTab === "utenti" && <UtentiTab utenti={utenti} />}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
