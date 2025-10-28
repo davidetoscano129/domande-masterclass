@@ -130,20 +130,38 @@ function UtenteDashboard({ user, onLogout }) {
   }
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>Area {user.utente.nome}</h1>
-        <button onClick={onLogout} className="btn-secondary">
+    <div className="dashboard-modern">
+      <header className="dashboard-header-modern">
+        <div className="dashboard-user-info">
+          <h1>Benvenuto, {user.utente.nome}</h1>
+          <p className="user-subtitle">
+            Area Personale - I TESORI dell'IMPRESA
+          </p>
+        </div>
+        <button onClick={onLogout} className="btn-logout-modern">
+          <span className="logout-icon">👤</span>
           Logout
         </button>
       </header>
 
-      <main className="dashboard-content">
+      <main className="dashboard-content-modern">
         {!selectedRelatore ? (
           // Vista iniziale: lista dei relatori con materie
           <>
-            <div className="tesori-header">
-              <h1>I TESORI dell'IMPRESA</h1>
+            <div className="tesori-header-modern">
+              <div className="tesori-logo-container">
+                <h1 className="tesori-logo">
+                  <span className="tesori-i">I</span>
+                  <span className="tesori-tesori">TESORI</span>
+                  <span className="tesori-dell">dell'</span>
+                  <span className="tesori-impresa">IMPRESA</span>
+                </h1>
+                <p className="tesori-subtitle">
+                  Benvenuto nella tua{" "}
+                  <span className="area-highlight">Area riservata</span> qui
+                  potrai visionare tutti i contenuti degli incontri già avvenuti
+                </p>
+              </div>
             </div>
             {loading ? (
               <p>Caricamento...</p>
@@ -220,26 +238,47 @@ function UtenteDashboard({ user, onLogout }) {
 
                   return (
                     <>
-                      {relatoriConMaterie.map((relatore) => (
+                      {relatoriConMaterie.map((relatore, index) => (
                         <div
                           key={relatore.relatore_id}
-                          className={`tesoro-card tesoro-${relatore.materiaInfo.color}`}
+                          className={`tesoro-card-modern tesoro-${relatore.materiaInfo.color}`}
                           onClick={() => setSelectedRelatore(relatore)}
                         >
-                          <div className="tesoro-content">
-                            <h2 className="tesoro-materia">
-                              {relatore.materiaInfo.materia}
-                            </h2>
-                            <p className="tesoro-relatore">
-                              {relatore.materiaInfo.relatore ||
-                                relatore.relatore_nome}
-                            </p>
-                            <div className="tesoro-stats">
-                              <span>
-                                {relatore.completedQuestionari}/
-                                {relatore.totalQuestionari} completati
-                              </span>
-                              <span>{relatore.progressPercentage}%</span>
+                          <div className="tesoro-card-inner">
+                            <div className="tesoro-instructor-image">
+                              <div className="instructor-placeholder">
+                                {relatore.materiaInfo.relatore
+                                  ?.split(" ")
+                                  .map((n) => n[0])
+                                  .join("") || "R"}
+                              </div>
+                            </div>
+                            <div className="tesoro-content-modern">
+                              <h2 className="tesoro-title-modern">
+                                {relatore.materiaInfo.materia}
+                              </h2>
+                              <h3 className="tesoro-instructor-name">
+                                {relatore.materiaInfo.relatore ||
+                                  relatore.relatore_nome}
+                              </h3>
+                              <div className="tesoro-progress-section">
+                                <div className="progress-bar-container">
+                                  <div
+                                    className="progress-bar-fill"
+                                    style={{
+                                      width: `${relatore.progressPercentage}%`,
+                                    }}
+                                  ></div>
+                                </div>
+                                <span className="progress-text">
+                                  {relatore.completedQuestionari}/
+                                  {relatore.totalQuestionari} completati (
+                                  {relatore.progressPercentage}%)
+                                </span>
+                              </div>
+                              <button className="tesoro-view-btn">
+                                Vedi Contenuto
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -247,13 +286,25 @@ function UtenteDashboard({ user, onLogout }) {
 
                       {/* Card speciale per "L'ora dell'imprenditore" */}
                       <div
-                        className={`tesoro-card tesoro-${oraImprenditore.color}`}
+                        className={`tesoro-card-modern tesoro-${oraImprenditore.color} tesoro-coming-soon-card`}
                       >
-                        <div className="tesoro-content">
-                          <h2 className="tesoro-materia">
-                            {oraImprenditore.materia}
-                          </h2>
-                          <div className="tesoro-coming-soon">In arrivo</div>
+                        <div className="tesoro-card-inner">
+                          <div className="tesoro-instructor-image">
+                            <div className="instructor-placeholder">📈</div>
+                          </div>
+                          <div className="tesoro-content-modern">
+                            <h2 className="tesoro-title-modern">
+                              {oraImprenditore.materia}
+                            </h2>
+                            <h3 className="tesoro-instructor-name">
+                              Prossimamente
+                            </h3>
+                            <div className="tesoro-coming-soon-modern">
+                              <span className="coming-soon-badge">
+                                In arrivo
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </>
@@ -264,76 +315,111 @@ function UtenteDashboard({ user, onLogout }) {
           </>
         ) : (
           // Vista questionari del relatore selezionato
-          <>
-            <div className="back-button-container">
+          <div className="relatore-section-modern">
+            <div className="back-button-container-modern">
               <button
                 onClick={() => setSelectedRelatore(null)}
-                className="btn-back-prominent"
+                className="btn-back-modern"
               >
-                ← Torna ai Relatori
+                <span className="back-arrow">←</span>
+                Torna ai Relatori
               </button>
             </div>
 
-            <h2>Questionari di {selectedRelatore.relatore_nome}</h2>
+            <div className="relatore-header-modern">
+              <h2>Questionari di {selectedRelatore.relatore_nome}</h2>
+              <div className="relatore-progress-overview">
+                <span className="overview-text">
+                  {selectedRelatore.completedQuestionari} su{" "}
+                  {selectedRelatore.totalQuestionari} questionari completati
+                </span>
+                <div className="overview-progress-bar">
+                  <div
+                    className="overview-progress-fill"
+                    style={{ width: `${selectedRelatore.progressPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
 
-            <div className="questionari-by-lesson">
+            <div className="questionari-by-lesson-modern">
               {getQuestionariPerLezioneDelRelatore(
                 selectedRelatore.relatore_id
               ).map((lezione) => (
-                <div key={lezione.lezione_id} className="lesson-section">
-                  <div className="lesson-header">
+                <div key={lezione.lezione_id} className="lesson-section-modern">
+                  <div className="lesson-header-modern">
                     <h3>
                       {lezione.lezione_titolo}
                       {lezione.lezione_numero > 0 && (
-                        <span className="lesson-number">
+                        <span className="lesson-number-modern">
                           #{lezione.lezione_numero}
                         </span>
                       )}
                     </h3>
-                    <p className="lesson-instructor">
+                    <p className="lesson-instructor-modern">
                       Relatore: {lezione.relatore_nome}
                     </p>
-                    <div className="lesson-stats">
-                      {lezione.questionari.length} questionari •{" "}
-                      {lezione.questionari.filter((q) => q.hasAnswered).length}{" "}
-                      completati
+                    <div className="lesson-stats-modern">
+                      <span className="stats-badge">
+                        {lezione.questionari.length} questionari
+                      </span>
+                      <span className="stats-badge completed">
+                        {
+                          lezione.questionari.filter((q) => q.hasAnswered)
+                            .length
+                        }{" "}
+                        completati
+                      </span>
                     </div>
                   </div>
 
-                  <div className="lesson-questionari">
+                  <div className="lesson-questionari-modern">
                     {lezione.questionari.map((questionario) => (
-                      <div key={questionario.id} className="questionario-card">
-                        <div className="questionario-status">
+                      <div
+                        key={questionario.id}
+                        className="questionario-card-modern"
+                      >
+                        <div className="questionario-status-modern">
                           {questionario.hasAnswered ? (
-                            <span className="status completed">Completato</span>
+                            <span className="status-modern completed">
+                              <span className="status-icon">✓</span>
+                              Completato
+                            </span>
                           ) : (
-                            <span className="status pending">Da fare</span>
+                            <span className="status-modern pending">
+                              <span className="status-icon">○</span>
+                              Da fare
+                            </span>
                           )}
                         </div>
 
-                        <h4>{questionario.titolo}</h4>
-                        <p>{questionario.descrizione}</p>
+                        <div className="questionario-content-modern">
+                          <h4>{questionario.titolo}</h4>
+                          <p>{questionario.descrizione}</p>
 
-                        <div className="questionario-actions">
-                          {questionario.hasAnswered ? (
-                            <button
-                              onClick={() =>
-                                setActiveQuestionario(questionario)
-                              }
-                              className="btn-secondary"
-                            >
-                              Rivedi Risposte
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() =>
-                                setActiveQuestionario(questionario)
-                              }
-                              className="btn-primary"
-                            >
-                              Inizia
-                            </button>
-                          )}
+                          <div className="questionario-actions-modern">
+                            {questionario.hasAnswered ? (
+                              <button
+                                onClick={() =>
+                                  setActiveQuestionario(questionario)
+                                }
+                                className="btn-secondary-modern"
+                              >
+                                <span className="btn-icon">👁️</span>
+                                Rivedi Risposte
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  setActiveQuestionario(questionario)
+                                }
+                                className="btn-primary-modern"
+                              >
+                                <span className="btn-icon">▶️</span>
+                                Inizia
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -341,7 +427,7 @@ function UtenteDashboard({ user, onLogout }) {
                 </div>
               ))}
             </div>
-          </>
+          </div>
         )}
       </main>
     </div>
