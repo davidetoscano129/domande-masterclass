@@ -143,7 +143,7 @@ function UtenteDashboard({ user, onLogout }) {
           // Vista iniziale: lista dei relatori con materie
           <>
             <div className="tesori-header">
-              <h1>I TESORI DELL'IMPRESA</h1>
+              <h1>I TESORI dell'IMPRESA</h1>
             </div>
             {loading ? (
               <p>Caricamento...</p>

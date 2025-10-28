@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE } from '../../constants/api.js';
+import { API_BASE } from "../../constants/api.js";
 
 function LoginPage({ onLogin }) {
   const [loginType, setLoginType] = useState("");
