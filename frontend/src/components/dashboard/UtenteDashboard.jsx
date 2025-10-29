@@ -149,11 +149,11 @@ function UtenteDashboard({ user, onLogout }) {
           <>
             <div className="tesori-header-modern">
               <div className="tesori-logo-container">
-                <h1 className="tesori-logo">
-                  <span className="tesori-i">I</span>
-                  <span className="tesori-tesori">TESORI</span>
-                  <span className="tesori-dell">dell'</span>
-                  <span className="tesori-impresa">IMPRESA</span>
+                <h1 className="tesori-logo-main">
+                  <span className="tesori-i-main">I</span>
+                  <span className="tesori-tesori-main"> TESORI </span>
+                  <span className="tesori-dell-main">dell'</span>
+                  <span className="tesori-impresa-main">IMPRESA</span>
                 </h1>
                 <p className="tesori-subtitle">
                   Benvenuto nella tua{" "}
@@ -275,7 +275,9 @@ function UtenteDashboard({ user, onLogout }) {
                                   {relatore.progressPercentage}%)
                                 </span>
                               </div>
-                              <button className="tesoro-view-btn">
+                              <button
+                                className={`tesoro-view-btn tesoro-view-btn-${relatore.materiaInfo.color}`}
+                              >
                                 Vedi Contenuto
                               </button>
                             </div>
