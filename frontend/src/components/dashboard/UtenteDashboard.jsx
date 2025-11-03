@@ -150,11 +150,26 @@ function UtenteDashboard({ user, onLogout }) {
             <div className="tesori-header-modern">
               <div className="tesori-logo-container">
                 <h1 className="tesori-logo-main">
-                  <span className="tesori-i-main">I</span>
-                  <span className="tesori-tesori-main"> TESORI </span>
-                  <span className="tesori-dell-main">dell'</span>
-                  <span className="tesori-impresa-main">IMPRESA</span>
+                  <span className="letter-i">I</span>{" "}
+                  <span className="letter-t1">T</span>
+                  <span className="letter-e1">E</span>
+                  <span className="letter-s">S</span>
+                  <span className="letter-o">O</span>
+                  <span className="letter-r">R</span>
+                  <span className="letter-i2">I</span>
                 </h1>
+                <h2 className="tesori-logo-sub">
+                  <span className="dell">dell'</span>{" "}
+                  <span className="tesori-logo-impresa">
+                    <span className="letter-i3">I</span>
+                    <span className="letter-m">M</span>
+                    <span className="letter-p">P</span>
+                    <span className="letter-r2">R</span>
+                    <span className="letter-e2">E</span>
+                    <span className="letter-s2">S</span>
+                    <span className="letter-a">A</span>
+                  </span>
+                </h2>
                 <p className="tesori-subtitle">
                   Benvenuto nella tua{" "}
                   <span className="area-highlight">Area riservata</span> qui

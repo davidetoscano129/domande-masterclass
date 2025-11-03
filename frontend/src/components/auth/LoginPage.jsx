@@ -50,121 +50,150 @@ function LoginPage({ onLogin }) {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-brand">
-        <h1 className="login-title">Questionari</h1>
-        <div className="login-subtitle">Sistema di gestione questionari</div>
+    <div className="login-page">
+      <div className="login-logo-text">
+        <h1 className="logo-main">
+          <span className="letter-i">I</span>{" "}
+          <span className="letter-t1">T</span>
+          <span className="letter-e1">E</span>
+          <span className="letter-s">S</span>
+          <span className="letter-o">O</span>
+          <span className="letter-r">R</span>
+          <span className="letter-i2">I</span>
+        </h1>
+        <h2 className="logo-sub">
+          <span className="dell">dell'</span>{" "}
+          <span className="logo-impresa">
+            <span className="letter-i3">I</span>
+            <span className="letter-m">M</span>
+            <span className="letter-p">P</span>
+            <span className="letter-r2">R</span>
+            <span className="letter-e2">E</span>
+            <span className="letter-s2">S</span>
+            <span className="letter-a">A</span>
+          </span>
+        </h2>
       </div>
-
-      {!loginType && (
-        <div className="login-selection">
-          <h2>Seleziona il tipo di accesso</h2>
-          <div className="access-buttons">
-            <button
-              onClick={() => setLoginType("relatore")}
-              className="btn-access btn-relatore"
-            >
-              <div className="btn-icon">�</div>
-              <div className="btn-content">
-                <span className="btn-title">Area Relatore</span>
-                <span className="btn-description">
-                  Gestisci lezioni e questionari
-                </span>
-              </div>
-              <div className="btn-arrow">→</div>
-            </button>
-            <button
-              onClick={() => setLoginType("utente")}
-              className="btn-access btn-utente"
-            >
-              <div className="btn-icon">�</div>
-              <div className="btn-content">
-                <span className="btn-title">Area Utente</span>
-                <span className="btn-description">
-                  Accedi ai contenuti formativi
-                </span>
-              </div>
-              <div className="btn-arrow">→</div>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {loginType && (
-        <div className="user-selection">
-          <div className="login-header">
-            <h2>
-              {loginType === "relatore"
-                ? "🎯 Login Relatore"
-                : "📚 Login Utente"}
-            </h2>
-            <p className="login-description">
-              {loginType === "relatore"
-                ? "Accedi alla tua area di gestione"
-                : "Accedi ai tuoi contenuti formativi"}
-            </p>
-          </div>
-
-          <div className="login-form">
-            <div className="input-group">
-              <label htmlFor="codiceFiscale">Codice Fiscale</label>
-              <div className="input-wrapper">
-                <input
-                  id="codiceFiscale"
-                  type="text"
-                  value={codiceFiscale}
-                  onChange={(e) =>
-                    setCodiceFiscale(e.target.value.toUpperCase())
-                  }
-                  placeholder="Inserisci il tuo codice fiscale (16 caratteri)"
-                  maxLength="16"
-                  className="login-input"
-                  disabled={loading}
-                />
-                <div className="input-icon">📄</div>
-              </div>
-              <div className="input-hint">
-                Il codice fiscale deve essere di 16 caratteri
-              </div>
+      <div className="login-card">
+        {!loginType ? (
+          <>
+            <div className="login-card-header">
+              <p className="login-card-subtitle">
+                Sistema di gestione questionari
+              </p>
             </div>
 
-            {error && (
-              <div className="error-message">
-                <span className="error-icon">⚠️</span>
-                {error}
-              </div>
-            )}
+            <div className="login-card-body">
+              <h2 className="selection-title">Seleziona il tipo di accesso</h2>
+              <div className="login-options">
+                <button
+                  onClick={() => setLoginType("relatore")}
+                  className="login-option-btn login-option-relatore"
+                >
+                  <div className="option-avatar option-avatar-relatore">
+                    <span>R</span>
+                  </div>
+                  <div className="option-content">
+                    <span className="option-title">AREA RELATORE</span>
+                    <span className="option-subtitle">
+                      Gestisci lezioni e questionari
+                    </span>
+                  </div>
+                </button>
 
-            <div className="login-actions">
-              <button
-                onClick={handleBack}
-                className="btn-back"
-                disabled={loading}
-              >
-                ← Indietro
-              </button>
-              <button
-                onClick={handleLogin}
-                disabled={loading || !codiceFiscale.trim()}
-                className={`btn-login ${
-                  loginType === "relatore"
-                    ? "btn-login-relatore"
-                    : "btn-login-utente"
+                <button
+                  onClick={() => setLoginType("utente")}
+                  className="login-option-btn login-option-utente"
+                >
+                  <div className="option-avatar option-avatar-utente">
+                    <span>U</span>
+                  </div>
+                  <div className="option-content">
+                    <span className="option-title">AREA UTENTE</span>
+                    <span className="option-subtitle">
+                      Accedi ai contenuti formativi
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="login-card-header">
+              <div
+                className={`login-logo ${
+                  loginType === "relatore" ? "logo-relatore" : "logo-utente"
                 }`}
               >
-                {loading ? (
-                  <>
-                    <span className="loading-spinner">⏳</span>
-                    Accesso in corso...
-                  </>
-                ) : (
-                  <>🚀 Accedi</>
-                )}
-              </button>
+                <span className="logo-text">
+                  {loginType === "relatore" ? "R" : "U"}
+                </span>
+              </div>
+              <h1 className="login-card-title">
+                {loginType === "relatore" ? "AREA RELATORE" : "AREA UTENTE"}
+              </h1>
+              <p className="login-card-subtitle">
+                {loginType === "relatore"
+                  ? "Gestione lezioni e questionari"
+                  : "Contenuti formativi"}
+              </p>
             </div>
-          </div>
-        </div>
-      )}
+
+            <div className="login-card-body">
+              <form
+                className="login-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleLogin();
+                }}
+              >
+                <div className="form-field">
+                  <label htmlFor="codiceFiscale">Codice Fiscale</label>
+                  <input
+                    id="codiceFiscale"
+                    type="text"
+                    value={codiceFiscale}
+                    onChange={(e) =>
+                      setCodiceFiscale(e.target.value.toUpperCase())
+                    }
+                    placeholder="Inserisci 16 caratteri"
+                    maxLength="16"
+                    className="form-control"
+                    disabled={loading}
+                    autoComplete="off"
+                  />
+                  <span className="form-hint">16 caratteri alfanumerici</span>
+                </div>
+
+                {error && <div className="alert-error">{error}</div>}
+
+                <div className="form-buttons">
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="btn btn-secondary"
+                    disabled={loading}
+                  >
+                    Indietro
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading || !codiceFiscale.trim()}
+                    className={`btn btn-primary ${
+                      loginType === "relatore"
+                        ? "btn-relatore-primary"
+                        : "btn-utente-primary"
+                    }`}
+                  >
+                    {loading ? "Accesso in corso..." : "Accedi"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
