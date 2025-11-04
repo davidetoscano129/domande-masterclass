@@ -47,8 +47,7 @@ function RelatoreDashboard({ user, onLogout }) {
         <div className="dashboard-user-info">
           <h1>Dashboard Relatore</h1>
           <p className="user-subtitle">
-            <span className="relatore-name">{user.relatore.nome}</span> - I
-            TESORI dell'IMPRESA
+            <span className="relatore-name">{user.relatore.nome}</span>
           </p>
         </div>
         <button onClick={onLogout} className="btn-logout-modern">
@@ -86,6 +85,17 @@ function RelatoreDashboard({ user, onLogout }) {
       </nav>
 
       <main className="dashboard-content-modern relatore-content">
+        {/* Logo I Tesori dell'Impresa */}
+        <div className="tesori-header-modern tesori-header-centered">
+          <div className="tesori-logo-container">
+            <img
+              src="/images/logo-tesoridellimpresa.png"
+              alt="I Tesori dell'Impresa"
+              className="tesori-logo-image"
+            />
+          </div>
+        </div>
+
         <div className="content-wrapper-modern">
           {loading ? (
             <div className="loading-modern">

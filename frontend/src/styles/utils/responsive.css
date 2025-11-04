@@ -124,21 +124,31 @@
   }
 
   /* Responsive per componenti relatore */
+  .relatore-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .relatore-content {
+    padding: var(--space-lg) var(--space-md);
+  }
+
   .nav-container {
-    padding: 0 var(--space-md);
+    padding: 0;
     flex-direction: column;
   }
 
   .nav-btn-modern {
     padding: var(--space-md);
     justify-content: center;
-    border-bottom: none;
-    border-right: 3px solid transparent;
+    border-bottom: 2px solid transparent;
+    border-right: none;
+    width: 100%;
   }
 
   .nav-btn-modern.active {
-    border-right-color: var(--brand-blue);
-    border-bottom-color: transparent;
+    border-bottom-color: var(--brand-blue);
+    border-right-color: transparent;
   }
 
   .relatore-content {

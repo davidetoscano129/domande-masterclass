@@ -134,9 +134,7 @@ function UtenteDashboard({ user, onLogout }) {
       <header className="dashboard-header-modern">
         <div className="dashboard-user-info">
           <h1>Benvenuto, {user.utente.nome}</h1>
-          <p className="user-subtitle">
-            Area Personale - I TESORI dell'IMPRESA
-          </p>
+          <p className="user-subtitle">Area Personale</p>
         </div>
         <button onClick={onLogout} className="btn-logout-modern">
           Logout

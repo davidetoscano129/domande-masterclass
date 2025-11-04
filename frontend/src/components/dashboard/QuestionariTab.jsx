@@ -88,17 +88,22 @@ function QuestionariTab({ questionari, user, onUpdate }) {
   };
 
   return (
-    <div>
-      <div>
-        <div>
+    <div className="tab-section-modern">
+      <div className="section-header-modern">
+        <div className="header-content">
           <h2>I miei Questionari</h2>
-          <p>Crea e gestisci i questionari per le tue lezioni</p>
+          <p className="section-subtitle">
+            Crea e gestisci i questionari per le tue lezioni
+          </p>
         </div>
         <button
           onClick={() => {
             setShowForm(!showForm);
             setEditingQuestionario(null);
           }}
+          className={`btn-action-modern ${
+            showForm ? "btn-cancel" : "btn-create"
+          }`}
         >
           {showForm ? "Annulla" : "Nuovo Questionario"}
         </button>
@@ -121,9 +126,9 @@ function QuestionariTab({ questionari, user, onUpdate }) {
         />
       )}
 
-      <div>
+      <div className="content-section-modern">
         {questionari.length === 0 ? (
-          <div>
+          <div className="empty-state-modern">
             <h3>Nessun questionario creato</h3>
             <p>
               Inizia creando il tuo primo questionario usando il pulsante "Nuovo
@@ -131,13 +136,15 @@ function QuestionariTab({ questionari, user, onUpdate }) {
             </p>
           </div>
         ) : (
-          <div>
+          <div className="items-grid-relatore">
             {questionari.map((questionario) => (
-              <div key={questionario.id}>
-                <div>
-                  <h3>{questionario.titolo}</h3>
-                  <p>{questionario.descrizione}</p>
-                  <div>
+              <div key={questionario.id} className="relatore-card-modern">
+                <div className="relatore-card-content">
+                  <h3 className="relatore-card-title">{questionario.titolo}</h3>
+                  <p className="relatore-card-description">
+                    {questionario.descrizione}
+                  </p>
+                  <div className="relatore-card-meta">
                     <span>Lezione: {questionario.lezione_titolo}</span>
                     <span>
                       {new Date(questionario.created_at).toLocaleDateString(
@@ -147,17 +154,29 @@ function QuestionariTab({ questionari, user, onUpdate }) {
                   </div>
                 </div>
 
-                <div>
-                  <button onClick={() => handleEdit(questionario)}>
+                <div className="relatore-card-footer">
+                  <button
+                    onClick={() => handleEdit(questionario)}
+                    className="btn-small-modern btn-edit"
+                  >
                     Modifica
                   </button>
-                  <button onClick={() => handleDelete(questionario.id)}>
+                  <button
+                    onClick={() => handleDelete(questionario.id)}
+                    className="btn-small-modern btn-delete"
+                  >
                     Elimina
                   </button>
-                  <button onClick={() => handleViewResponses(questionario)}>
+                  <button
+                    onClick={() => handleViewResponses(questionario)}
+                    className="btn-small-modern btn-view"
+                  >
                     Risposte
                   </button>
-                  <button onClick={() => handleShare(questionario)}>
+                  <button
+                    onClick={() => handleShare(questionario)}
+                    className="btn-small-modern btn-share"
+                  >
                     Condividi
                   </button>
                 </div>

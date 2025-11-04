@@ -20,15 +20,17 @@
 
 /* Content area relatore */
 .relatore-content {
-  padding: var(--space-xl);
+  padding: var(--space-lg) var(--space-xl);
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .content-wrapper-modern {
   max-width: 1400px;
   margin: 0 auto;
   background-color: var(--white);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   border: 1px solid var(--gray-200);
   overflow: hidden;
 }

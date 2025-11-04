@@ -1,6 +1,250 @@
 /* ===== DASHBOARD RELATORE - GESTIONE TAB ===== */
 
-/* Non ci sono stili specifici aggiuntivi per il relatore oltre a quelli già in header.css */
-/* Questo file è un placeholder per futuri stili specifici del relatore */
+/* Stili per le tab Lezioni, Questionari, Utenti */
 
-/* Se necessario, aggiungere qui stili per funzionalità specifiche del relatore */
+/* Grid unificata per tutte le tab */
+.items-grid-relatore {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+/* Card unificate per lezioni, questionari, utenti */
+.relatore-card-modern {
+  background-color: var(--white);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--gray-200);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+}
+
+.relatore-card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--gray-300);
+}
+
+/* Header card con numero e azioni */
+.relatore-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.relatore-card-number {
+  background-color: var(--brand-blue);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+}
+
+/* Content card */
+.relatore-card-content {
+  flex: 1;
+  margin-bottom: var(--space-md);
+}
+
+.relatore-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-sm);
+  line-height: 1.4;
+}
+
+.relatore-card-description {
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: var(--space-md);
+}
+
+.relatore-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* Footer card con azioni */
+.relatore-card-footer {
+  border-top: 1px solid var(--gray-100);
+  padding-top: var(--space-md);
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* Bottoni piccoli nelle card */
+.btn-small-modern {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-small-modern:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-small-modern:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-edit {
+  background-color: var(--brand-blue);
+  color: var(--white);
+  border-color: var(--brand-blue);
+}
+
+.btn-edit:hover {
+  background-color: var(--blue-600);
+}
+
+.btn-delete {
+  background-color: var(--brand-red);
+  color: var(--white);
+  border-color: var(--brand-red);
+}
+
+.btn-delete:hover {
+  background-color: var(--red-600);
+}
+
+.btn-view {
+  background-color: var(--brand-green);
+  color: var(--white);
+  border-color: var(--brand-green);
+}
+
+.btn-view:hover {
+  background-color: var(--green-600);
+}
+
+.btn-share {
+  background-color: var(--gray-600);
+  color: var(--white);
+  border-color: var(--gray-600);
+}
+
+.btn-share:hover {
+  background-color: var(--gray-700);
+}
+
+/* Sezione header tab */
+.tab-header-relatore {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.tab-header-relatore h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-sm);
+}
+
+.tab-header-relatore p {
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Lista utenti specifica */
+.utenti-list-relatore {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-md);
+}
+
+.utente-card-relatore {
+  background-color: var(--white);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--gray-200);
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.utente-card-relatore:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--gray-300);
+}
+
+.utente-info-relatore {
+  flex: 1;
+}
+
+.utente-name-relatore {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-xs);
+}
+
+.utente-id-relatore {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.utente-actions-relatore {
+  margin-left: var(--space-md);
+}
+
+/* Badge e stati */
+.badge-elimina {
+  background-color: var(--brand-red);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+}
+
+.badge-success {
+  background-color: var(--brand-green);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .items-grid-relatore {
+    grid-template-columns: 1fr;
+  }
+
+  .utenti-list-relatore {
+    grid-template-columns: 1fr;
+  }
+
+  .relatore-card-footer {
+    flex-direction: column;
+  }
+
+  .relatore-card-footer .btn-small-modern {
+    width: 100%;
+  }
+}
