@@ -1,0 +1,316 @@
+/* ===== PULSANTI ===== */
+
+/* Pulsanti principali */
+.btn-logout-modern {
+  background-color: var(--gray-800);
+  color: var(--white);
+  border: none;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-logout-modern:hover {
+  background-color: var(--gray-700);
+}
+
+.btn-back-modern {
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+  border: none;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back-modern:hover {
+  background-color: var(--gray-200);
+  color: var(--gray-800);
+}
+
+.btn-primary-modern,
+.btn-secondary-modern {
+  border: none;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary-modern {
+  background-color: var(--gray-900);
+  color: var(--white);
+}
+
+.btn-primary-modern:hover {
+  background-color: var(--gray-800);
+}
+
+.btn-secondary-modern {
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.btn-secondary-modern:hover {
+  background-color: var(--gray-200);
+  color: var(--gray-800);
+}
+
+/* Pulsanti azione */
+.btn-action-modern {
+  border: none;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-create {
+  background-color: var(--brand-green);
+  color: var(--white);
+}
+
+.btn-create:hover {
+  background-color: var(--brand-green);
+  opacity: 0.9;
+}
+
+.btn-cancel {
+  background-color: var(--brand-red);
+  color: var(--white);
+}
+
+.btn-cancel:hover {
+  background-color: var(--brand-red);
+  opacity: 0.9;
+}
+
+.btn-delete-modern {
+  background-color: var(--brand-red);
+  color: var(--white);
+  border: none;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.btn-delete-modern:hover {
+  background-color: var(--brand-red);
+  opacity: 0.9;
+}
+
+.btn-small-modern {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.875rem;
+  border-radius: calc(var(--radius) / 1.5);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+/* Pulsanti colorati per le card */
+.tesoro-view-btn {
+  background-color: var(--gray-900);
+  color: white;
+  border: none;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.tesoro-view-btn:hover {
+  background-color: var(--gray-800);
+}
+
+.tesoro-blue .tesoro-view-btn,
+.tesoro-view-btn-blue {
+  background-color: var(--brand-blue);
+  color: white;
+}
+
+.tesoro-blue .tesoro-view-btn:hover,
+.tesoro-view-btn-blue:hover {
+  background-color: #2563eb;
+}
+
+.tesoro-yellow .tesoro-view-btn,
+.tesoro-view-btn-yellow {
+  background-color: var(--brand-yellow);
+  color: var(--gray-900);
+}
+
+.tesoro-yellow .tesoro-view-btn:hover,
+.tesoro-view-btn-yellow:hover {
+  background-color: #eab308;
+}
+
+/* Legacy compatibility styles */
+.btn-small {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 0.875rem;
+  border-radius: calc(var(--border-radius) / 1.5);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  background: var(--surface-color);
+  color: var(--text-primary);
+}
+
+.btn-small:hover {
+  background: var(--background-secondary);
+  border-color: var(--primary-color);
+}
+
+.btn-delete {
+  background: var(--error-color);
+  color: white;
+  border-color: var(--error-color);
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.btn-responses {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.btn-responses:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.btn-share {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.btn-share:hover {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.btn-users {
+  background: var(--secondary-color);
+  color: white;
+  border-color: var(--secondary-color);
+}
+
+.btn-users:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.btn-export {
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-export:hover {
+  background: var(--background-secondary);
+  border-color: var(--primary-color);
+}
+
+.btn-word {
+  color: #1e40af;
+}
+
+.btn-excel {
+  color: #047857;
+}
+
+.btn-edit {
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-edit:hover {
+  background: var(--background-secondary);
+  border-color: var(--primary-color);
+}
+
+/* Login buttons */
+.btn {
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  flex: 2;
+  background: #5b8def;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #4a7dd9;
+  box-shadow: 0 4px 12px rgba(91, 141, 239, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-relatore-primary {
+  background: #5b8def;
+}
+
+.btn-relatore-primary:hover:not(:disabled) {
+  background: #4a7dd9;
+}
+
+.btn-utente-primary {
+  background: #f59e0b;
+}
+
+.btn-utente-primary:hover:not(:disabled) {
+  background: #ea9307;
+}

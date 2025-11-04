@@ -1,0 +1,156 @@
+/* ===== LOGIN PAGE - I TESORI DELL'IMPRESA ===== */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fa;
+  padding: var(--spacing-lg);
+}
+
+/* Logo con stile tipografico */
+.login-logo-text {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo-main {
+  font-family: "Playfair Display", serif;
+  font-size: 5rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  margin: 0;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.logo-main span {
+  display: inline-block;
+}
+
+/* Colori per I TESORI */
+.letter-i {
+  color: #f4c430;
+}
+.letter-t1 {
+  color: #f4c430;
+}
+.letter-e1 {
+  color: #d4a420;
+}
+.letter-s {
+  color: #9b9154;
+}
+.letter-o {
+  color: #618088;
+}
+.letter-r {
+  color: #4577a2;
+}
+.letter-i2 {
+  color: #3d7ec9;
+}
+
+.logo-sub {
+  font-family: "Playfair Display", serif;
+  font-size: 3.5rem;
+  font-weight: 400;
+  font-style: italic;
+  margin: -15px 0 0 0;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.dell {
+  color: #2c3e50;
+}
+
+.logo-impresa {
+  font-family: "Playfair Display", serif;
+  font-weight: 900;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* Colori per IMPRESA */
+.letter-i3 {
+  color: #f4c430;
+}
+.letter-m {
+  color: #f4c430;
+}
+.letter-p {
+  color: #d4a420;
+}
+.letter-r2 {
+  color: #9b9154;
+}
+.letter-e2 {
+  color: #618088;
+}
+.letter-s2 {
+  color: #4577a2;
+}
+.letter-a {
+  color: #3d7ec9;
+}
+
+/* Card login */
+.login-card {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.login-card-header {
+  text-align: center;
+  padding: 48px 32px 32px 32px;
+  background: white;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.login-logo-image {
+  max-width: 450px;
+  height: auto;
+  margin: 0 auto 32px;
+  display: block;
+}
+
+.login-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+}
+
+.login-card-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.login-card-body {
+  padding: 32px;
+  background: white;
+}
+
+.selection-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.login-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

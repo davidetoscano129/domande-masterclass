@@ -1,0 +1,52 @@
+/* ===== QUESTIONARI E LEZIONI ===== */
+
+/* Questionari organizzati per lezione */
+.questionari-by-lesson-modern {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+/* Sezione singola lezione */
+.lesson-section-modern {
+  background-color: var(--gray-50);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  border: 1px solid var(--gray-200);
+}
+
+.lesson-header-modern {
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.lesson-header-modern h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.lesson-instructor-modern {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  margin-bottom: var(--space-sm);
+  font-weight: 400;
+}
+
+.lesson-stats-modern {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* Grid questionari */
+.lesson-questionari-modern {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-md);
+}

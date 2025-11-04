@@ -1,0 +1,220 @@
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* ========================================
+   TABLET - Max Width 1024px
+   ======================================== */
+@media (max-width: 1024px) {
+  /* Tesori grid */
+  .tesori-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .tesori-logo-main {
+    font-size: 3rem;
+  }
+
+  .tesori-logo-sub {
+    font-size: 2.5rem;
+  }
+}
+
+/* ========================================
+   MOBILE - Max Width 768px
+   ======================================== */
+@media (max-width: 768px) {
+  /* Header dashboard */
+  .dashboard-header-modern {
+    padding: var(--space-md);
+    flex-direction: column;
+    gap: var(--space-md);
+    text-align: center;
+  }
+
+  .dashboard-content-modern {
+    padding: var(--space-md);
+  }
+
+  /* Tesori header */
+  .tesori-header-modern {
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  .tesori-logo-main {
+    font-size: 2rem;
+  }
+
+  .tesori-logo-sub {
+    font-size: 1.5rem;
+    margin: -5px 0 var(--space-lg) 0;
+  }
+
+  .tesori-subtitle {
+    font-size: 1rem;
+  }
+
+  /* Tesori grid - single column */
+  .tesori-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+  }
+
+  .tesoro-card-inner {
+    padding: var(--space-lg);
+    min-height: 240px;
+  }
+
+  .tesoro-instructor-image {
+    width: 60px;
+    height: 60px;
+    margin-bottom: var(--space-md);
+  }
+
+  .instructor-placeholder {
+    font-size: 1.25rem;
+  }
+
+  /* Responsive per questionari */
+  .relatore-section-modern {
+    padding: var(--space-lg);
+  }
+
+  .lesson-questionari-modern {
+    grid-template-columns: 1fr;
+  }
+
+  .questionario-card-modern {
+    padding: var(--space-md);
+  }
+
+  .lesson-header-modern h3 {
+    font-size: 1.125rem;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-xs);
+  }
+
+  .overview-progress-bar {
+    width: 250px;
+  }
+
+  .relatore-header-modern h2 {
+    font-size: 1.5rem;
+  }
+
+  /* Responsive per componenti relatore */
+  .nav-container {
+    padding: 0 var(--space-md);
+    flex-direction: column;
+  }
+
+  .nav-btn-modern {
+    padding: var(--space-md);
+    justify-content: center;
+    border-bottom: none;
+    border-right: 3px solid transparent;
+  }
+
+  .nav-btn-modern.active {
+    border-right-color: var(--brand-blue);
+    border-bottom-color: transparent;
+  }
+
+  .relatore-content {
+    padding: var(--space-md);
+  }
+
+  .tab-content-modern {
+    padding: var(--space-lg);
+  }
+
+  .section-header-modern {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-md);
+  }
+
+  .form-row-modern {
+    flex-direction: column;
+  }
+
+  .items-grid-modern {
+    grid-template-columns: 1fr;
+  }
+
+  .item-card-modern {
+    padding: var(--space-md);
+  }
+
+  /* Login page mobile */
+  .login-page {
+    padding: var(--spacing-md);
+  }
+
+  .login-logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .logo-main {
+    font-size: 2.5rem;
+  }
+
+  .logo-sub {
+    font-size: 2rem;
+  }
+
+  .login-card-title {
+    font-size: 1.25rem;
+  }
+
+  .login-card {
+    max-width: 100%;
+  }
+
+  .option-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+
+  /* Users grid mobile */
+  .users-grid-modern {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================
+   SMALL MOBILE - Max Width 480px
+   ======================================== */
+@media (max-width: 480px) {
+  .tesori-logo-main {
+    font-size: 1.5rem;
+  }
+
+  .tesori-logo-sub {
+    font-size: 1.25rem;
+  }
+
+  .logo-main {
+    font-size: 2rem;
+  }
+
+  .logo-sub {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-header-modern {
+    padding: var(--space-sm);
+  }
+
+  .dashboard-content-modern {
+    padding: var(--space-sm);
+  }
+
+  .tesori-header-modern {
+    padding: var(--space-lg) var(--space-sm);
+  }
+}

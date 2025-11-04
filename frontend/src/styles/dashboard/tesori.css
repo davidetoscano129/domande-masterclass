@@ -1,0 +1,75 @@
+/* ===== AREA TESORI (DASHBOARD UTENTE) ===== */
+
+/* Header principale "I Tesori dell'Impresa" */
+.tesori-header-modern {
+  background-color: var(--white);
+  text-align: center;
+  padding: var(--space-2xl);
+  margin-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.tesori-logo-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Logo principale nella dashboard - stesso stile del login */
+.tesori-logo-main {
+  font-family: "Playfair Display", serif;
+  font-size: 4rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  margin: 0;
+  line-height: 1;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.tesori-logo-main span {
+  display: inline-block;
+}
+
+.tesori-logo-sub {
+  font-family: "Playfair Display", serif;
+  font-size: 3rem;
+  font-weight: 400;
+  font-style: italic;
+  margin: -10px 0 var(--space-xl) 0;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-align: center;
+}
+
+.tesori-logo-impresa {
+  font-family: "Playfair Display", serif;
+  font-weight: 900;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.tesori-subtitle {
+  font-size: 1.125rem;
+  color: var(--gray-600);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.area-highlight {
+  background-color: var(--brand-yellow);
+  color: var(--gray-900);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+
+/* Grid relatori */
+.tesori-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xl);
+  padding: var(--space-xl) 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}

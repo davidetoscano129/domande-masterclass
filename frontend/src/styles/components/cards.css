@@ -1,0 +1,396 @@
+/* ===== CARD COMPONENTS ===== */
+
+/* Card base moderna */
+.item-card-modern {
+  background-color: var(--white);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  border: 1px solid var(--gray-200);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--gray-300);
+}
+
+.card-header-modern {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.card-content-modern {
+  flex: 1;
+  margin-bottom: var(--space-md);
+}
+
+.card-footer-modern {
+  border-top: 1px solid var(--gray-100);
+  padding-top: var(--space-md);
+}
+
+/* Card relatori/tesori */
+.tesoro-card-modern {
+  background-color: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+
+.tesoro-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--gray-300);
+}
+
+.tesoro-card-inner {
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 280px;
+}
+
+.tesoro-instructor-image {
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--space-lg);
+}
+
+.instructor-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  border: 2px solid var(--gray-200);
+}
+
+.tesoro-blue .instructor-placeholder {
+  background-color: var(--brand-blue);
+  color: var(--white);
+  border-color: var(--brand-blue);
+}
+
+.tesoro-yellow .instructor-placeholder {
+  background-color: var(--brand-yellow);
+  color: var(--gray-900);
+  border-color: var(--brand-yellow);
+}
+
+.tesoro-content-modern {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.tesoro-title-modern {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-sm);
+  line-height: 1.3;
+}
+
+.tesoro-instructor-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  margin-bottom: var(--space-lg);
+}
+
+.tesoro-progress-section {
+  margin-bottom: var(--space-lg);
+}
+
+/* Card "In arrivo" */
+.tesoro-coming-soon-card {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.tesoro-coming-soon-card:hover {
+  transform: none;
+}
+
+.coming-soon-badge {
+  background-color: var(--gray-200);
+  color: var(--gray-600);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* Card questionari */
+.questionario-card-modern {
+  background-color: var(--white);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  border: 1px solid var(--gray-200);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.questionario-card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--gray-300);
+}
+
+.questionario-card-modern .questionario-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.questionario-card-modern .questionario-description {
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: 1.4;
+}
+
+.questionario-status-modern {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-md);
+}
+
+.status-modern {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius);
+}
+
+.status-modern.completed {
+  background-color: var(--brand-green);
+  color: var(--white);
+}
+
+.status-modern.pending {
+  background-color: var(--brand-yellow);
+  color: var(--gray-900);
+}
+
+.questionario-content-modern {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.questionario-content-modern h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-sm);
+  line-height: 1.4;
+}
+
+.questionario-content-modern p {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  line-height: 1.5;
+  margin-bottom: var(--space-lg);
+  flex: 1;
+}
+
+.questionario-actions-modern {
+  display: flex;
+  justify-content: center;
+}
+
+.questionario-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.questionario-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* Card utenti */
+.user-card-modern {
+  background-color: var(--white);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  border: 1px solid var(--gray-200);
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--gray-300);
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-xs);
+}
+
+.user-id {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  margin: 0;
+  font-weight: 400;
+}
+
+.user-actions {
+  margin-left: var(--space-md);
+}
+
+/* Lezione cards */
+.lesson-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-sm);
+  line-height: 1.4;
+}
+
+.lesson-description {
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: var(--space-md);
+}
+
+.lesson-meta {
+  display: flex;
+  align-items: center;
+}
+
+/* Items Grid and Cards compatibility */
+.items-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.item-card-modern {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.item-card-modern:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+.click-hint-modern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-blue);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Login option cards */
+.login-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.login-option-btn:hover {
+  border-color: #5b8def;
+  box-shadow: 0 4px 12px rgba(91, 141, 239, 0.15);
+  transform: translateY(-2px);
+}
+
+.login-option-relatore:hover {
+  border-color: #5b8def;
+}
+
+.login-option-utente:hover {
+  border-color: #f59e0b;
+}
+
+.option-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.option-avatar-relatore {
+  background: #5b8def;
+}
+
+.option-avatar-utente {
+  background: #f59e0b;
+}
+
+.option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.option-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: 0.5px;
+}
+
+.option-subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
+}

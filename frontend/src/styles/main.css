@@ -1,0 +1,28 @@
+/* SISTEMA DESIGN PULITO - I TESORI dell'IMPRESA */
+/* File principale che importa tutti i moduli CSS */
+
+/* === BASE === */
+@import "./base/variables.css";
+@import "./base/reset.css";
+
+/* === COMPONENTS === */
+@import "./components/buttons.css";
+@import "./components/cards.css";
+@import "./components/forms.css";
+@import "./components/loading.css";
+
+/* === LAYOUTS === */
+@import "./layouts/dashboard.css";
+@import "./layouts/header.css";
+
+/* === AUTH === */
+@import "./auth/login.css";
+
+/* === DASHBOARD === */
+@import "./dashboard/tesori.css";
+@import "./dashboard/relatore.css";
+@import "./dashboard/lezioni.css";
+@import "./dashboard/utenti.css";
+
+/* === UTILS === */
+@import "./utils/responsive.css";
