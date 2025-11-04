@@ -121,46 +121,73 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
   };
 
   return (
-    <div>
-      <h3>{questionario ? "Modifica Questionario" : "Nuovo Questionario"}</h3>
+    <div className="form-card-modern">
+      <div className="form-header">
+        <h3>{questionario ? "Modifica Questionario" : "Nuovo Questionario"}</h3>
+        <p>
+          Compila tutti i campi per {questionario ? "modificare" : "creare"} il
+          questionario
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Titolo questionario"
-          value={formData.titolo}
-          onChange={(e) => setFormData({ ...formData, titolo: e.target.value })}
-          required
-        />
+      <form onSubmit={handleSubmit} className="form-modern">
+        <div className="input-group">
+          <label>Titolo questionario</label>
+          <input
+            type="text"
+            placeholder="Titolo questionario"
+            value={formData.titolo}
+            onChange={(e) =>
+              setFormData({ ...formData, titolo: e.target.value })
+            }
+            required
+            className="input-modern"
+          />
+        </div>
 
-        <textarea
-          placeholder="Descrizione"
-          value={formData.descrizione}
-          onChange={(e) =>
-            setFormData({ ...formData, descrizione: e.target.value })
-          }
-          rows={3}
-        />
+        <div className="input-group">
+          <label>Descrizione</label>
+          <textarea
+            placeholder="Descrizione"
+            value={formData.descrizione}
+            onChange={(e) =>
+              setFormData({ ...formData, descrizione: e.target.value })
+            }
+            rows={3}
+            className="textarea-modern"
+          />
+        </div>
 
-        <select
-          value={formData.lezione_id}
-          onChange={(e) =>
-            setFormData({ ...formData, lezione_id: e.target.value })
-          }
-          required
+        <div className="input-group">
+          <label>Seleziona lezione</label>
+          <select
+            value={formData.lezione_id}
+            onChange={(e) =>
+              setFormData({ ...formData, lezione_id: e.target.value })
+            }
+            required
+            className="input-modern"
+          >
+            <option value="">Seleziona lezione</option>
+            {lezioni.map((lezione) => (
+              <option key={lezione.id} value={lezione.id}>
+                {lezione.titolo}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div
+          className="questions-section"
+          style={{ marginTop: "var(--space-lg)" }}
         >
-          <option value="">Seleziona lezione</option>
-          {lezioni.map((lezione) => (
-            <option key={lezione.id} value={lezione.id}>
-              {lezione.titolo}
-            </option>
-          ))}
-        </select>
-
-        <div>
-          <div>
+          <div className="section-header-modern">
             <h4>Domande</h4>
-            <button type="button" onClick={addQuestion}>
+            <button
+              type="button"
+              onClick={addQuestion}
+              className="btn-small-modern btn-view"
+            >
               + Aggiungi Domanda
             </button>
           </div>
@@ -183,11 +210,15 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
           ))}
         </div>
 
-        <div>
-          <button type="button" onClick={onCancel}>
+        <div className="form-actions">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="btn-secondary-modern"
+          >
             Annulla
           </button>
-          <button type="submit">
+          <button type="submit" className="btn-primary-modern">
             {questionario ? "Aggiorna" : "Crea"} Questionario
           </button>
         </div>
@@ -220,68 +251,130 @@ function QuestionEditor({
   const needsOptions = ["multiple_choice", "checkbox"].includes(question.type);
 
   return (
-    <div>
-      <div>
-        <span>Domanda {index + 1}</span>
-        <button type="button" onClick={onDelete}>
+    <div
+      className="relatore-card-modern"
+      style={{ marginBottom: "var(--space-md)" }}
+    >
+      <div className="relatore-card-header">
+        <span className="relatore-card-number">Domanda {index + 1}</span>
+        <button
+          type="button"
+          onClick={onDelete}
+          className="btn-small-modern btn-delete"
+        >
           Elimina
         </button>
       </div>
 
-      <input
-        type="text"
-        placeholder="Scrivi la domanda..."
-        value={question.question}
-        onChange={(e) => onUpdate("question", e.target.value)}
-        required
-      />
-
-      <div>
-        <select
-          value={question.type}
-          onChange={(e) => onUpdate("type", e.target.value)}
-        >
-          {questionTypes.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.label}
-            </option>
-          ))}
-        </select>
-
-        <label>
+      <div className="relatore-card-content">
+        <div className="input-group">
           <input
-            type="checkbox"
-            checked={question.required}
-            onChange={(e) => onUpdate("required", e.target.checked)}
+            type="text"
+            placeholder="Scrivi la domanda..."
+            value={question.question}
+            onChange={(e) => onUpdate("question", e.target.value)}
+            required
+            className="input-modern"
           />
-          Obbligatoria
-        </label>
-      </div>
+        </div>
 
-      {needsOptions && (
-        <div>
-          <div>
-            <span>Opzioni:</span>
-            <button type="button" onClick={onAddOption}>
-              + Opzione
-            </button>
+        <div className="form-row-modern">
+          <div className="input-group flex-2">
+            <select
+              value={question.type}
+              onChange={(e) => onUpdate("type", e.target.value)}
+              className="input-modern"
+            >
+              {questionTypes.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {(question.options || []).map((option, optIndex) => (
-            <div key={option.id || optIndex}>
-              <input
-                type="text"
-                placeholder={`Opzione ${optIndex + 1}`}
-                value={option.text}
-                onChange={(e) => onUpdateOption(option.id, e.target.value)}
-              />
-              <button type="button" onClick={() => onDeleteOption(option.id)}>
-                ×
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--space-xs)",
+              padding: "var(--space-sm)",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={question.required}
+              onChange={(e) => onUpdate("required", e.target.checked)}
+            />
+            Obbligatoria
+          </label>
+        </div>
+
+        {needsOptions && (
+          <div
+            className="options-section"
+            style={{
+              marginTop: "var(--space-md)",
+              padding: "var(--space-md)",
+              backgroundColor: "var(--gray-50)",
+              borderRadius: "var(--radius-sm)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "var(--space-sm)",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.875rem",
+                  fontWeight: "600",
+                  color: "var(--gray-700)",
+                }}
+              >
+                Opzioni:
+              </span>
+              <button
+                type="button"
+                onClick={onAddOption}
+                className="btn-small-modern btn-view"
+              >
+                + Opzione
               </button>
             </div>
-          ))}
-        </div>
-      )}
+
+            {(question.options || []).map((option, optIndex) => (
+              <div
+                key={option.id || optIndex}
+                style={{
+                  display: "flex",
+                  gap: "var(--space-xs)",
+                  marginBottom: "var(--space-xs)",
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder={`Opzione ${optIndex + 1}`}
+                  value={option.text}
+                  onChange={(e) => onUpdateOption(option.id, e.target.value)}
+                  className="input-modern"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => onDeleteOption(option.id)}
+                  className="btn-small-modern btn-delete"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

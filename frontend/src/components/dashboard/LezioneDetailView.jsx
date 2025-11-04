@@ -52,56 +52,80 @@ function LezioneDetailView({ lezione, questionari, loading, user, onBack }) {
   };
 
   return (
-    <div className="lezione-detail">
-      <div className="back-button-container">
-        <button onClick={onBack} className="btn-back-prominent">
+    <div className="tab-section-modern">
+      <div className="section-header-modern">
+        <button
+          onClick={onBack}
+          className="btn-small-modern btn-view"
+          style={{ marginBottom: "var(--space-md)" }}
+        >
           ← Torna alle lezioni
         </button>
       </div>
 
-      <div className="lezione-header">
-        <div className="lezione-info">
-          <h2>{lezione.titolo}</h2>
-          <p>{lezione.descrizione}</p>
-          <small>
-            Creata: {new Date(lezione.created_at).toLocaleDateString()}
-          </small>
+      <div
+        className="relatore-card-modern"
+        style={{ marginBottom: "var(--space-lg)" }}
+      >
+        <div className="relatore-card-content">
+          <h2 className="relatore-card-title" style={{ fontSize: "1.5rem" }}>
+            {lezione.titolo}
+          </h2>
+          <p className="relatore-card-description">{lezione.descrizione}</p>
+          <div className="relatore-card-meta">
+            <span>
+              Creata: {new Date(lezione.created_at).toLocaleDateString("it-IT")}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="questionari-section">
-        <h3>Questionari associati ({questionari.length})</h3>
+      <div className="content-section-modern">
+        <div
+          className="section-header-modern"
+          style={{ marginBottom: "var(--space-md)" }}
+        >
+          <h3>Questionari associati ({questionari.length})</h3>
+        </div>
 
         {loading ? (
-          <div className="loading-message">
+          <div className="empty-state-modern">
             <p>Caricamento questionari...</p>
           </div>
         ) : questionari.length === 0 ? (
-          <div className="empty-state">
-            <p>Nessun questionario associato a questa lezione.</p>
+          <div className="empty-state-modern">
+            <h3>Nessun questionario associato</h3>
             <p>Vai nella sezione "Questionari" per crearne uno nuovo.</p>
           </div>
         ) : (
-          <div className="questionari-grid">
+          <div className="items-grid-relatore">
             {questionari.map((questionario) => (
-              <div key={questionario.id} className="questionario-card">
-                <h4>{questionario.titolo}</h4>
-                <p>{questionario.descrizione}</p>
-                <small>
-                  Creato:{" "}
-                  {new Date(questionario.created_at).toLocaleDateString()}
-                </small>
+              <div key={questionario.id} className="relatore-card-modern">
+                <div className="relatore-card-content">
+                  <h4 className="relatore-card-title">{questionario.titolo}</h4>
+                  <p className="relatore-card-description">
+                    {questionario.descrizione}
+                  </p>
+                  <div className="relatore-card-meta">
+                    <span>
+                      Creato:{" "}
+                      {new Date(questionario.created_at).toLocaleDateString(
+                        "it-IT"
+                      )}
+                    </span>
+                  </div>
+                </div>
 
-                <div className="questionario-actions">
+                <div className="relatore-card-footer">
                   <button
                     onClick={() => handleViewResponses(questionario)}
-                    className="btn-small btn-responses"
+                    className="btn-small-modern btn-view"
                   >
                     Risposte
                   </button>
                   <button
                     onClick={() => handleShare(questionario)}
-                    className="btn-small btn-share"
+                    className="btn-small-modern btn-share"
                   >
                     Condividi
                   </button>

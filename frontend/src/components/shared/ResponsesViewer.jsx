@@ -98,13 +98,15 @@ function ResponsesViewer({ questionario, onClose }) {
 
   if (loading) {
     return (
-      <div>
-        <div>
-          <div>
+      <div className="modal-overlay">
+        <div className="modal-content-large">
+          <div className="modal-header">
             <h2>Risposte - {questionario.titolo}</h2>
-            <button onClick={onClose}>×</button>
+            <button onClick={onClose} className="btn-close">
+              ×
+            </button>
           </div>
-          <div>
+          <div className="empty-state-modern">
             <p>Caricamento risposte...</p>
           </div>
         </div>
@@ -113,107 +115,269 @@ function ResponsesViewer({ questionario, onClose }) {
   }
 
   return (
-    <div>
-      <div>
-        <div>
+    <div className="modal-overlay">
+      <div className="modal-content-large">
+        <div className="modal-header">
           <h2>Risposte - {questionario.titolo}</h2>
-          <div>
-            <div>
-              <h4>Esporta Risposte Questionario</h4>
-              <div>
+          <div
+            style={{
+              display: "flex",
+              gap: "var(--space-md)",
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-end",
+              }}
+            >
+              <h4
+                style={{
+                  margin: "0 0 var(--space-xs) 0",
+                  fontSize: "0.875rem",
+                  color: "var(--gray-600)",
+                }}
+              >
+                Esporta Risposte Questionario
+              </h4>
+              <div style={{ display: "flex", gap: "var(--space-xs)" }}>
                 <button
                   onClick={() => alert("Export non ancora implementato")}
                   title="Esporta in formato Word"
+                  className="btn-small-modern btn-view"
                 >
                   Word
                 </button>
                 <button
                   onClick={() => alert("Export non ancora implementato")}
                   title="Esporta in formato Excel"
+                  className="btn-small-modern btn-view"
                 >
                   Excel
                 </button>
                 <button
                   onClick={() => alert("Export non ancora implementato")}
                   title="Esporta in formato CSV"
+                  className="btn-small-modern btn-view"
                 >
                   CSV
                 </button>
                 <button
                   onClick={() => alert("Export non ancora implementato")}
                   title="Esporta in formato PDF"
+                  className="btn-small-modern btn-view"
                 >
                   PDF
                 </button>
                 <button
                   onClick={() => alert("Export non ancora implementato")}
                   title="Esporta in formato JSON"
+                  className="btn-small-modern btn-view"
                 >
                   JSON
                 </button>
               </div>
             </div>
-            <button onClick={onClose}>×</button>
+            <button onClick={onClose} className="btn-close">
+              ×
+            </button>
           </div>
         </div>
 
-        <div>
-          <button onClick={() => setActiveTab("overview")}>Panoramica</button>
-          <button onClick={() => setActiveTab("analysis")}>
+        <div
+          className="modal-tabs"
+          style={{
+            display: "flex",
+            gap: "var(--space-sm)",
+            padding: "var(--space-md)",
+            borderBottom: "1px solid var(--gray-200)",
+            backgroundColor: "var(--gray-50)",
+          }}
+        >
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`btn-small-modern ${
+              activeTab === "overview" ? "btn-view" : "btn-share"
+            }`}
+          >
+            Panoramica
+          </button>
+          <button
+            onClick={() => setActiveTab("analysis")}
+            className={`btn-small-modern ${
+              activeTab === "analysis" ? "btn-view" : "btn-share"
+            }`}
+          >
             Analisi Dettagliata
           </button>
-          <button onClick={() => setActiveTab("details")}>
+          <button
+            onClick={() => setActiveTab("details")}
+            className={`btn-small-modern ${
+              activeTab === "details" ? "btn-view" : "btn-share"
+            }`}
+          >
             Risposte Individuali
           </button>
         </div>
 
-        <div>
+        <div style={{ padding: "var(--space-lg)" }}>
           {activeTab === "overview" && (
             <div>
               {statistics && (
-                <div>
-                  <h3>Statistiche Generali</h3>
-                  <div>
-                    <div>
-                      <span>{statistics.totale_risposte}</span>
-                      <span>Risposte Totali</span>
-                    </div>
-                    <div>
-                      <span>{statistics.risposte_completate}</span>
-                      <span>Completate</span>
-                    </div>
-                    <div>
-                      <span>{formatTime(statistics.tempo_medio)}</span>
-                      <span>Tempo Medio</span>
+                <div
+                  className="relatore-card-modern"
+                  style={{ marginBottom: "var(--space-lg)" }}
+                >
+                  <div className="relatore-card-content">
+                    <h3 className="relatore-card-title">
+                      Statistiche Generali
+                    </h3>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fit, minmax(200px, 1fr))",
+                        gap: "var(--space-md)",
+                        marginTop: "var(--space-md)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          padding: "var(--space-md)",
+                          backgroundColor: "var(--gray-50)",
+                          borderRadius: "var(--radius-sm)",
+                          textAlign: "center",
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "block",
+                            fontSize: "2rem",
+                            fontWeight: "700",
+                            color: "var(--brand-blue)",
+                          }}
+                        >
+                          {statistics.totale_risposte}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "0.875rem",
+                            color: "var(--gray-600)",
+                          }}
+                        >
+                          Risposte Totali
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          padding: "var(--space-md)",
+                          backgroundColor: "var(--gray-50)",
+                          borderRadius: "var(--radius-sm)",
+                          textAlign: "center",
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "block",
+                            fontSize: "2rem",
+                            fontWeight: "700",
+                            color: "var(--brand-green)",
+                          }}
+                        >
+                          {statistics.risposte_completate}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "0.875rem",
+                            color: "var(--gray-600)",
+                          }}
+                        >
+                          Completate
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          padding: "var(--space-md)",
+                          backgroundColor: "var(--gray-50)",
+                          borderRadius: "var(--radius-sm)",
+                          textAlign: "center",
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "block",
+                            fontSize: "2rem",
+                            fontWeight: "700",
+                            color: "var(--gray-700)",
+                          }}
+                        >
+                          {formatTime(statistics.tempo_medio)}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "0.875rem",
+                            color: "var(--gray-600)",
+                          }}
+                        >
+                          Tempo Medio
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
               {analysis && (
-                <div>
-                  <h3>Panoramica Rapida</h3>
-                  <div>
-                    {analysis.questions.map((q) => (
-                      <div key={q.questionId}>
-                        <h4>{q.question}</h4>
-                        <div>
-                          <span>
-                            Risposte: {q.responseRate}% ({q.answeredResponses}/
-                            {q.totalResponses})
-                          </span>
-                          {q.type === "multiple_choice" &&
-                            q.analysis.distribution[0] && (
-                              <span>
-                                Più votata: "{q.analysis.distribution[0].choice}
-                                " ({q.analysis.distribution[0].percentage}%)
-                              </span>
+                <div className="relatore-card-modern">
+                  <div className="relatore-card-content">
+                    <h3 className="relatore-card-title">Panoramica Rapida</h3>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "var(--space-md)",
+                        marginTop: "var(--space-md)",
+                      }}
+                    >
+                      {analysis.questions.map((q) => (
+                        <div
+                          key={q.questionId}
+                          style={{
+                            padding: "var(--space-md)",
+                            backgroundColor: "var(--gray-50)",
+                            borderRadius: "var(--radius-sm)",
+                            borderLeft: "3px solid var(--brand-blue)",
+                          }}
+                        >
+                          <h4
+                            style={{
+                              margin: "0 0 var(--space-sm) 0",
+                              color: "var(--gray-900)",
+                            }}
+                          >
+                            {q.question}
+                          </h4>
+                          <div className="relatore-card-meta">
+                            <span>
+                              Risposte: {q.responseRate}% ({q.answeredResponses}
+                              /{q.totalResponses})
+                            </span>
+                            {q.type === "multiple_choice" &&
+                              q.analysis.distribution[0] && (
+                                <span>
+                                  Più votata: "
+                                  {q.analysis.distribution[0].choice}" (
+                                  {q.analysis.distribution[0].percentage}%)
+                                </span>
+                              )}
+                            {q.type === "rating" && (
+                              <span>Media: {q.analysis.average}/10</span>
                             )}
-                          {q.type === "rating" && (
-                            <span>Media: {q.analysis.average}/10</span>
-                          )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -224,40 +388,103 @@ function ResponsesViewer({ questionario, onClose }) {
             <div>
               {!showDetailedView ? (
                 <div>
-                  <h3>Analisi Dettagliata per Domanda</h3>
+                  <h3 style={{ marginBottom: "var(--space-lg)" }}>
+                    Analisi Dettagliata per Domanda
+                  </h3>
                   {analysis.questions.map((questionData) => (
-                    <div key={questionData.questionId}>
-                      <div>
-                        <h4>{questionData.question}</h4>
-                        <div>
-                          <span>{questionData.type}</span>
-                          <span>{questionData.responseRate}% risposto</span>
+                    <div
+                      key={questionData.questionId}
+                      className="relatore-card-modern"
+                      style={{ marginBottom: "var(--space-md)" }}
+                    >
+                      <div className="relatore-card-header">
+                        <h4 style={{ margin: 0, flex: 1 }}>
+                          {questionData.question}
+                        </h4>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "var(--space-sm)",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span className="badge-success">
+                            {questionData.type}
+                          </span>
+                          <span className="relatore-card-number">
+                            {questionData.responseRate}% risposto
+                          </span>
                           <button
                             onClick={() =>
                               handleShowUserResponses(questionData.questionId)
                             }
                             title="Vedi chi ha risposto cosa"
+                            className="btn-small-modern btn-view"
                           >
                             Dettagli utenti
                           </button>
                         </div>
                       </div>
-                      <div>
+                      <div className="relatore-card-content">
                         {questionData.type === "multiple_choice" && (
                           <div>
-                            <h5>Distribuzione Scelte:</h5>
+                            <h5
+                              style={{
+                                margin: "0 0 var(--space-md) 0",
+                                fontSize: "0.875rem",
+                                fontWeight: "600",
+                                color: "var(--gray-700)",
+                              }}
+                            >
+                              Distribuzione Scelte:
+                            </h5>
                             {questionData.analysis.distribution.map(
                               (item, index) => (
-                                <div key={index}>
-                                  <div>
-                                    <span>{item.choice}</span>
-                                    <span>
+                                <div
+                                  key={index}
+                                  style={{ marginBottom: "var(--space-sm)" }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      marginBottom: "var(--space-xs)",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        fontSize: "0.875rem",
+                                        color: "var(--gray-700)",
+                                      }}
+                                    >
+                                      {item.choice}
+                                    </span>
+                                    <span
+                                      style={{
+                                        fontSize: "0.875rem",
+                                        fontWeight: "600",
+                                        color: "var(--brand-blue)",
+                                      }}
+                                    >
                                       {item.count} voti ({item.percentage}%)
                                     </span>
                                   </div>
-                                  <div>
+                                  <div
+                                    style={{
+                                      width: "100%",
+                                      height: "8px",
+                                      backgroundColor: "var(--gray-200)",
+                                      borderRadius: "var(--radius-sm)",
+                                      overflow: "hidden",
+                                    }}
+                                  >
                                     <div
-                                      style={{ width: `${item.percentage}%` }}
+                                      style={{
+                                        width: `${item.percentage}%`,
+                                        height: "100%",
+                                        backgroundColor: "var(--brand-blue)",
+                                        transition: "width 0.3s ease",
+                                      }}
                                     ></div>
                                   </div>
                                 </div>
@@ -267,24 +494,87 @@ function ResponsesViewer({ questionario, onClose }) {
                         )}
                         {questionData.type === "rating" && (
                           <div>
-                            <div>
+                            <div
+                              style={{
+                                padding: "var(--space-md)",
+                                backgroundColor: "var(--brand-blue)",
+                                color: "var(--white)",
+                                borderRadius: "var(--radius-sm)",
+                                textAlign: "center",
+                                marginBottom: "var(--space-md)",
+                              }}
+                            >
                               <div>
-                                <span>{questionData.analysis.average}</span>
-                                <span>Media</span>
+                                <span
+                                  style={{
+                                    fontSize: "2.5rem",
+                                    fontWeight: "700",
+                                    display: "block",
+                                  }}
+                                >
+                                  {questionData.analysis.average}
+                                </span>
+                                <span style={{ fontSize: "0.875rem" }}>
+                                  Media
+                                </span>
                               </div>
                             </div>
-                            <h5>Distribuzione Voti:</h5>
+                            <h5
+                              style={{
+                                margin: "0 0 var(--space-md) 0",
+                                fontSize: "0.875rem",
+                                fontWeight: "600",
+                                color: "var(--gray-700)",
+                              }}
+                            >
+                              Distribuzione Voti:
+                            </h5>
                             {questionData.analysis.distribution.map((item) => (
-                              <div key={item.rating}>
-                                <div>
-                                  <span>{item.rating} ★</span>
-                                  <span>
+                              <div
+                                key={item.rating}
+                                style={{ marginBottom: "var(--space-sm)" }}
+                              >
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    marginBottom: "var(--space-xs)",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: "0.875rem",
+                                      color: "var(--gray-700)",
+                                    }}
+                                  >
+                                    {item.rating} ★
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: "0.875rem",
+                                      fontWeight: "600",
+                                      color: "var(--brand-blue)",
+                                    }}
+                                  >
                                     {item.count} voti ({item.percentage}%)
                                   </span>
                                 </div>
-                                <div>
+                                <div
+                                  style={{
+                                    width: "100%",
+                                    height: "8px",
+                                    backgroundColor: "var(--gray-200)",
+                                    borderRadius: "var(--radius-sm)",
+                                    overflow: "hidden",
+                                  }}
+                                >
                                   <div
-                                    style={{ width: `${item.percentage}%` }}
+                                    style={{
+                                      width: `${item.percentage}%`,
+                                      height: "100%",
+                                      backgroundColor: "var(--brand-green)",
+                                      transition: "width 0.3s ease",
+                                    }}
                                   ></div>
                                 </div>
                               </div>
@@ -294,7 +584,10 @@ function ResponsesViewer({ questionario, onClose }) {
                         {(questionData.type === "text" ||
                           questionData.type === "textarea") && (
                           <div>
-                            <div>
+                            <div
+                              className="relatore-card-meta"
+                              style={{ marginBottom: "var(--space-md)" }}
+                            >
                               <span>
                                 Risposte: {questionData.analysis.responses}{" "}
                                 risposte testuali
@@ -306,10 +599,32 @@ function ResponsesViewer({ questionario, onClose }) {
                             </div>
                             {questionData.analysis.samples.length > 0 && (
                               <div>
-                                <h5>Esempi di risposte:</h5>
+                                <h5
+                                  style={{
+                                    margin: "0 0 var(--space-sm) 0",
+                                    fontSize: "0.875rem",
+                                    fontWeight: "600",
+                                    color: "var(--gray-700)",
+                                  }}
+                                >
+                                  Esempi di risposte:
+                                </h5>
                                 {questionData.analysis.samples.map(
                                   (sample, index) => (
-                                    <div key={index}>"{sample}"</div>
+                                    <div
+                                      key={index}
+                                      style={{
+                                        padding: "var(--space-sm)",
+                                        backgroundColor: "var(--gray-50)",
+                                        borderRadius: "var(--radius-sm)",
+                                        marginBottom: "var(--space-xs)",
+                                        fontSize: "0.875rem",
+                                        color: "var(--gray-700)",
+                                        fontStyle: "italic",
+                                      }}
+                                    >
+                                      "{sample}"
+                                    </div>
                                   )
                                 )}
                               </div>
@@ -333,23 +648,39 @@ function ResponsesViewer({ questionario, onClose }) {
           {activeTab === "details" && (
             <div>
               <div>
-                <h3>Risposte Individuali ({responses.length})</h3>
+                <h3 style={{ marginBottom: "var(--space-lg)" }}>
+                  Risposte Individuali ({responses.length})
+                </h3>
                 {responses.length === 0 ? (
-                  <p>Nessuna risposta ancora ricevuta.</p>
+                  <div className="empty-state-modern">
+                    <p>Nessuna risposta ancora ricevuta.</p>
+                  </div>
                 ) : (
-                  <div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "var(--space-md)",
+                    }}
+                  >
                     {responses.map((response) => (
-                      <div key={response.id}>
-                        <div>
-                          <h4>{response.utente_nome}</h4>
-                          <div>
+                      <div key={response.id} className="relatore-card-modern">
+                        <div className="relatore-card-header">
+                          <h4 style={{ margin: 0 }}>{response.utente_nome}</h4>
+                          <div className="relatore-card-meta">
                             <span>
                               Data: {formatDate(response.submitted_at)}
                             </span>
                             <span>
                               Tempo: {formatTime(response.tempo_impiegato)}
                             </span>
-                            <span>
+                            <span
+                              className={
+                                response.completata
+                                  ? "badge-success"
+                                  : "badge-elimina"
+                              }
+                            >
                               {response.completata
                                 ? "Completata"
                                 : "Incompleta"}

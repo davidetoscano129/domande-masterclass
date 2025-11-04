@@ -231,77 +231,121 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
   const globalResponses = getGlobalResponses();
 
   return (
-    <div>
-      <div>
-        <button onClick={onBack}>← Torna alla lista utenti</button>
+    <div className="tab-section-modern">
+      <div className="section-header-modern">
+        <button onClick={onBack} className="btn-small-modern btn-view">
+          ← Torna alla lista utenti
+        </button>
       </div>
 
-      <div>
-        <h2>Risposte di {utente.nome}</h2>
-        <p>
-          Totale questionari compilati: <strong>{risposte.length}</strong>
-        </p>
+      <div
+        className="relatore-card-modern"
+        style={{ marginBottom: "var(--space-lg)" }}
+      >
+        <div className="relatore-card-content">
+          <h2 className="relatore-card-title">Risposte di {utente.nome}</h2>
+          <p className="relatore-card-description">
+            Totale questionari compilati: <strong>{risposte.length}</strong>
+          </p>
+        </div>
 
         {/* Bottoni di esportazione */}
-        <div>
-          <h5>Esporta tutte le risposte:</h5>
-          <div>
+        <div
+          className="relatore-card-footer"
+          style={{ flexDirection: "column", alignItems: "flex-start" }}
+        >
+          <h5 style={{ margin: "0 0 var(--space-sm) 0", fontSize: "0.875rem" }}>
+            Esporta tutte le risposte:
+          </h5>
+          <div
+            style={{
+              display: "flex",
+              gap: "var(--space-xs)",
+              flexWrap: "wrap",
+            }}
+          >
             <button
               onClick={() => handleUserExport("word")}
               title="Esporta in formato Word"
+              className="btn-small-modern btn-view"
             >
               Word
             </button>
             <button
               onClick={() => handleUserExport("excel")}
               title="Esporta in formato Excel"
+              className="btn-small-modern btn-view"
             >
               Excel
             </button>
             <button
               onClick={() => handleUserExport("csv")}
               title="Esporta in formato CSV"
+              className="btn-small-modern btn-view"
             >
               CSV
             </button>
             <button
               onClick={() => handleUserExport("pdf")}
               title="Esporta in formato PDF"
+              className="btn-small-modern btn-view"
             >
               PDF
             </button>
             <button
               onClick={() => handleUserExport("json")}
               title="Esporta in formato JSON"
+              className="btn-small-modern btn-view"
             >
               JSON
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Toggle per modalità visualizzazione */}
-        <div>
-          <button onClick={() => setViewMode("categorized")}>
+      {/* Toggle per modalità visualizzazione */}
+      <div
+        className="section-header-modern"
+        style={{ marginBottom: "var(--space-md)" }}
+      >
+        <div style={{ display: "flex", gap: "var(--space-sm)" }}>
+          <button
+            onClick={() => setViewMode("categorized")}
+            className={`btn-small-modern ${
+              viewMode === "categorized" ? "btn-view" : "btn-share"
+            }`}
+          >
             Per Questionario
           </button>
-          <button onClick={() => setViewMode("global")}>
+          <button
+            onClick={() => setViewMode("global")}
+            className={`btn-small-modern ${
+              viewMode === "global" ? "btn-view" : "btn-share"
+            }`}
+          >
             Tutte le Risposte
           </button>
         </div>
       </div>
 
       {risposte.length === 0 ? (
-        <div>
+        <div className="empty-state-modern">
           <p>Questo utente non ha ancora compilato nessun questionario.</p>
         </div>
       ) : viewMode === "categorized" ? (
         // Vista categorizzata per questionario (esistente)
-        <div id="utente-risposte-content">
+        <div id="utente-risposte-content" className="content-section-modern">
           {risposte.map((risposta) => (
-            <div key={risposta.id}>
-              <div>
-                <h3>{risposta.questionario_titolo}</h3>
-                <div>
+            <div
+              key={risposta.id}
+              className="relatore-card-modern"
+              style={{ marginBottom: "var(--space-lg)" }}
+            >
+              <div className="relatore-card-content">
+                <h3 className="relatore-card-title">
+                  {risposta.questionario_titolo}
+                </h3>
+                <div className="relatore-card-meta">
                   <span>Lezione: {risposta.lezione_titolo}</span>
                   <span>Relatore: {risposta.relatore_nome}</span>
                   <span>

@@ -167,38 +167,49 @@ function LezioniTab({ lezioni, user, onUpdate }) {
               </p>
             </div>
           ) : (
-            <div className="items-grid-modern">
+            <div className="items-grid-relatore">
               {lezioni.map((lezione, index) => (
                 <div
                   key={lezione.id}
-                  className="item-card-modern lezione-card-modern"
+                  className="relatore-card-modern"
                   onClick={() => handleLezioneClick(lezione)}
+                  style={{ cursor: "pointer" }}
                 >
-                  <div className="card-header-modern">
-                    <div className="lesson-number">
+                  <div className="relatore-card-header">
+                    <div className="relatore-card-number">
                       #{lezione.numero || index + 1}
                     </div>
                     <button
                       onClick={(e) => handleDeleteLezione(lezione.id, e)}
-                      className="btn-delete-modern"
+                      className="btn-small-modern btn-delete"
                       title="Elimina lezione"
                     >
                       Elimina
                     </button>
                   </div>
-                  <div className="card-content-modern">
-                    <h3 className="lesson-title">{lezione.titolo}</h3>
-                    <p className="lesson-description">{lezione.descrizione}</p>
-                    <div className="lesson-meta">
-                      <span className="creation-date">
+                  <div className="relatore-card-content">
+                    <h3 className="relatore-card-title">{lezione.titolo}</h3>
+                    <p className="relatore-card-description">
+                      {lezione.descrizione}
+                    </p>
+                    <div className="relatore-card-meta">
+                      <span>
                         {new Date(lezione.created_at).toLocaleDateString(
                           "it-IT"
                         )}
                       </span>
                     </div>
                   </div>
-                  <div className="card-footer-modern">
-                    <div className="click-hint-modern">
+                  <div className="relatore-card-footer">
+                    <div
+                      className="click-hint-modern"
+                      style={{
+                        color: "var(--gray-500)",
+                        fontSize: "0.75rem",
+                        fontStyle: "italic",
+                        textAlign: "center",
+                      }}
+                    >
                       Clicca per vedere i questionari
                     </div>
                   </div>
