@@ -147,34 +147,13 @@ function UtenteDashboard({ user, onLogout }) {
         {!selectedRelatore ? (
           // Vista iniziale: lista dei relatori con materie
           <>
-            <div className="tesori-header-modern">
+            <div className="tesori-header-modern tesori-header-centered">
               <div className="tesori-logo-container">
-                <h1 className="tesori-logo-main">
-                  <span className="letter-i">I</span>{" "}
-                  <span className="letter-t1">T</span>
-                  <span className="letter-e1">E</span>
-                  <span className="letter-s">S</span>
-                  <span className="letter-o">O</span>
-                  <span className="letter-r">R</span>
-                  <span className="letter-i2">I</span>
-                </h1>
-                <h2 className="tesori-logo-sub">
-                  <span className="dell">dell'</span>{" "}
-                  <span className="tesori-logo-impresa">
-                    <span className="letter-i3">I</span>
-                    <span className="letter-m">M</span>
-                    <span className="letter-p">P</span>
-                    <span className="letter-r2">R</span>
-                    <span className="letter-e2">E</span>
-                    <span className="letter-s2">S</span>
-                    <span className="letter-a">A</span>
-                  </span>
-                </h2>
-                <p className="tesori-subtitle">
-                  Benvenuto nella tua{" "}
-                  <span className="area-highlight">Area riservata</span> qui
-                  potrai visionare tutti i contenuti degli incontri già avvenuti
-                </p>
+                <img
+                  src="/images/logo-tesoridellimpresa.png"
+                  alt="I Tesori dell'Impresa"
+                  className="tesori-logo-image"
+                />
               </div>
             </div>
             {loading ? (

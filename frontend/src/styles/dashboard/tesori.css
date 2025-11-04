@@ -2,16 +2,35 @@
 
 /* Header principale "I Tesori dell'Impresa" */
 .tesori-header-modern {
-  background-color: var(--white);
+  background-color: transparent;
   text-align: center;
-  padding: var(--space-2xl);
-  margin-bottom: var(--space-xl);
-  border-bottom: 1px solid var(--gray-200);
+  padding: 0;
+  margin-bottom: var(--space-lg);
+  border-bottom: none;
+}
+
+.tesori-header-centered {
+  padding: 0;
+  max-width: 1200px;
+  margin: 0 auto var(--space-lg) auto;
 }
 
 .tesori-logo-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
+  background-color: var(--white);
+  padding: var(--space-xl);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Logo immagine come titolo */
+.tesori-logo-image {
+  max-width: 600px;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  display: block;
 }
 
 /* Logo principale nella dashboard - stesso stile del login */
@@ -54,6 +73,12 @@
   color: var(--gray-600);
   line-height: 1.6;
   font-weight: 400;
+  text-align: center;
+}
+
+.tesori-subtitle-centered {
+  text-align: center;
+  margin: 0 auto;
 }
 
 .area-highlight {
@@ -68,8 +93,8 @@
 .tesori-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-xl);
-  padding: var(--space-xl) 0;
+  gap: var(--space-lg);
+  padding: var(--space-md) 0;
   max-width: 1200px;
   margin: 0 auto;
 }

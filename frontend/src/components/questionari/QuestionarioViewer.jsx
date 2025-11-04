@@ -81,20 +81,26 @@ function QuestionarioViewer({ questionario, user, onBack, onComplete }) {
   };
 
   return (
-    <div>
-      <header>
-        <button onClick={onBack}>← Indietro</button>
-        <div>
-          <h1>{questionario.titolo}</h1>
-          <p>{questionario.descrizione}</p>
-          <small>
+    <div className="questionario-viewer-container">
+      <header className="questionario-viewer-header">
+        <button onClick={onBack} className="btn-back-modern">
+          ← Indietro
+        </button>
+        <div className="questionario-viewer-title-section">
+          <h1 className="questionario-viewer-title">
+            Visualizzazione Questionario
+          </h1>
+          <p className="questionario-viewer-description">
+            {questionario.descrizione}
+          </p>
+          <small className="questionario-viewer-meta">
             Lezione: {questionario.lezione_titolo} -{" "}
             {questionario.relatore_nome}
           </small>
         </div>
       </header>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="questionario-viewer-form">
         {normalizedConfig.questions.map((question, index) => (
           <QuestionRenderer
             key={question.id}
@@ -107,8 +113,12 @@ function QuestionarioViewer({ questionario, user, onBack, onComplete }) {
         ))}
 
         {!isReadOnly && (
-          <div>
-            <button type="submit" disabled={loading}>
+          <div className="questionario-viewer-actions">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary-modern"
+            >
               {loading ? "Salvataggio..." : "Invia Questionario"}
             </button>
           </div>

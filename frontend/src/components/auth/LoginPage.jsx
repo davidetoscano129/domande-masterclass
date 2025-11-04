@@ -77,12 +77,6 @@ function LoginPage({ onLogin }) {
       <div className="login-card">
         {!loginType ? (
           <>
-            <div className="login-card-header">
-              <p className="login-card-subtitle">
-                Sistema di gestione questionari
-              </p>
-            </div>
-
             <div className="login-card-body">
               <h2 className="selection-title">Seleziona il tipo di accesso</h2>
               <div className="login-options">
@@ -91,7 +85,7 @@ function LoginPage({ onLogin }) {
                   className="login-option-btn login-option-relatore"
                 >
                   <div className="option-avatar option-avatar-relatore">
-                    <span>R</span>
+                    {/* Avatar senza lettera */}
                   </div>
                   <div className="option-content">
                     <span className="option-title">AREA RELATORE</span>
@@ -106,7 +100,7 @@ function LoginPage({ onLogin }) {
                   className="login-option-btn login-option-utente"
                 >
                   <div className="option-avatar option-avatar-utente">
-                    <span>U</span>
+                    {/* Avatar senza lettera */}
                   </div>
                   <div className="option-content">
                     <span className="option-title">AREA UTENTE</span>
@@ -126,9 +120,7 @@ function LoginPage({ onLogin }) {
                   loginType === "relatore" ? "logo-relatore" : "logo-utente"
                 }`}
               >
-                <span className="logo-text">
-                  {loginType === "relatore" ? "R" : "U"}
-                </span>
+                {/* Logo senza lettera */}
               </div>
               <h1 className="login-card-title">
                 {loginType === "relatore" ? "AREA RELATORE" : "AREA UTENTE"}

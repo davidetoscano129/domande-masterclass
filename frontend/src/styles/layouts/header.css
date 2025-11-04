@@ -6,9 +6,16 @@
   border-bottom: 1px solid var(--gray-200);
   padding: var(--space-lg) var(--space-xl);
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
   box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.dashboard-user-info {
+  text-align: center;
+  margin-bottom: var(--space-sm);
 }
 
 .dashboard-user-info h1 {
@@ -16,12 +23,14 @@
   font-weight: 600;
   color: var(--gray-900);
   margin-bottom: var(--space-xs);
+  text-align: center;
 }
 
 .user-subtitle {
   font-size: 0.875rem;
   color: var(--gray-500);
   font-weight: 400;
+  text-align: center;
 }
 
 .relatore-name {

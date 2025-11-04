@@ -14,6 +14,7 @@
 @import "./components/forms.css";
 @import "./components/loading.css";
 @import "./components/progress.css";
+@import "./components/questionario-viewer.css";
 
 /* === LAYOUTS === */
 @import "./layouts/dashboard.css";

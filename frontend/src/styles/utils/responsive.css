@@ -31,13 +31,31 @@
     text-align: center;
   }
 
+  .dashboard-user-info {
+    text-align: center;
+  }
+
   .dashboard-content-modern {
     padding: var(--space-md);
   }
 
   /* Tesori header */
   .tesori-header-modern {
-    padding: var(--space-xl) var(--space-md);
+    padding: 0;
+    margin-bottom: var(--space-md);
+  }
+
+  .tesori-header-centered {
+    padding: 0;
+  }
+
+  .tesori-logo-container {
+    padding: var(--space-lg) var(--space-md);
+    margin: 0 var(--space-md) var(--space-md) var(--space-md);
+  }
+
+  .tesori-logo-image {
+    max-width: 100%;
   }
 
   .tesori-logo-main {
@@ -51,13 +69,14 @@
 
   .tesori-subtitle {
     font-size: 1rem;
+    text-align: center;
   }
 
   /* Tesori grid - single column */
   .tesori-grid {
     grid-template-columns: 1fr;
     gap: var(--space-md);
-    padding: var(--space-md) 0;
+    padding: var(--space-sm) 0;
   }
 
   .tesoro-card-inner {
