@@ -138,7 +138,7 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
 
   if (loading) {
     return (
-      <div className="loading-container">
+      <div>
         <p>Caricamento risposte...</p>
       </div>
     );
@@ -231,54 +231,47 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
   const globalResponses = getGlobalResponses();
 
   return (
-    <div className="utente-risposte">
-      <div className="back-button-container">
-        <button onClick={onBack} className="btn-back-prominent">
-          ← Torna alla lista utenti
-        </button>
+    <div>
+      <div>
+        <button onClick={onBack}>← Torna alla lista utenti</button>
       </div>
 
-      <div className="utente-header">
+      <div>
         <h2>Risposte di {utente.nome}</h2>
-        <p className="total-risposte">
+        <p>
           Totale questionari compilati: <strong>{risposte.length}</strong>
         </p>
 
         {/* Bottoni di esportazione */}
-        <div className="export-section">
+        <div>
           <h5>Esporta tutte le risposte:</h5>
-          <div className="export-options">
+          <div>
             <button
               onClick={() => handleUserExport("word")}
-              className="btn-export btn-word"
               title="Esporta in formato Word"
             >
               Word
             </button>
             <button
               onClick={() => handleUserExport("excel")}
-              className="btn-export btn-excel"
               title="Esporta in formato Excel"
             >
               Excel
             </button>
             <button
               onClick={() => handleUserExport("csv")}
-              className="btn-export btn-csv"
               title="Esporta in formato CSV"
             >
               CSV
             </button>
             <button
               onClick={() => handleUserExport("pdf")}
-              className="btn-export btn-pdf"
               title="Esporta in formato PDF"
             >
               PDF
             </button>
             <button
               onClick={() => handleUserExport("json")}
-              className="btn-export btn-json"
               title="Esporta in formato JSON"
             >
               JSON
@@ -287,62 +280,50 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
         </div>
 
         {/* Toggle per modalità visualizzazione */}
-        <div className="view-mode-toggle">
-          <button
-            className={`toggle-btn ${
-              viewMode === "categorized" ? "active" : ""
-            }`}
-            onClick={() => setViewMode("categorized")}
-          >
+        <div>
+          <button onClick={() => setViewMode("categorized")}>
             Per Questionario
           </button>
-          <button
-            className={`toggle-btn ${viewMode === "global" ? "active" : ""}`}
-            onClick={() => setViewMode("global")}
-          >
+          <button onClick={() => setViewMode("global")}>
             Tutte le Risposte
           </button>
         </div>
       </div>
 
       {risposte.length === 0 ? (
-        <div className="no-responses">
+        <div>
           <p>Questo utente non ha ancora compilato nessun questionario.</p>
         </div>
       ) : viewMode === "categorized" ? (
         // Vista categorizzata per questionario (esistente)
-        <div id="utente-risposte-content" className="risposte-list">
+        <div id="utente-risposte-content">
           {risposte.map((risposta) => (
-            <div key={risposta.id} className="risposta-card">
-              <div className="risposta-header">
+            <div key={risposta.id}>
+              <div>
                 <h3>{risposta.questionario_titolo}</h3>
-                <div className="risposta-meta">
-                  <span className="lezione">
-                    Lezione: {risposta.lezione_titolo}
-                  </span>
-                  <span className="relatore">
-                    Relatore: {risposta.relatore_nome}
-                  </span>
-                  <span className="data">
+                <div>
+                  <span>Lezione: {risposta.lezione_titolo}</span>
+                  <span>Relatore: {risposta.relatore_nome}</span>
+                  <span>
                     Data:{" "}
                     {new Date(risposta.submitted_at).toLocaleString("it-IT")}
                   </span>
                   {risposta.tempo_impiegato && (
-                    <span className="tempo">
+                    <span>
                       Tempo: {Math.round(risposta.tempo_impiegato / 60)} minuti
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="risposta-content">
+              <div>
                 {risposta.completata ? (
-                  <div className="status completata">Completato</div>
+                  <div>Completato</div>
                 ) : (
-                  <div className="status incompleta">In corso</div>
+                  <div>In corso</div>
                 )}
 
-                <div className="risposte-details">
+                <div>
                   <h4>Risposte:</h4>
                   {(() => {
                     try {
@@ -359,7 +340,7 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
                           );
                           console.log("Contenuto stringa:", risposta.risposte);
                           return (
-                            <div className="error">
+                            <div>
                               <p>Errore nel formato JSON delle risposte</p>
                               <details>
                                 <summary>Dettagli errore</summary>
@@ -383,17 +364,11 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
                           typeof risposta.risposte,
                           risposta.risposte
                         );
-                        return (
-                          <p className="error">
-                            Formato risposte non riconosciuto
-                          </p>
-                        );
+                        return <p>Formato risposte non riconosciuto</p>;
                       }
 
                       if (!risposteData || typeof risposteData !== "object") {
-                        return (
-                          <p className="error">Nessuna risposta disponibile</p>
-                        );
+                        return <p>Nessuna risposta disponibile</p>;
                       }
 
                       // Parse delle domande del questionario
@@ -417,13 +392,11 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
 
                       const entries = Object.entries(risposteData);
                       if (entries.length === 0) {
-                        return (
-                          <p className="error">Nessuna risposta trovata</p>
-                        );
+                        return <p>Nessuna risposta trovata</p>;
                       }
 
                       return (
-                        <div className="answers-grid">
+                        <div>
                           {entries.map(([questionId, answer], index) => {
                             // Trova la domanda corrispondente
                             let questionText = `Domanda ${index + 1}`;
@@ -443,23 +416,15 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
                             }
 
                             return (
-                              <div key={questionId} className="answer-item">
-                                <div className="question-section">
-                                  <span className="question-number">
-                                    {index + 1}.
-                                  </span>
-                                  <span className="question-text">
-                                    {questionText}
-                                  </span>
-                                  <span className="question-type">
-                                    ({questionType})
-                                  </span>
+                              <div key={questionId}>
+                                <div>
+                                  <span>{index + 1}.</span>
+                                  <span>{questionText}</span>
+                                  <span>({questionType})</span>
                                 </div>
-                                <div className="answer-section">
-                                  <span className="answer-label">
-                                    Risposta:
-                                  </span>
-                                  <span className="answer-text">
+                                <div>
+                                  <span>Risposta:</span>
+                                  <span>
                                     {(() => {
                                       try {
                                         if (Array.isArray(answer)) {
@@ -502,7 +467,7 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
                       console.log("Dati risposte completi:", risposta.risposte);
                       console.log("Tipo dati:", typeof risposta.risposte);
                       return (
-                        <div className="error">
+                        <div>
                           <p>Errore nel parsing delle risposte</p>
                           <details>
                             <summary>
@@ -529,65 +494,50 @@ function UtenteRisposteView({ utente, risposte, loading, onBack }) {
         </div>
       ) : (
         // Vista globale di tutte le risposte
-        <div className="global-responses">
-          <div className="global-responses-header">
+        <div>
+          <div>
             <h3>Tutte le risposte ({globalResponses.length} totali)</h3>
-            <p className="global-description">
+            <p>
               Vista unificata di tutte le risposte fornite dall'utente, ordinate
               per data più recente.
             </p>
           </div>
 
           {globalResponses.length === 0 ? (
-            <div className="no-responses">
+            <div>
               <p>Nessuna risposta trovata.</p>
             </div>
           ) : (
-            <div className="global-responses-list">
+            <div>
               {globalResponses.map((response, index) => (
                 <div
                   key={`${response.questionario}-${response.questionId}-${index}`}
-                  className="global-response-item"
                 >
-                  <div className="response-context">
-                    <div className="context-info">
-                      <span className="questionario-ref">
-                        Questionario: {response.questionario}
-                      </span>
-                      <span className="lezione-ref">
-                        Lezione: {response.lezione}
-                      </span>
-                      <span className="relatore-ref">
-                        Relatore: {response.relatore}
-                      </span>
-                      <span className="data-ref">
+                  <div>
+                    <div>
+                      <span>Questionario: {response.questionario}</span>
+                      <span>Lezione: {response.lezione}</span>
+                      <span>Relatore: {response.relatore}</span>
+                      <span>
                         Data: {new Date(response.data).toLocaleString("it-IT")}
                       </span>
                       {response.completata ? (
-                        <span className="status-ref completata">
-                          Completato
-                        </span>
+                        <span>Completato</span>
                       ) : (
-                        <span className="status-ref incompleta">In corso</span>
+                        <span>In corso</span>
                       )}
                     </div>
                   </div>
 
-                  <div className="response-content">
-                    <div className="question-section-global">
-                      <div className="question-number">
-                        Domanda {response.questionNumber}:
-                      </div>
-                      <div className="question-text-global">
-                        {response.questionText}
-                      </div>
-                      <div className="question-type-global">
-                        Tipo: {response.questionType}
-                      </div>
+                  <div>
+                    <div>
+                      <div>Domanda {response.questionNumber}:</div>
+                      <div>{response.questionText}</div>
+                      <div>Tipo: {response.questionType}</div>
                     </div>
-                    <div className="answer-section-global">
-                      <div className="answer-label-global">Risposta:</div>
-                      <div className="answer-text">
+                    <div>
+                      <div>Risposta:</div>
+                      <div>
                         {(() => {
                           try {
                             if (Array.isArray(response.answer)) {

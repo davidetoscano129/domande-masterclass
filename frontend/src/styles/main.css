@@ -1,8 +1,11 @@
 /* SISTEMA DESIGN PULITO - I TESORI dell'IMPRESA */
 /* File principale che importa tutti i moduli CSS */
 
+/* === DESIGN TOKENS === */
+@import "./design-tokens.css";
+
 /* === BASE === */
-@import "./base/variables.css";
+@import "./base/variables.css"; /* Legacy compatibility */
 @import "./base/reset.css";
 
 /* === COMPONENTS === */
@@ -10,6 +13,7 @@
 @import "./components/cards.css";
 @import "./components/forms.css";
 @import "./components/loading.css";
+@import "./components/progress.css";
 
 /* === LAYOUTS === */
 @import "./layouts/dashboard.css";

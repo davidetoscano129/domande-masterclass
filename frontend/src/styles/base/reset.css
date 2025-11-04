@@ -1,15 +1,278 @@
-/* ===== RESET E BASE ===== */
-* {
+/**
+ * BASE RESET & FOUNDATIONS
+ * Reset moderno + fondazioni accessibili
+ * Basato su: modern-normalize + custom enhancements
+ */
+
+/* ===== RESET UNIVERSALE ===== */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body {
-  font-family: var(--font-sans);
-  background-color: var(--gray-50);
-  color: var(--gray-800);
-  line-height: 1.6;
+/* ===== ROOT & HTML ===== */
+html {
+  /* Previene scroll shift su Windows */
+  overflow-y: scroll;
+  /* Font size base per rem (1rem = 16px) */
+  font-size: 100%;
+  /* Anti-aliasing per font rendering migliore */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Smooth scroll se rispetta prefers-reduced-motion */
+  scroll-behavior: smooth;
+  /* Tab size consistente */
+  tab-size: 4;
+  /* Text size adjust per iOS */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Rispetta prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== BODY ===== */
+body {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  /* Text rendering ottimizzato */
+  text-rendering: optimizeLegibility;
+  /* Kerning attivo */
+  font-feature-settings: "kern" 1;
+  /* Previene font size inflation su mobile */
+  -webkit-text-size-adjust: 100%;
+  /* Min-height per viewport piena */
+  min-height: 100vh;
+}
+
+/* ===== TIPOGRAFIA ===== */
+
+/* Headings reset */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+/* Paragraphs */
+p {
+  margin-bottom: var(--space-md);
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/* Lists */
+ul,
+ol {
+  list-style: none;
+}
+
+/* Links */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+/* Focus visibile per accessibilità */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Rimuovi outline solo se non keyboard navigation */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ===== FORM ELEMENTS ===== */
+
+/* Consistenza cross-browser */
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: inherit;
+  margin: 0;
+}
+
+/* Button reset */
+button {
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+/* Input reset */
+input,
+textarea,
+select {
+  border: var(--border-width-base) solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  transition: border-color var(--transition-fast);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-border-focus);
+  outline: none;
+}
+
+/* Placeholder styling */
+::placeholder {
+  color: var(--color-text-disabled);
+  opacity: 1;
+}
+
+/* ===== MEDIA ELEMENTS ===== */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* SVG fill */
+svg {
+  fill: currentColor;
+}
+
+/* ===== TABLE ===== */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+
+/* ===== HIDDEN ELEMENTS ===== */
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Hidden but accessible */
+[hidden] {
+  display: none !important;
+}
+
+/* ===== SCROLLBAR STYLING (Webkit only) ===== */
+
+/* Custom scrollbar per estetica coerente */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: var(--radius-full);
+  border: 3px solid var(--color-gray-100);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-400);
+}
+
+/* ===== SELECTION ===== */
+
+::selection {
+  background-color: var(--color-primary-light);
+  color: var(--color-text-primary);
+}
+
+::-moz-selection {
+  background-color: var(--color-primary-light);
+  color: var(--color-text-primary);
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+
+  img {
+    page-break-inside: avoid;
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
 }

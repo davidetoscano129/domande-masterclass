@@ -55,9 +55,9 @@ function SharedQuestionairePage() {
 
   if (loading) {
     return (
-      <div className="shared-page">
-        <div className="shared-container">
-          <div className="loading">
+      <div>
+        <div>
+          <div>
             <h2>🔄 Caricamento questionario...</h2>
             <p>Attendere prego</p>
           </div>
@@ -68,15 +68,12 @@ function SharedQuestionairePage() {
 
   if (error) {
     return (
-      <div className="shared-page">
-        <div className="shared-container">
-          <div className="error-message">
+      <div>
+        <div>
+          <div>
             <h2>Errore</h2>
             <p>{error}</p>
-            <button
-              onClick={() => (window.location.href = "/")}
-              className="btn-primary"
-            >
+            <button onClick={() => (window.location.href = "/")}>
               Torna alla home
             </button>
           </div>
@@ -87,10 +84,10 @@ function SharedQuestionairePage() {
 
   if (!showQuestionnaire) {
     return (
-      <div className="shared-page">
-        <div className="shared-container">
-          <div className="user-selection-section">
-            <div className="header">
+      <div>
+        <div>
+          <div>
+            <div>
               <h1>Compilazione Questionario</h1>
               <h2>{questionario.titolo}</h2>
               <p>
@@ -98,17 +95,13 @@ function SharedQuestionairePage() {
               </p>
             </div>
 
-            <div className="user-selection">
+            <div>
               <h3>Seleziona il tuo nome per iniziare:</h3>
-              <div className="users-grid">
+              <div>
                 {utenti.map((user) => (
-                  <div
-                    key={user.id}
-                    className="user-card"
-                    onClick={() => handleUserSelection(user)}
-                  >
-                    <div className="user-avatar">•</div>
-                    <span className="user-name">{user.nome}</span>
+                  <div key={user.id} onClick={() => handleUserSelection(user)}>
+                    <div>•</div>
+                    <span>{user.nome}</span>
                   </div>
                 ))}
               </div>
@@ -120,8 +113,8 @@ function SharedQuestionairePage() {
   }
 
   return (
-    <div className="shared-page">
-      <div className="shared-container">
+    <div>
+      <div>
         <SharedQuestionnaireViewer
           questionario={questionario}
           selectedUser={selectedUser}
@@ -191,8 +184,8 @@ function SharedQuestionnaireViewer({
 
   if (submitted) {
     return (
-      <div className="submission-success">
-        <div className="success-content">
+      <div>
+        <div>
           <h2>Questionario completato!</h2>
           <p>
             Grazie <strong>{selectedUser.nome}</strong> per aver compilato il
@@ -200,7 +193,7 @@ function SharedQuestionnaireViewer({
           </p>
           <h3>"{questionario.titolo}"</h3>
           <p>Le tue risposte sono state salvate correttamente.</p>
-          <p className="completion-note">
+          <p>
             🎉 La compilazione è stata completata. Puoi chiudere questa pagina.
           </p>
         </div>
@@ -209,12 +202,10 @@ function SharedQuestionnaireViewer({
   }
 
   return (
-    <div className="questionnaire-viewer">
-      <div className="questionnaire-header">
-        <button onClick={onBack} className="btn-back">
-          ← Indietro
-        </button>
-        <div className="header-info">
+    <div>
+      <div>
+        <button onClick={onBack}>← Indietro</button>
+        <div>
           <h2>{questionario.titolo}</h2>
           <p>
             Utente: <strong>{selectedUser.nome}</strong>
@@ -222,19 +213,19 @@ function SharedQuestionnaireViewer({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="questionnaire-form">
+      <form onSubmit={handleSubmit}>
         {config.questions.map((question, index) => (
-          <div key={question.id} className="question-block">
-            <div className="question-header">
-              <span className="question-number">{index + 1}.</span>
-              <h3 className="question-text">{question.question}</h3>
+          <div key={question.id}>
+            <div>
+              <span>{index + 1}.</span>
+              <h3>{question.question}</h3>
             </div>
 
-            <div className="question-input">
+            <div>
               {question.type === "multiple_choice" && (
-                <div className="options-list">
+                <div>
                   {question.options.map((option) => (
-                    <label key={option.id} className="option-label">
+                    <label key={option.id}>
                       <input
                         type="radio"
                         name={`question_${question.id}`}
@@ -244,7 +235,7 @@ function SharedQuestionnaireViewer({
                           handleResponseChange(question.id, e.target.value)
                         }
                       />
-                      <span className="option-text">{option.text}</span>
+                      <span>{option.text}</span>
                     </label>
                   ))}
                 </div>
@@ -258,7 +249,6 @@ function SharedQuestionnaireViewer({
                     handleResponseChange(question.id, e.target.value)
                   }
                   placeholder="Inserisci la tua risposta..."
-                  className="text-input"
                 />
               )}
 
@@ -270,7 +260,6 @@ function SharedQuestionnaireViewer({
                     handleResponseChange(question.id, e.target.value)
                   }
                   placeholder="inserisci@email.com"
-                  className="text-input"
                 />
               )}
 
@@ -281,7 +270,6 @@ function SharedQuestionnaireViewer({
                   onChange={(e) =>
                     handleResponseChange(question.id, e.target.value)
                   }
-                  className="text-input"
                 />
               )}
 
@@ -293,15 +281,14 @@ function SharedQuestionnaireViewer({
                   }
                   placeholder="Inserisci la tua risposta..."
                   rows={4}
-                  className="textarea-input"
                 />
               )}
 
               {question.type === "rating" && (
-                <div className="rating-input">
-                  <div className="rating-scale">
+                <div>
+                  <div>
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
-                      <label key={value} className="rating-option">
+                      <label key={value}>
                         <input
                           type="radio"
                           name={`question_${question.id}`}
@@ -314,11 +301,11 @@ function SharedQuestionnaireViewer({
                             )
                           }
                         />
-                        <span className="rating-number">{value}</span>
+                        <span>{value}</span>
                       </label>
                     ))}
                   </div>
-                  <div className="rating-labels">
+                  <div>
                     <span>Molto basso</span>
                     <span>Molto alto</span>
                   </div>
@@ -326,9 +313,9 @@ function SharedQuestionnaireViewer({
               )}
 
               {question.type === "checkbox" && (
-                <div className="checkbox-list">
+                <div>
                   {question.options.map((option) => (
-                    <label key={option.id} className="checkbox-label">
+                    <label key={option.id}>
                       <input
                         type="checkbox"
                         checked={(responses[question.id] || []).includes(
@@ -349,7 +336,7 @@ function SharedQuestionnaireViewer({
                           }
                         }}
                       />
-                      <span className="checkbox-text">{option.text}</span>
+                      <span>{option.text}</span>
                     </label>
                   ))}
                 </div>
@@ -363,15 +350,14 @@ function SharedQuestionnaireViewer({
                     handleResponseChange(question.id, e.target.value)
                   }
                   placeholder="Inserisci un numero..."
-                  className="number-input"
                 />
               )}
             </div>
           </div>
         ))}
 
-        <div className="submit-section">
-          <button type="submit" disabled={submitting} className="btn-submit">
+        <div>
+          <button type="submit" disabled={submitting}>
             {submitting ? "Invio in corso..." : "Invia Risposte"}
           </button>
         </div>

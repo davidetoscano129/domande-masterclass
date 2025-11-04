@@ -81,12 +81,10 @@ function QuestionarioViewer({ questionario, user, onBack, onComplete }) {
   };
 
   return (
-    <div className="questionario-viewer">
-      <header className="viewer-header">
-        <button onClick={onBack} className="btn-secondary">
-          ← Indietro
-        </button>
-        <div className="questionario-info">
+    <div>
+      <header>
+        <button onClick={onBack}>← Indietro</button>
+        <div>
           <h1>{questionario.titolo}</h1>
           <p>{questionario.descrizione}</p>
           <small>
@@ -96,7 +94,7 @@ function QuestionarioViewer({ questionario, user, onBack, onComplete }) {
         </div>
       </header>
 
-      <form onSubmit={handleSubmit} className="questions-form">
+      <form onSubmit={handleSubmit}>
         {normalizedConfig.questions.map((question, index) => (
           <QuestionRenderer
             key={question.id}
@@ -109,12 +107,8 @@ function QuestionarioViewer({ questionario, user, onBack, onComplete }) {
         ))}
 
         {!isReadOnly && (
-          <div className="form-actions">
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary btn-large"
-            >
+          <div>
+            <button type="submit" disabled={loading}>
               {loading ? "Salvataggio..." : "Invia Questionario"}
             </button>
           </div>
@@ -136,7 +130,6 @@ function QuestionRenderer({ question, index, value, onChange, isReadOnly }) {
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled={isReadOnly}
-            className="question-input"
           />
         );
 
@@ -147,7 +140,6 @@ function QuestionRenderer({ question, index, value, onChange, isReadOnly }) {
             onChange={(e) => onChange(e.target.value)}
             disabled={isReadOnly}
             rows={4}
-            className="question-input"
           />
         );
 
@@ -158,7 +150,6 @@ function QuestionRenderer({ question, index, value, onChange, isReadOnly }) {
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled={isReadOnly}
-            className="question-input"
           />
         );
 
@@ -169,15 +160,14 @@ function QuestionRenderer({ question, index, value, onChange, isReadOnly }) {
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled={isReadOnly}
-            className="question-input"
           />
         );
 
       case "multiple_choice":
         return (
-          <div className="options-list">
+          <div>
             {question.options.map((option, optionIndex) => (
-              <label key={option.id || optionIndex} className="option-label">
+              <label key={option.id || optionIndex}>
                 <input
                   type="radio"
                   name={`question_${question.id}`}
@@ -195,9 +185,9 @@ function QuestionRenderer({ question, index, value, onChange, isReadOnly }) {
       case "checkbox":
         const selectedValues = Array.isArray(value) ? value : [];
         return (
-          <div className="options-list">
+          <div>
             {question.options.map((option, optionIndex) => (
-              <label key={option.id || optionIndex} className="option-label">
+              <label key={option.id || optionIndex}>
                 <input
                   type="checkbox"
                   checked={selectedValues.includes(option.text)}
@@ -218,9 +208,9 @@ function QuestionRenderer({ question, index, value, onChange, isReadOnly }) {
 
       case "rating":
         return (
-          <div className="rating-input">
+          <div>
             {[1, 2, 3, 4, 5].map((rating) => (
-              <label key={rating} className="rating-label">
+              <label key={rating}>
                 <input
                   type="radio"
                   name={`question_${question.id}`}
@@ -229,7 +219,7 @@ function QuestionRenderer({ question, index, value, onChange, isReadOnly }) {
                   onChange={(e) => onChange(parseInt(e.target.value))}
                   disabled={isReadOnly}
                 />
-                <span className="rating-star">★</span>
+                <span>★</span>
                 {rating}
               </label>
             ))}
@@ -242,15 +232,15 @@ function QuestionRenderer({ question, index, value, onChange, isReadOnly }) {
   };
 
   return (
-    <div className="question-container">
-      <div className="question-header">
-        <span className="question-number">Domanda {index + 1}</span>
-        {question.required && <span className="required-indicator">*</span>}
+    <div>
+      <div>
+        <span>Domanda {index + 1}</span>
+        {question.required && <span>*</span>}
       </div>
 
-      <h3 className="question-text">{question.question}</h3>
+      <h3>{question.question}</h3>
 
-      <div className="question-input-container">{renderInput()}</div>
+      <div>{renderInput()}</div>
     </div>
   );
 }

@@ -121,10 +121,10 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
   };
 
   return (
-    <div className="questionario-editor">
+    <div>
       <h3>{questionario ? "Modifica Questionario" : "Nuovo Questionario"}</h3>
 
-      <form onSubmit={handleSubmit} className="form-card">
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Titolo questionario"
@@ -157,10 +157,10 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
           ))}
         </select>
 
-        <div className="questions-section">
-          <div className="section-header">
+        <div>
+          <div>
             <h4>Domande</h4>
-            <button type="button" onClick={addQuestion} className="btn-small">
+            <button type="button" onClick={addQuestion}>
               + Aggiungi Domanda
             </button>
           </div>
@@ -183,11 +183,11 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
           ))}
         </div>
 
-        <div className="form-actions">
-          <button type="button" onClick={onCancel} className="btn-secondary">
+        <div>
+          <button type="button" onClick={onCancel}>
             Annulla
           </button>
-          <button type="submit" className="btn-primary">
+          <button type="submit">
             {questionario ? "Aggiorna" : "Crea"} Questionario
           </button>
         </div>
@@ -220,14 +220,10 @@ function QuestionEditor({
   const needsOptions = ["multiple_choice", "checkbox"].includes(question.type);
 
   return (
-    <div className="question-editor">
-      <div className="question-header">
-        <span className="question-number">Domanda {index + 1}</span>
-        <button
-          type="button"
-          onClick={onDelete}
-          className="btn-small btn-delete"
-        >
+    <div>
+      <div>
+        <span>Domanda {index + 1}</span>
+        <button type="button" onClick={onDelete}>
           Elimina
         </button>
       </div>
@@ -240,7 +236,7 @@ function QuestionEditor({
         required
       />
 
-      <div className="question-controls">
+      <div>
         <select
           value={question.type}
           onChange={(e) => onUpdate("type", e.target.value)}
@@ -252,7 +248,7 @@ function QuestionEditor({
           ))}
         </select>
 
-        <label className="checkbox-label">
+        <label>
           <input
             type="checkbox"
             checked={question.required}
@@ -263,27 +259,23 @@ function QuestionEditor({
       </div>
 
       {needsOptions && (
-        <div className="options-section">
-          <div className="section-header">
+        <div>
+          <div>
             <span>Opzioni:</span>
-            <button type="button" onClick={onAddOption} className="btn-small">
+            <button type="button" onClick={onAddOption}>
               + Opzione
             </button>
           </div>
 
           {(question.options || []).map((option, optIndex) => (
-            <div key={option.id || optIndex} className="option-editor">
+            <div key={option.id || optIndex}>
               <input
                 type="text"
                 placeholder={`Opzione ${optIndex + 1}`}
                 value={option.text}
                 onChange={(e) => onUpdateOption(option.id, e.target.value)}
               />
-              <button
-                type="button"
-                onClick={() => onDeleteOption(option.id)}
-                className="btn-small btn-delete"
-              >
+              <button type="button" onClick={() => onDeleteOption(option.id)}>
                 ×
               </button>
             </div>

@@ -40,18 +40,16 @@ function ShareModal({ shareData, onClose }) {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content share-modal">
-        <div className="modal-header">
+    <div>
+      <div>
+        <div>
           <h2>Condividi Questionario</h2>
-          <button onClick={onClose} className="btn-close">
-            ×
-          </button>
+          <button onClick={onClose}>×</button>
         </div>
 
-        <div className="modal-body">
-          <div className="share-content">
-            <div className="questionario-info">
+        <div>
+          <div>
+            <div>
               <h3>{shareData.questionario.titolo}</h3>
               <p>
                 Gli utenti potranno compilare questo questionario tramite il
@@ -59,61 +57,45 @@ function ShareModal({ shareData, onClose }) {
               </p>
             </div>
 
-            <div className="share-methods">
-              <div className="share-link-section">
+            <div>
+              <div>
                 <h4>Link di condivisione</h4>
-                <div className="link-container">
-                  <input
-                    type="text"
-                    value={shareData.shareLink}
-                    readOnly
-                    className="share-link-input"
-                  />
-                  <button
-                    onClick={copyToClipboard}
-                    className={`btn-copy ${copied ? "copied" : ""}`}
-                  >
+                <div>
+                  <input type="text" value={shareData.shareLink} readOnly />
+                  <button onClick={copyToClipboard}>
                     {copied ? "Copiato!" : "Copia"}
                   </button>
                 </div>
               </div>
 
-              <div className="qr-code-section">
+              <div>
                 <h4>QR Code</h4>
-                <div className="qr-container">
+                <div>
                   {qrCodeDataUrl ? (
-                    <img
-                      src={qrCodeDataUrl}
-                      alt="QR Code"
-                      className="qr-code"
-                    />
+                    <img src={qrCodeDataUrl} alt="QR Code" />
                   ) : (
-                    <div className="qr-loading">Generazione QR code...</div>
+                    <div>Generazione QR code...</div>
                   )}
                 </div>
-                <p className="qr-instruction">
+                <p>
                   Gli utenti possono scansionare questo QR code per accedere
                   direttamente al questionario
                 </p>
               </div>
             </div>
 
-            <div className="share-info">
-              <div className="info-item">
-                <span className="info-label">🕒 Scadenza:</span>
-                <span className="info-value">
-                  {formatExpiryDate(shareData.expiresAt)}
-                </span>
+            <div>
+              <div>
+                <span>🕒 Scadenza:</span>
+                <span>{formatExpiryDate(shareData.expiresAt)}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Token:</span>
-                <span className="info-value">
-                  {shareData.shareToken.substring(0, 8)}...
-                </span>
+              <div>
+                <span>Token:</span>
+                <span>{shareData.shareToken.substring(0, 8)}...</span>
               </div>
             </div>
 
-            <div className="usage-instructions">
+            <div>
               <h4>Istruzioni per gli utenti</h4>
               <ol>
                 <li>Accedere al link o scansionare il QR code</li>
@@ -125,10 +107,8 @@ function ShareModal({ shareData, onClose }) {
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button onClick={onClose} className="btn-secondary">
-            Chiudi
-          </button>
+        <div>
+          <button onClick={onClose}>Chiudi</button>
         </div>
       </div>
     </div>

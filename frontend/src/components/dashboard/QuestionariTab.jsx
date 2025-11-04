@@ -88,22 +88,17 @@ function QuestionariTab({ questionari, user, onUpdate }) {
   };
 
   return (
-    <div className="tab-section-modern">
-      <div className="section-header-modern">
-        <div className="header-content">
+    <div>
+      <div>
+        <div>
           <h2>I miei Questionari</h2>
-          <p className="section-subtitle">
-            Crea e gestisci i questionari per le tue lezioni
-          </p>
+          <p>Crea e gestisci i questionari per le tue lezioni</p>
         </div>
         <button
           onClick={() => {
             setShowForm(!showForm);
             setEditingQuestionario(null);
           }}
-          className={`btn-action-modern ${
-            showForm ? "btn-cancel" : "btn-create"
-          }`}
         >
           {showForm ? "Annulla" : "Nuovo Questionario"}
         </button>
@@ -126,9 +121,9 @@ function QuestionariTab({ questionari, user, onUpdate }) {
         />
       )}
 
-      <div className="content-section-modern">
+      <div>
         {questionari.length === 0 ? (
-          <div className="empty-state-modern">
+          <div>
             <h3>Nessun questionario creato</h3>
             <p>
               Inizia creando il tuo primo questionario usando il pulsante "Nuovo
@@ -136,22 +131,15 @@ function QuestionariTab({ questionari, user, onUpdate }) {
             </p>
           </div>
         ) : (
-          <div className="items-grid-modern">
+          <div>
             {questionari.map((questionario) => (
-              <div
-                key={questionario.id}
-                className="item-card-modern questionario-card-modern"
-              >
-                <div className="card-content-modern">
-                  <h3 className="questionario-title">{questionario.titolo}</h3>
-                  <p className="questionario-description">
-                    {questionario.descrizione}
-                  </p>
-                  <div className="questionario-meta">
-                    <span className="lesson-badge">
-                      Lezione: {questionario.lezione_titolo}
-                    </span>
-                    <span className="creation-date">
+              <div key={questionario.id}>
+                <div>
+                  <h3>{questionario.titolo}</h3>
+                  <p>{questionario.descrizione}</p>
+                  <div>
+                    <span>Lezione: {questionario.lezione_titolo}</span>
+                    <span>
                       {new Date(questionario.created_at).toLocaleDateString(
                         "it-IT"
                       )}
@@ -159,29 +147,17 @@ function QuestionariTab({ questionari, user, onUpdate }) {
                   </div>
                 </div>
 
-                <div className="questionario-actions">
-                  <button
-                    onClick={() => handleEdit(questionario)}
-                    className="btn-secondary-modern btn-small-modern"
-                  >
+                <div>
+                  <button onClick={() => handleEdit(questionario)}>
                     Modifica
                   </button>
-                  <button
-                    onClick={() => handleDelete(questionario.id)}
-                    className="btn-delete-modern btn-small-modern"
-                  >
+                  <button onClick={() => handleDelete(questionario.id)}>
                     Elimina
                   </button>
-                  <button
-                    onClick={() => handleViewResponses(questionario)}
-                    className="btn-primary-modern btn-small-modern"
-                  >
+                  <button onClick={() => handleViewResponses(questionario)}>
                     Risposte
                   </button>
-                  <button
-                    onClick={() => handleShare(questionario)}
-                    className="btn-action-modern btn-small-modern"
-                  >
+                  <button onClick={() => handleShare(questionario)}>
                     Condividi
                   </button>
                 </div>

@@ -1,63 +1,67 @@
-/* ===== VARIABILI PRINCIPALI ===== */
+/**
+ * VARIABILI LEGACY - Retrocompatibilità
+ * Questi token delegano ai nuovi design-tokens.css
+ * Mantenuti per non rompere il codice esistente
+ * TODO: Migrare progressivamente alle nuove variabili semantiche
+ */
+
 :root {
-  /* Colori base - palette minimale */
-  --white: #ffffff;
-  --black: #000000;
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
+  /* Colori base - LEGACY (mappati ai nuovi tokens) */
+  --white: var(--color-white);
+  --black: var(--color-black);
+  --gray-50: var(--color-gray-50);
+  --gray-100: var(--color-gray-100);
+  --gray-200: var(--color-gray-200);
+  --gray-300: var(--color-gray-300);
+  --gray-400: var(--color-gray-400);
+  --gray-500: var(--color-gray-500);
+  --gray-600: var(--color-gray-600);
+  --gray-700: var(--color-gray-700);
+  --gray-800: var(--color-gray-800);
+  --gray-900: var(--color-gray-900);
 
-  /* Colori accent - solo per titoli e elementi importanti */
-  --brand-yellow: #fbbf24;
-  --brand-green: #10b981;
-  --brand-blue: #3b82f6;
-  --brand-red: #ef4444;
+  /* Colori accent - LEGACY */
+  --brand-yellow: var(--color-secondary);
+  --brand-green: var(--color-success);
+  --brand-blue: var(--color-primary);
+  --brand-red: var(--color-error);
 
-  /* Sistema tipografico */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
+  /* Sistema tipografico - LEGACY */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 
-  /* Dimensioni */
-  --radius: 8px;
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* Dimensioni - LEGACY */
+  --radius: var(--radius-md);
+  --shadow: var(--shadow-base);
+  --shadow-lg: var(--shadow-lg);
 
-  /* Spacing system */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
+  /* Spacing system - LEGACY */
+  --space-xs: var(--space-1);
+  --space-sm: var(--space-2);
+  --space-md: var(--space-4);
+  --space-lg: var(--space-6);
+  --space-xl: var(--space-8);
+  --space-2xl: var(--space-12);
 
-  /* Legacy compatibility - old variables */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-xxl: 3rem;
+  /* Legacy compatibility - old naming */
+  --spacing-xs: var(--space-1);
+  --spacing-sm: var(--space-2);
+  --spacing-md: var(--space-4);
+  --spacing-lg: var(--space-6);
+  --spacing-xl: var(--space-8);
+  --spacing-xxl: var(--space-12);
 
-  --primary-color: #3b82f6;
-  --secondary-color: #10b981;
-  --accent-color: #8b5cf6;
-  --error-color: #ef4444;
+  --primary-color: var(--color-primary);
+  --secondary-color: var(--color-success);
+  --accent-color: #8b5cf6; /* Purple - mantieni se usato */
+  --error-color: var(--color-error);
 
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-muted: var(--color-text-disabled);
 
-  --surface-color: #ffffff;
-  --background-secondary: #f1f5f9;
-  --border-color: #e2e8f0;
-  --border-radius: 8px;
+  --surface-color: var(--color-bg-secondary);
+  --background-secondary: var(--color-bg-tertiary);
+  --border-color: var(--color-border-primary);
+  --border-radius: var(--radius-md);
 }

@@ -1,0 +1,303 @@
+/**
+ * DESIGN TOKENS - I TESORI DELL'IMPRESA
+ * Sistema di design centralizzato derivato da UtenteDashboard.jsx
+ * 
+ * Convenzioni:
+ * - Naming semantico (color-primary, not color-blue)
+ * - Fallback sicuri per compatibilità
+ * - Preparato per dark mode (future)
+ * - WCAG 2.1 AA compliant (contrasto ≥ 4.5:1)
+ */
+
+:root {
+  /* ==========================================
+     PALETTE COLORI - Semantica & Brand
+     ========================================== */
+
+  /* Brand Colors - Primari */
+  --color-primary: #3b82f6; /* Blue - azioni principali, link, focus */
+  --color-primary-hover: #2563eb; /* Blue scuro - hover state */
+  --color-primary-light: rgba(
+    59,
+    130,
+    246,
+    0.1
+  ); /* Blue trasparente - background */
+
+  --color-secondary: #fbbf24; /* Yellow/Gold - accenti, highlight */
+  --color-secondary-hover: #eab308; /* Yellow scuro - hover */
+  --color-secondary-light: rgba(251, 191, 36, 0.1);
+
+  /* Status Colors - Feedback utente */
+  --color-success: #10b981; /* Green - completato, successo */
+  --color-success-hover: #16a34a;
+  --color-success-light: rgba(16, 185, 129, 0.1);
+
+  --color-error: #ef4444; /* Red - errore, eliminazione */
+  --color-error-hover: #dc2626;
+  --color-error-light: rgba(239, 68, 68, 0.1);
+
+  --color-warning: #f59e0b; /* Orange - attenzione */
+  --color-warning-hover: #d97706;
+  --color-warning-light: rgba(245, 158, 11, 0.1);
+
+  --color-info: #3b82f6; /* Blue - informazioni */
+  --color-info-light: rgba(59, 130, 246, 0.1);
+
+  /* Neutral Colors - Scala grigia (11 steps) */
+  --color-white: #ffffff;
+  --color-gray-50: #f8fafc; /* Background principale */
+  --color-gray-100: #f1f5f9; /* Background card secondarie */
+  --color-gray-200: #e2e8f0; /* Bordi */
+  --color-gray-300: #cbd5e1; /* Bordi hover/separatori */
+  --color-gray-400: #94a3b8; /* Testo disabilitato */
+  --color-gray-500: #64748b; /* Testo secondario */
+  --color-gray-600: #475569; /* Testo terziario */
+  --color-gray-700: #334155; /* Testo importante */
+  --color-gray-800: #1e293b; /* Testo principale */
+  --color-gray-900: #0f172a; /* Testo enfatizzato */
+  --color-black: #000000;
+
+  /* Semantic Aliases - Uso contestuale */
+  --color-text-primary: var(--color-gray-800);
+  --color-text-secondary: var(--color-gray-500);
+  --color-text-tertiary: var(--color-gray-600);
+  --color-text-disabled: var(--color-gray-400);
+  --color-text-inverse: var(--color-white);
+
+  --color-bg-primary: var(--color-gray-50);
+  --color-bg-secondary: var(--color-white);
+  --color-bg-tertiary: var(--color-gray-100);
+  --color-bg-inverse: var(--color-gray-900);
+
+  --color-border-primary: var(--color-gray-200);
+  --color-border-secondary: var(--color-gray-300);
+  --color-border-focus: var(--color-primary);
+
+  /* ==========================================
+     TIPOGRAFIA - Font Family & Scale
+     ========================================== */
+
+  /* Font Families */
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+
+  /* Font Sizes - Scala tipografica armonica */
+  --font-size-xs: 0.75rem; /* 12px - badge, note, caption */
+  --font-size-sm: 0.875rem; /* 14px - label, meta, secondary */
+  --font-size-md: 1rem; /* 16px - body text */
+  --font-size-base: 1.125rem; /* 18px - sottotitoli, lead */
+  --font-size-lg: 1.25rem; /* 20px - H3, card title */
+  --font-size-xl: 1.5rem; /* 24px - H2, dashboard header */
+  --font-size-2xl: 1.875rem; /* 30px - H1, section header */
+  --font-size-3xl: 3rem; /* 48px - Logo sub, display */
+  --font-size-4xl: 4rem; /* 64px - Logo main, hero */
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Line Heights - Leggibilità ottimale */
+  --line-height-none: 1;
+  --line-height-tight: 1.3;
+  --line-height-snug: 1.4;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+  --line-height-loose: 1.8;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.08em;
+  --letter-spacing-widest: 0.2em;
+
+  /* ==========================================
+     SPAZIATURA - Scala 4/8 armonica
+     ========================================== */
+
+  --space-0: 0;
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+  --space-20: 5rem; /* 80px */
+  --space-24: 6rem; /* 96px */
+
+  /* Semantic Aliases */
+  --space-xs: var(--space-1);
+  --space-sm: var(--space-2);
+  --space-md: var(--space-4);
+  --space-lg: var(--space-6);
+  --space-xl: var(--space-8);
+  --space-2xl: var(--space-12);
+  --space-3xl: var(--space-16);
+
+  /* ==========================================
+     RADIUS - Border Radius Scale
+     ========================================== */
+
+  --radius-none: 0;
+  --radius-sm: 0.125rem; /* 2px */
+  --radius-default: 0.25rem; /* 4px */
+  --radius-md: 0.5rem; /* 8px */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-xl: 1rem; /* 16px */
+  --radius-2xl: 1.5rem; /* 24px */
+  --radius-full: 9999px; /* Circle */
+
+  /* ==========================================
+     ELEVATION - Box Shadows (6 livelli)
+     ========================================== */
+
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+  /* Focus Ring - Accessibilità */
+  --shadow-focus: 0 0 0 3px var(--color-primary-light);
+  --shadow-focus-error: 0 0 0 3px var(--color-error-light);
+
+  /* ==========================================
+     TRANSIZIONI - Motion & Timing
+     ========================================== */
+
+  /* Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-medium: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+
+  /* Easing Functions */
+  --easing-linear: linear;
+  --easing-ease: ease;
+  --easing-ease-in: ease-in;
+  --easing-ease-out: ease-out;
+  --easing-ease-in-out: ease-in-out;
+  --easing-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+  --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Presets comuni */
+  --transition-fast: var(--duration-fast) var(--easing-ease);
+  --transition-base: var(--duration-base) var(--easing-ease);
+  --transition-medium: var(--duration-medium) var(--easing-ease);
+  --transition-slow: var(--duration-slow) var(--easing-smooth);
+
+  /* ==========================================
+     Z-INDEX - Stacking Order (gestione livelli)
+     ========================================== */
+
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-notification: 1080;
+  --z-max: 9999;
+
+  /* ==========================================
+     BREAKPOINTS - Responsive Design
+     ========================================== */
+
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* ==========================================
+     SIZING - Dimensioni comuni
+     ========================================== */
+
+  /* Touch Target - Accessibilità mobile (min 44px) */
+  --size-touch-min: 44px;
+
+  /* Icon Sizes */
+  --size-icon-xs: 16px;
+  --size-icon-sm: 20px;
+  --size-icon-md: 24px;
+  --size-icon-lg: 32px;
+  --size-icon-xl: 48px;
+
+  /* Avatar Sizes */
+  --size-avatar-sm: 32px;
+  --size-avatar-md: 48px;
+  --size-avatar-lg: 64px;
+  --size-avatar-xl: 80px;
+
+  /* Container Max Widths */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+  --container-dashboard: 1400px;
+
+  /* ==========================================
+     ALTRI - Valori vari
+     ========================================== */
+
+  /* Border Width */
+  --border-width-thin: 1px;
+  --border-width-base: 1px;
+  --border-width-thick: 2px;
+  --border-width-thicker: 3px;
+
+  /* Opacity */
+  --opacity-disabled: 0.5;
+  --opacity-hover: 0.9;
+  --opacity-tooltip: 0.95;
+}
+
+/* ==========================================
+   DARK MODE - Preparazione futura
+   ========================================== */
+
+@media (prefers-color-scheme: dark) {
+  /* Placeholder per dark mode - implementazione futura */
+  /* 
+  :root {
+    --color-bg-primary: var(--color-gray-900);
+    --color-text-primary: var(--color-gray-50);
+    ...
+  }
+  */
+}
+
+/* Data attribute per forzare tema */
+/* 
+[data-theme="dark"] {
+  Dark mode esplicito - implementazione futura
+}
+
+[data-theme="light"] {
+  Light mode esplicito (default)
+}
+*/
