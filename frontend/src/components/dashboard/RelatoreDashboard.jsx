@@ -3,6 +3,7 @@ import { API_BASE } from "../../constants/api.js";
 import LezioniTab from "./LezioniTab.jsx";
 import QuestionariTab from "./QuestionariTab.jsx";
 import UtentiTab from "./UtentiTab.jsx";
+import ExportManager from "../shared/ExportManager.jsx";
 
 function RelatoreDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("lezioni");
@@ -10,6 +11,7 @@ function RelatoreDashboard({ user, onLogout }) {
   const [questionari, setQuestionari] = useState([]);
   const [utenti, setUtenti] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showExportManager, setShowExportManager] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -50,9 +52,24 @@ function RelatoreDashboard({ user, onLogout }) {
             <span className="relatore-name">{user.relatore.nome}</span>
           </p>
         </div>
-        <button onClick={onLogout} className="btn-logout-modern">
-          Logout
-        </button>
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--space-sm)",
+            alignItems: "center",
+          }}
+        >
+          <button
+            onClick={() => setShowExportManager(true)}
+            className="btn-small-modern btn-view"
+            title="Gestisci esportazioni"
+          >
+            📊 Esporta Risposte
+          </button>
+          <button onClick={onLogout} className="btn-logout-modern">
+            Logout
+          </button>
+        </div>
       </header>
 
       <nav className="dashboard-nav-modern">
@@ -123,6 +140,13 @@ function RelatoreDashboard({ user, onLogout }) {
           )}
         </div>
       </main>
+
+      {showExportManager && (
+        <ExportManager
+          user={user}
+          onClose={() => setShowExportManager(false)}
+        />
+      )}
     </div>
   );
 }

@@ -2,6 +2,19 @@ const express = require("express");
 const mysql = require("mysql2/promise");
 const cors = require("cors");
 const path = require("path");
+const ExcelJS = require("exceljs");
+const PDFDocument = require("pdfkit");
+const {
+  Document,
+  Packer,
+  Paragraph,
+  Table,
+  TableCell,
+  TableRow,
+  TextRun,
+  AlignmentType,
+  WidthType,
+} = require("docx");
 require("dotenv").config();
 
 const app = express();
@@ -1151,6 +1164,549 @@ app.post("/api/shared/:token/submit", async (req, res) => {
 app.get("/shared/:token", (req, res) => {
   const { token } = req.params;
   res.redirect(`http://localhost:5173/shared/${token}`);
+});
+
+// ===== EXPORT ENDPOINTS =====
+
+// Anteprima dati export
+app.get("/api/export/preview", async (req, res) => {
+  try {
+    const { utente_id, questionario_id, lezione_id, date_from, date_to } =
+      req.query;
+
+    let query = `
+      SELECT 
+        r.id,
+        r.utente_id,
+        u.nome as utente_nome,
+        r.questionario_id,
+        q.titolo as questionario_titolo,
+        l.titolo as lezione_titolo,
+        r.submitted_at,
+        r.completata
+      FROM risposte r
+      JOIN utenti u ON r.utente_id = u.id
+      JOIN questionari q ON r.questionario_id = q.id
+      JOIN lezioni l ON q.lezione_id = l.id
+      WHERE 1=1
+    `;
+
+    const params = [];
+
+    if (utente_id) {
+      query += " AND r.utente_id = ?";
+      params.push(utente_id);
+    }
+
+    if (questionario_id) {
+      query += " AND r.questionario_id = ?";
+      params.push(questionario_id);
+    }
+
+    if (lezione_id) {
+      query += " AND q.lezione_id = ?";
+      params.push(lezione_id);
+    }
+
+    if (date_from) {
+      query += " AND DATE(r.submitted_at) >= ?";
+      params.push(date_from);
+    }
+
+    if (date_to) {
+      query += " AND DATE(r.submitted_at) <= ?";
+      params.push(date_to);
+    }
+
+    query += " ORDER BY r.submitted_at DESC";
+
+    const [risposte] = await db.execute(query, params);
+
+    // Calcola statistiche
+    const utentiUnici = new Set(risposte.map((r) => r.utente_id)).size;
+    const questionariUnici = new Set(risposte.map((r) => r.questionario_id))
+      .size;
+
+    res.json({
+      totale_risposte: risposte.length,
+      utenti_unici: utentiUnici,
+      questionari_unici: questionariUnici,
+      risposte: risposte,
+    });
+  } catch (error) {
+    console.error("Errore anteprima export:", error);
+    res.status(500).json({ error: "Errore nel caricamento dell'anteprima" });
+  }
+});
+
+// Export risposte
+app.get("/api/export/risposte", async (req, res) => {
+  try {
+    const {
+      format,
+      utente_id,
+      questionario_id,
+      lezione_id,
+      date_from,
+      date_to,
+    } = req.query;
+
+    // Query per ottenere le risposte complete
+    let query = `
+      SELECT 
+        r.id,
+        u.nome as utente_nome,
+        u.id as utente_id,
+        q.titolo as questionario_titolo,
+        q.descrizione as questionario_descrizione,
+        q.domande,
+        l.titolo as lezione_titolo,
+        rel.nome as relatore_nome,
+        r.risposte,
+        r.submitted_at,
+        r.completata,
+        r.tempo_impiegato
+      FROM risposte r
+      JOIN utenti u ON r.utente_id = u.id
+      JOIN questionari q ON r.questionario_id = q.id
+      JOIN lezioni l ON q.lezione_id = l.id
+      JOIN relatori rel ON l.relatore_id = rel.id
+      WHERE 1=1
+    `;
+
+    const params = [];
+
+    if (utente_id) {
+      query += " AND r.utente_id = ?";
+      params.push(utente_id);
+    }
+
+    if (questionario_id) {
+      query += " AND r.questionario_id = ?";
+      params.push(questionario_id);
+    }
+
+    if (lezione_id) {
+      query += " AND q.lezione_id = ?";
+      params.push(lezione_id);
+    }
+
+    if (date_from) {
+      query += " AND DATE(r.submitted_at) >= ?";
+      params.push(date_from);
+    }
+
+    if (date_to) {
+      query += " AND DATE(r.submitted_at) <= ?";
+      params.push(date_to);
+    }
+
+    query += " ORDER BY r.submitted_at DESC";
+
+    const [risposte] = await db.execute(query, params);
+
+    // Prepara i dati per l'export
+    const exportData = [];
+
+    risposte.forEach((risposta) => {
+      let risposteData = {};
+      let domandeData = {};
+
+      try {
+        risposteData =
+          typeof risposta.risposte === "string"
+            ? JSON.parse(risposta.risposte)
+            : risposta.risposte;
+
+        domandeData =
+          typeof risposta.domande === "string"
+            ? JSON.parse(risposta.domande)
+            : risposta.domande;
+      } catch (e) {
+        console.error("Errore parsing JSON:", e);
+        return;
+      }
+
+      // Estrai le domande e risposte
+      if (domandeData.questions && Array.isArray(domandeData.questions)) {
+        domandeData.questions.forEach((domanda, index) => {
+          const questionId = domanda.id || index;
+          const risposta_valore = risposteData[questionId];
+
+          let rispostaFormattata = "";
+          if (Array.isArray(risposta_valore)) {
+            rispostaFormattata = risposta_valore.join(", ");
+          } else if (
+            risposta_valore !== null &&
+            risposta_valore !== undefined
+          ) {
+            rispostaFormattata = String(risposta_valore);
+          } else {
+            rispostaFormattata = "Nessuna risposta";
+          }
+
+          exportData.push({
+            utente_nome: risposta.utente_nome,
+            utente_id: risposta.utente_id,
+            questionario: risposta.questionario_titolo,
+            lezione: risposta.lezione_titolo,
+            relatore: risposta.relatore_nome,
+            domanda: domanda.question,
+            tipo_domanda: domanda.type,
+            risposta: rispostaFormattata,
+            data_invio: new Date(risposta.submitted_at).toLocaleString("it-IT"),
+            completata: risposta.completata ? "Sì" : "No",
+            tempo_impiegato: risposta.tempo_impiegato
+              ? `${Math.round(risposta.tempo_impiegato / 60)} min`
+              : "N/A",
+          });
+        });
+      }
+    });
+
+    // In base al formato richiesto
+    if (format === "json") {
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Content-Disposition", "attachment; filename=export.json");
+      res.json(exportData);
+    } else if (format === "csv") {
+      // Genera CSV
+      const headers = Object.keys(exportData[0] || {});
+      let csv = headers.join(",") + "\n";
+
+      exportData.forEach((row) => {
+        const values = headers.map((header) => {
+          const value = row[header] || "";
+          const escaped = String(value).replace(/"/g, '""');
+          return escaped.includes(",") || escaped.includes("\n")
+            ? `"${escaped}"`
+            : escaped;
+        });
+        csv += values.join(",") + "\n";
+      });
+
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", "attachment; filename=export.csv");
+      res.send(csv);
+    } else if (format === "excel") {
+      // Genera Excel
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Risposte");
+
+      // Stili
+      const headerStyle = {
+        font: { bold: true, color: { argb: "FFFFFFFF" } },
+        fill: {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF0066CC" },
+        },
+        alignment: { vertical: "middle", horizontal: "center" },
+      };
+
+      // Aggiungi headers
+      const headers = Object.keys(exportData[0] || {});
+      const headerRow = worksheet.addRow(
+        headers.map((h) => h.replace(/_/g, " ").toUpperCase())
+      );
+      headerRow.eachCell((cell) => {
+        cell.style = headerStyle;
+      });
+
+      // Aggiungi dati
+      exportData.forEach((row) => {
+        const values = headers.map((h) => row[h]);
+        worksheet.addRow(values);
+      });
+
+      // Auto-width colonne
+      worksheet.columns.forEach((column) => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: true }, (cell) => {
+          const cellLength = cell.value ? cell.value.toString().length : 10;
+          if (cellLength > maxLength) maxLength = cellLength;
+        });
+        column.width = Math.min(maxLength + 2, 50);
+      });
+
+      // Freeze header
+      worksheet.views = [{ state: "frozen", xSplit: 0, ySplit: 1 }];
+
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader("Content-Disposition", "attachment; filename=export.xlsx");
+
+      await workbook.xlsx.write(res);
+      res.end();
+    } else if (format === "pdf") {
+      // Genera PDF
+      const doc = new PDFDocument({
+        margin: 50,
+        size: "A4",
+        layout: "landscape",
+      });
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "attachment; filename=export.pdf");
+
+      doc.pipe(res);
+
+      // Titolo
+      doc
+        .fontSize(20)
+        .font("Helvetica-Bold")
+        .text("Export Risposte Questionari", { align: "center" });
+      doc
+        .fontSize(10)
+        .font("Helvetica")
+        .text(`Generato il ${new Date().toLocaleString("it-IT")}`, {
+          align: "center",
+        });
+      doc.moveDown(2);
+
+      // Statistiche
+      const totalRisposte = exportData.length;
+      const utentiUnici = new Set(exportData.map((r) => r.utente_id)).size;
+
+      doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .text(
+          `Totale Risposte: ${totalRisposte}  |  Utenti Unici: ${utentiUnici}`
+        );
+      doc.moveDown(1);
+
+      // Tabella (semplificata per PDF)
+      doc.fontSize(8).font("Helvetica");
+
+      let y = doc.y;
+      const lineHeight = 15;
+      const colWidths = {
+        utente: 80,
+        questionario: 120,
+        domanda: 150,
+        risposta: 200,
+        data: 90,
+      };
+
+      // Headers
+      doc.font("Helvetica-Bold");
+      doc.text("UTENTE", 50, y, { width: colWidths.utente, continued: true });
+      doc.text("QUESTIONARIO", 50 + colWidths.utente, y, {
+        width: colWidths.questionario,
+        continued: true,
+      });
+      doc.text("DOMANDA", 50 + colWidths.utente + colWidths.questionario, y, {
+        width: colWidths.domanda,
+        continued: true,
+      });
+      doc.text(
+        "RISPOSTA",
+        50 + colWidths.utente + colWidths.questionario + colWidths.domanda,
+        y,
+        { width: colWidths.risposta, continued: true }
+      );
+      doc.text(
+        "DATA",
+        50 +
+          colWidths.utente +
+          colWidths.questionario +
+          colWidths.domanda +
+          colWidths.risposta,
+        y,
+        { width: colWidths.data }
+      );
+
+      doc
+        .moveTo(50, y + lineHeight)
+        .lineTo(750, y + lineHeight)
+        .stroke();
+      y += lineHeight + 5;
+
+      // Dati (primi 100 per non sovraccaricare il PDF)
+      doc.font("Helvetica");
+      exportData.slice(0, 100).forEach((row) => {
+        if (y > 500) {
+          doc.addPage();
+          y = 50;
+        }
+
+        const utente = (row.utente_nome || "").substring(0, 15);
+        const questionario = (row.questionario || "").substring(0, 20);
+        const domanda = (row.domanda || "").substring(0, 30);
+        const risposta = (row.risposta || "").substring(0, 40);
+        const data = (row.data_invio || "").split(",")[0];
+
+        doc.text(utente, 50, y, { width: colWidths.utente, continued: true });
+        doc.text(questionario, 50 + colWidths.utente, y, {
+          width: colWidths.questionario,
+          continued: true,
+        });
+        doc.text(domanda, 50 + colWidths.utente + colWidths.questionario, y, {
+          width: colWidths.domanda,
+          continued: true,
+        });
+        doc.text(
+          risposta,
+          50 + colWidths.utente + colWidths.questionario + colWidths.domanda,
+          y,
+          { width: colWidths.risposta, continued: true }
+        );
+        doc.text(
+          data,
+          50 +
+            colWidths.utente +
+            colWidths.questionario +
+            colWidths.domanda +
+            colWidths.risposta,
+          y,
+          { width: colWidths.data }
+        );
+
+        y += lineHeight;
+      });
+
+      if (exportData.length > 100) {
+        doc.moveDown(2);
+        doc
+          .fontSize(10)
+          .font("Helvetica-Oblique")
+          .text(`... e altre ${exportData.length - 100} risposte`, {
+            align: "center",
+          });
+      }
+
+      doc.end();
+    } else if (format === "word") {
+      // Genera Word
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              // Titolo
+              new Paragraph({
+                text: "Export Risposte Questionari",
+                heading: "Heading1",
+                alignment: AlignmentType.CENTER,
+              }),
+              new Paragraph({
+                text: `Generato il ${new Date().toLocaleString("it-IT")}`,
+                alignment: AlignmentType.CENTER,
+              }),
+              new Paragraph({ text: "" }),
+
+              // Statistiche
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Totale Risposte: ${exportData.length}  |  `,
+                    bold: true,
+                  }),
+                  new TextRun({
+                    text: `Utenti Unici: ${
+                      new Set(exportData.map((r) => r.utente_id)).size
+                    }`,
+                    bold: true,
+                  }),
+                ],
+              }),
+              new Paragraph({ text: "" }),
+
+              // Tabella
+              new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                rows: [
+                  // Header
+                  new TableRow({
+                    children: [
+                      new TableCell({
+                        children: [
+                          new Paragraph({ text: "Utente", bold: true }),
+                        ],
+                      }),
+                      new TableCell({
+                        children: [
+                          new Paragraph({ text: "Questionario", bold: true }),
+                        ],
+                      }),
+                      new TableCell({
+                        children: [
+                          new Paragraph({ text: "Domanda", bold: true }),
+                        ],
+                      }),
+                      new TableCell({
+                        children: [
+                          new Paragraph({ text: "Risposta", bold: true }),
+                        ],
+                      }),
+                      new TableCell({
+                        children: [new Paragraph({ text: "Data", bold: true })],
+                      }),
+                    ],
+                  }),
+                  // Dati (primi 50)
+                  ...exportData.slice(0, 50).map(
+                    (row) =>
+                      new TableRow({
+                        children: [
+                          new TableCell({
+                            children: [
+                              new Paragraph({ text: row.utente_nome || "" }),
+                            ],
+                          }),
+                          new TableCell({
+                            children: [
+                              new Paragraph({ text: row.questionario || "" }),
+                            ],
+                          }),
+                          new TableCell({
+                            children: [
+                              new Paragraph({ text: row.domanda || "" }),
+                            ],
+                          }),
+                          new TableCell({
+                            children: [
+                              new Paragraph({ text: row.risposta || "" }),
+                            ],
+                          }),
+                          new TableCell({
+                            children: [
+                              new Paragraph({
+                                text: (row.data_invio || "").split(",")[0],
+                              }),
+                            ],
+                          }),
+                        ],
+                      })
+                  ),
+                ],
+              }),
+            ],
+          },
+        ],
+      });
+
+      const buffer = await Packer.toBuffer(doc);
+
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      );
+      res.setHeader("Content-Disposition", "attachment; filename=export.docx");
+      res.send(buffer);
+    } else {
+      res.status(400).json({
+        error: "Formato non valido",
+        message: "Formati supportati: json, csv, excel, pdf, word",
+      });
+    }
+  } catch (error) {
+    console.error("Errore export risposte:", error);
+    res.status(500).json({ error: "Errore durante l'export" });
+  }
 });
 
 // Error handling middleware
