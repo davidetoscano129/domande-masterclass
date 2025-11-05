@@ -135,7 +135,6 @@ function UtenteDashboard({ user, onLogout }) {
             className="hero-logo-image"
           />
         </div>
-        <h1 className="hero-title">Masterclass</h1>
         <p className="hero-subtitle">
           Accedi ai questionari e completa il tuo percorso formativo
         </p>

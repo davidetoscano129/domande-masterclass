@@ -4,7 +4,7 @@
 .item-card-modern {
   background-color: var(--white);
   border-radius: var(--radius);
-  padding: var(--space-lg);
+  padding: 20px;
   border: 1px solid var(--gray-200);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -22,17 +22,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-md);
+  margin-bottom: 16px;
 }
 
 .card-content-modern {
   flex: 1;
-  margin-bottom: var(--space-md);
+  margin-bottom: 16px;
 }
 
 .card-footer-modern {
   border-top: 1px solid var(--gray-100);
-  padding-top: var(--space-md);
+  padding-top: 16px;
 }
 
 /* Card relatori/tesori */
@@ -53,18 +53,18 @@
 }
 
 .tesoro-card-inner {
-  padding: var(--space-xl);
+  padding: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-height: 280px;
+  min-height: 260px;
 }
 
 .tesoro-instructor-image {
-  width: 80px;
-  height: 80px;
-  margin-bottom: var(--space-lg);
+  width: 70px;
+  height: 70px;
+  margin-bottom: 20px;
 }
 
 .instructor-placeholder {
@@ -75,7 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--gray-600);
   border: 2px solid var(--gray-200);
@@ -102,7 +102,7 @@
 }
 
 .tesoro-title-modern {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--gray-900);
   margin-bottom: var(--space-sm);
@@ -110,14 +110,14 @@
 }
 
 .tesoro-instructor-name {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   color: var(--gray-600);
-  margin-bottom: var(--space-lg);
+  margin-bottom: 20px;
 }
 
 .tesoro-progress-section {
-  margin-bottom: var(--space-lg);
+  margin-bottom: 20px;
 }
 
 /* Card "In arrivo" */
@@ -133,10 +133,10 @@
 .coming-soon-badge {
   background-color: var(--gray-200);
   color: var(--gray-600);
-  padding: var(--space-sm) var(--space-md);
+  padding: 8px 14px;
   border-radius: var(--radius);
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 /* Card questionari */

@@ -114,8 +114,8 @@ h4 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 24px;
-  font-size: 17px;
+  padding: 10px 20px;
+  font-size: 15px;
   font-weight: var(--font-weight-regular);
   line-height: 1.17648;
   text-decoration: none;
@@ -124,7 +124,7 @@ h4 {
   cursor: pointer;
   transition: all var(--transition-base);
   white-space: nowrap;
-  min-height: 48px;
+  min-height: 42px;
 }
 
 .btn-primary {
@@ -152,7 +152,7 @@ h4 {
 .btn-text {
   background: transparent;
   color: var(--color-primary);
-  padding: 8px 16px;
+  padding: 7px 14px;
 }
 
 .btn-text:hover {
@@ -175,7 +175,7 @@ h4 {
 .card {
   background: white;
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  padding: 24px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--color-border-light);
   transition: all var(--transition-base);
@@ -187,16 +187,16 @@ h4 {
 }
 
 .card-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: var(--font-weight-semibold);
   margin-bottom: var(--space-sm);
   color: var(--color-text-primary);
 }
 
 .card-subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--color-text-secondary);
-  margin-bottom: var(--space-lg);
+  margin-bottom: 20px;
 }
 
 /* ============================================
@@ -207,12 +207,12 @@ h4 {
   display: flex;
   gap: var(--space-sm);
   border-bottom: 1px solid var(--color-border-light);
-  margin-bottom: var(--space-2xl);
+  margin-bottom: 40px;
 }
 
 .nav-tab {
-  padding: var(--space-md) var(--space-lg);
-  font-size: 17px;
+  padding: 14px 20px;
+  font-size: 15px;
   font-weight: var(--font-weight-regular);
   color: var(--color-text-secondary);
   background: transparent;

@@ -5,10 +5,10 @@
   background-color: var(--gray-800);
   color: var(--white);
   border: none;
-  padding: var(--space-sm) var(--space-lg);
+  padding: 8px 18px;
   border-radius: var(--radius);
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -21,10 +21,10 @@
   background-color: var(--gray-100);
   color: var(--gray-700);
   border: none;
-  padding: var(--space-sm) var(--space-lg);
+  padding: 8px 18px;
   border-radius: var(--radius);
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -37,10 +37,10 @@
 .btn-primary-modern,
 .btn-secondary-modern {
   border: none;
-  padding: var(--space-sm) var(--space-lg);
+  padding: 8px 18px;
   border-radius: var(--radius);
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -67,10 +67,10 @@
 /* Pulsanti azione */
 .btn-action-modern {
   border: none;
-  padding: var(--space-sm) var(--space-lg);
+  padding: 8px 18px;
   border-radius: var(--radius);
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;

@@ -112,7 +112,6 @@ function RelatoreDashboard({ user, onLogout }) {
             className="hero-logo-image"
           />
         </div>
-        <h1 className="hero-title">Masterclass</h1>
         <p className="hero-subtitle">
           Gestisci le tue lezioni e questionari in modo semplice ed efficace
         </p>

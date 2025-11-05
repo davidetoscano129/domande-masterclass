@@ -43,33 +43,33 @@
 /* Hero Section */
 .hero {
   background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
-  padding: var(--space-3xl) 0 var(--space-2xl);
+  padding: 48px 0 40px;
   text-align: center;
 }
 
 .hero-logo-container {
-  margin-bottom: var(--space-xl);
+  margin-bottom: 32px;
   display: inline-flex;
   justify-content: center;
   align-items: center;
   background: white;
-  padding: var(--space-lg) var(--space-2xl);
-  border-radius: var(--radius-xl);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 16px 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .hero-logo-image {
-  height: 70px;
+  height: 240px;
   width: auto;
   object-fit: contain;
   display: block;
 }
 
 .hero-title {
-  font-size: 56px;
+  font-size: 40px;
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.015em;
-  margin-bottom: var(--space-md);
+  margin-bottom: 12px;
   background: linear-gradient(90deg, #0071e3 0%, #00c1ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -77,55 +77,55 @@
 }
 
 .hero-subtitle {
-  font-size: 21px;
+  font-size: 18px;
   color: var(--color-text-secondary);
   max-width: 600px;
   margin: 0 auto;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* Section */
 .section {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--space-xl) var(--space-3xl);
+  padding: 0 var(--space-xl) 48px;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: var(--space-xl);
-  padding-bottom: var(--space-lg);
+  margin-bottom: 28px;
+  padding-bottom: 20px;
   border-bottom: 1px solid var(--color-border-light);
 }
 
 .section-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.005em;
 }
 
 .section-description {
-  font-size: 17px;
+  font-size: 15px;
   color: var(--color-text-secondary);
-  margin-top: var(--space-xs);
+  margin-top: 6px;
 }
 
 /* Lezione Card - Apple Style */
 .lezione-card {
   background: white;
-  border-radius: var(--radius-xl);
-  padding: var(--space-xl);
-  margin-bottom: var(--space-lg);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
   border: 1px solid var(--color-border-light);
   transition: all var(--transition-base);
   cursor: pointer;
 }
 
 .lezione-card:hover {
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
-  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
   border-color: var(--color-primary);
 }
 
@@ -133,7 +133,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: var(--space-lg);
+  margin-bottom: 20px;
 }
 
 .lezione-info {
@@ -142,33 +142,33 @@
 
 .lezione-number {
   display: inline-block;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   background: rgba(0, 113, 227, 0.1);
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 4px 10px;
+  border-radius: 12px;
   margin-bottom: var(--space-md);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
 .lezione-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--space-sm);
+  margin-bottom: 8px;
   letter-spacing: -0.01em;
 }
 
 .lezione-description {
-  font-size: 17px;
+  font-size: 15px;
   color: var(--color-text-secondary);
   line-height: 1.5;
 }
 
 .lezione-stats {
   display: flex;
-  gap: var(--space-lg);
+  gap: 24px;
 }
 
 .stat {
@@ -176,7 +176,7 @@
 }
 
 .stat-value {
-  font-size: 40px;
+  font-size: 32px;
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   line-height: 1;
@@ -184,11 +184,11 @@
 }
 
 .stat-label {
-  font-size: 13px;
+  font-size: 11px;
   color: var(--color-text-secondary);
-  margin-top: var(--space-xs);
+  margin-top: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   font-weight: var(--font-weight-medium);
 }
 
@@ -196,8 +196,8 @@
   background: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -617,7 +617,7 @@
 }
 
 .relatore-card-header {
-  padding: var(--space-2xl) var(--space-xl);
+  padding: 40px 24px;
   text-align: center;
   color: white;
   position: relative;
@@ -637,8 +637,8 @@
 }
 
 .relatore-avatar {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
@@ -646,10 +646,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36px;
+  font-size: 28px;
   font-weight: var(--font-weight-bold);
-  margin: 0 auto var(--space-lg);
-  border: 4px solid rgba(255, 255, 255, 0.3);
+  margin: 0 auto 16px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 .relatore-card:nth-child(3n + 2) .relatore-avatar {
@@ -658,17 +658,17 @@
 }
 
 .relatore-name {
-  font-size: 24px;
+  font-size: 19px;
   font-weight: var(--font-weight-bold);
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .relatore-stats {
   display: flex;
   justify-content: space-around;
-  padding: var(--space-xl) var(--space-lg);
+  padding: 24px 20px;
   background: white;
 }
 
@@ -686,7 +686,7 @@
 }
 
 .relatore-stats .stat-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -694,7 +694,7 @@
 }
 
 .progress-bar {
-  height: 6px;
+  height: 5px;
   background: var(--color-background);
   margin: 0;
   overflow: hidden;
@@ -718,14 +718,14 @@
 }
 
 .relatore-card-footer {
-  padding: var(--space-md) var(--space-lg);
+  padding: 16px 20px;
   background: white;
   text-align: center;
   border-top: 1px solid var(--color-border-light);
 }
 
 .progress-text {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-semibold);
 }

@@ -4,17 +4,17 @@
 .form-card-modern {
   background-color: var(--gray-50);
   border-radius: var(--radius);
-  padding: var(--space-xl);
+  padding: 24px;
   border: 1px solid var(--gray-200);
 }
 
 .form-header {
-  margin-bottom: var(--space-lg);
+  margin-bottom: 20px;
   text-align: center;
 }
 
 .form-header h3 {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--gray-900);
   margin-bottom: var(--space-sm);
@@ -22,7 +22,7 @@
 
 .form-header p {
   color: var(--gray-600);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   margin: 0;
 }
 
@@ -30,12 +30,12 @@
 .form-modern {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: 20px;
 }
 
 .form-row-modern {
   display: flex;
-  gap: var(--space-md);
+  gap: 16px;
 }
 
 .input-group {
@@ -52,16 +52,16 @@
 .input-group label {
   font-weight: 500;
   color: var(--gray-700);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 /* Input e textarea */
 .input-modern,
 .textarea-modern {
-  padding: var(--space-sm) var(--space-md);
+  padding: 10px 14px;
   border: 1px solid var(--gray-300);
   border-radius: var(--radius);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   transition: all 0.2s ease;
   background-color: var(--white);
 }
@@ -77,33 +77,33 @@
 .form-actions {
   display: flex;
   justify-content: center;
-  padding-top: var(--space-md);
+  padding-top: 16px;
 }
 
 /* Login form specific */
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .form-field label {
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
 }
 
 .form-control {
-  padding: 14px 16px;
+  padding: 12px 14px;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   transition: all 0.2s ease;
   background: white;
   color: #1a1a1a;
@@ -122,21 +122,21 @@
 }
 
 .form-hint {
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   color: #9ca3af;
 }
 
 .alert-error {
-  padding: 14px 16px;
+  padding: 12px 14px;
   background: #fee2e2;
   color: #dc2626;
   border-radius: 12px;
-  font-size: 0.9rem;
+  font-size: 0.8125rem;
   border: 1px solid #fecaca;
 }
 
 .form-buttons {
   display: flex;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 10px;
 }
