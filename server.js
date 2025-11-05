@@ -1176,17 +1176,17 @@ app.get("/api/export/preview", async (req, res) => {
 
     let query = `
       SELECT 
-        r.id,
-        r.utente_id,
+        c.id,
+        c.utente_id,
         u.nome as utente_nome,
-        r.questionario_id,
+        c.questionario_id,
         q.titolo as questionario_titolo,
         l.titolo as lezione_titolo,
-        r.submitted_at,
-        r.completata
-      FROM risposte r
-      JOIN utenti u ON r.utente_id = u.id
-      JOIN questionari q ON r.questionario_id = q.id
+        c.submitted_at,
+        c.completata
+      FROM compilazioni c
+      JOIN utenti u ON c.utente_id = u.id
+      JOIN questionari q ON c.questionario_id = q.id
       JOIN lezioni l ON q.lezione_id = l.id
       WHERE 1=1
     `;
@@ -1194,12 +1194,12 @@ app.get("/api/export/preview", async (req, res) => {
     const params = [];
 
     if (utente_id) {
-      query += " AND r.utente_id = ?";
+      query += " AND c.utente_id = ?";
       params.push(utente_id);
     }
 
     if (questionario_id) {
-      query += " AND r.questionario_id = ?";
+      query += " AND c.questionario_id = ?";
       params.push(questionario_id);
     }
 
@@ -1209,16 +1209,16 @@ app.get("/api/export/preview", async (req, res) => {
     }
 
     if (date_from) {
-      query += " AND DATE(r.submitted_at) >= ?";
+      query += " AND DATE(c.submitted_at) >= ?";
       params.push(date_from);
     }
 
     if (date_to) {
-      query += " AND DATE(r.submitted_at) <= ?";
+      query += " AND DATE(c.submitted_at) <= ?";
       params.push(date_to);
     }
 
-    query += " ORDER BY r.submitted_at DESC";
+    query += " ORDER BY c.submitted_at DESC";
 
     const [risposte] = await db.execute(query, params);
 
@@ -1254,7 +1254,7 @@ app.get("/api/export/risposte", async (req, res) => {
     // Query per ottenere le risposte complete
     let query = `
       SELECT 
-        r.id,
+        c.id,
         u.nome as utente_nome,
         u.id as utente_id,
         q.titolo as questionario_titolo,
@@ -1262,13 +1262,13 @@ app.get("/api/export/risposte", async (req, res) => {
         q.domande,
         l.titolo as lezione_titolo,
         rel.nome as relatore_nome,
-        r.risposte,
-        r.submitted_at,
-        r.completata,
-        r.tempo_impiegato
-      FROM risposte r
-      JOIN utenti u ON r.utente_id = u.id
-      JOIN questionari q ON r.questionario_id = q.id
+        c.risposte,
+        c.submitted_at,
+        c.completata,
+        c.tempo_impiegato
+      FROM compilazioni c
+      JOIN utenti u ON c.utente_id = u.id
+      JOIN questionari q ON c.questionario_id = q.id
       JOIN lezioni l ON q.lezione_id = l.id
       JOIN relatori rel ON l.relatore_id = rel.id
       WHERE 1=1
@@ -1277,12 +1277,12 @@ app.get("/api/export/risposte", async (req, res) => {
     const params = [];
 
     if (utente_id) {
-      query += " AND r.utente_id = ?";
+      query += " AND c.utente_id = ?";
       params.push(utente_id);
     }
 
     if (questionario_id) {
-      query += " AND r.questionario_id = ?";
+      query += " AND c.questionario_id = ?";
       params.push(questionario_id);
     }
 
@@ -1292,16 +1292,16 @@ app.get("/api/export/risposte", async (req, res) => {
     }
 
     if (date_from) {
-      query += " AND DATE(r.submitted_at) >= ?";
+      query += " AND DATE(c.submitted_at) >= ?";
       params.push(date_from);
     }
 
     if (date_to) {
-      query += " AND DATE(r.submitted_at) <= ?";
+      query += " AND DATE(c.submitted_at) <= ?";
       params.push(date_to);
     }
 
-    query += " ORDER BY r.submitted_at DESC";
+    query += " ORDER BY c.submitted_at DESC";
 
     const [risposte] = await db.execute(query, params);
 
@@ -1478,102 +1478,113 @@ app.get("/api/export/risposte", async (req, res) => {
         );
       doc.moveDown(1);
 
-      // Tabella (semplificata per PDF)
-      doc.fontSize(8).font("Helvetica");
+      // Tabella con layout corretto
+      doc.fontSize(7).font("Helvetica");
 
       let y = doc.y;
-      const lineHeight = 15;
+      const margin = 50;
+      const pageWidth = 792 - margin * 2; // A4 landscape width minus margins
+
+      // Larghezze colonne proporzionali
       const colWidths = {
-        utente: 80,
-        questionario: 120,
-        domanda: 150,
-        risposta: 200,
-        data: 90,
+        utente: pageWidth * 0.12,
+        questionario: pageWidth * 0.15,
+        domanda: pageWidth * 0.28,
+        risposta: pageWidth * 0.3,
+        data: pageWidth * 0.15,
       };
 
+      // Funzione per disegnare cella
+      const drawCell = (text, x, y, width, height, bold = false) => {
+        doc.font(bold ? "Helvetica-Bold" : "Helvetica");
+        doc.rect(x, y, width, height).stroke();
+        doc.text(text || "", x + 2, y + 2, {
+          width: width - 4,
+          height: height - 4,
+          ellipsis: true,
+          lineBreak: false,
+        });
+      };
+
+      const rowHeight = 20;
+
       // Headers
-      doc.font("Helvetica-Bold");
-      doc.text("UTENTE", 50, y, { width: colWidths.utente, continued: true });
-      doc.text("QUESTIONARIO", 50 + colWidths.utente, y, {
-        width: colWidths.questionario,
-        continued: true,
-      });
-      doc.text("DOMANDA", 50 + colWidths.utente + colWidths.questionario, y, {
-        width: colWidths.domanda,
-        continued: true,
-      });
-      doc.text(
-        "RISPOSTA",
-        50 + colWidths.utente + colWidths.questionario + colWidths.domanda,
+      let xPos = margin;
+      drawCell("UTENTE", xPos, y, colWidths.utente, rowHeight, true);
+      xPos += colWidths.utente;
+      drawCell(
+        "QUESTIONARIO",
+        xPos,
         y,
-        { width: colWidths.risposta, continued: true }
+        colWidths.questionario,
+        rowHeight,
+        true
       );
-      doc.text(
-        "DATA",
-        50 +
-          colWidths.utente +
-          colWidths.questionario +
-          colWidths.domanda +
-          colWidths.risposta,
-        y,
-        { width: colWidths.data }
-      );
+      xPos += colWidths.questionario;
+      drawCell("DOMANDA", xPos, y, colWidths.domanda, rowHeight, true);
+      xPos += colWidths.domanda;
+      drawCell("RISPOSTA", xPos, y, colWidths.risposta, rowHeight, true);
+      xPos += colWidths.risposta;
+      drawCell("DATA", xPos, y, colWidths.data, rowHeight, true);
 
-      doc
-        .moveTo(50, y + lineHeight)
-        .lineTo(750, y + lineHeight)
-        .stroke();
-      y += lineHeight + 5;
+      y += rowHeight;
 
-      // Dati (primi 100 per non sovraccaricare il PDF)
-      doc.font("Helvetica");
-      exportData.slice(0, 100).forEach((row) => {
+      // Dati (primi 150 righe)
+      exportData.slice(0, 150).forEach((row) => {
+        // Nuova pagina se necessario
         if (y > 500) {
           doc.addPage();
           y = 50;
+
+          // Ridisegna header
+          let xHeader = margin;
+          drawCell("UTENTE", xHeader, y, colWidths.utente, rowHeight, true);
+          xHeader += colWidths.utente;
+          drawCell(
+            "QUESTIONARIO",
+            xHeader,
+            y,
+            colWidths.questionario,
+            rowHeight,
+            true
+          );
+          xHeader += colWidths.questionario;
+          drawCell("DOMANDA", xHeader, y, colWidths.domanda, rowHeight, true);
+          xHeader += colWidths.domanda;
+          drawCell("RISPOSTA", xHeader, y, colWidths.risposta, rowHeight, true);
+          xHeader += colWidths.risposta;
+          drawCell("DATA", xHeader, y, colWidths.data, rowHeight, true);
+          y += rowHeight;
         }
 
-        const utente = (row.utente_nome || "").substring(0, 15);
-        const questionario = (row.questionario || "").substring(0, 20);
-        const domanda = (row.domanda || "").substring(0, 30);
-        const risposta = (row.risposta || "").substring(0, 40);
-        const data = (row.data_invio || "").split(",")[0];
+        const utente = row.utente_nome || "N/A";
+        const questionario = row.questionario || "N/A";
+        const domanda = row.domanda || "N/A";
+        const risposta = String(row.risposta || "N/A");
+        const data = row.data_invio
+          ? new Date(row.data_invio).toLocaleDateString("it-IT")
+          : "N/A";
 
-        doc.text(utente, 50, y, { width: colWidths.utente, continued: true });
-        doc.text(questionario, 50 + colWidths.utente, y, {
-          width: colWidths.questionario,
-          continued: true,
-        });
-        doc.text(domanda, 50 + colWidths.utente + colWidths.questionario, y, {
-          width: colWidths.domanda,
-          continued: true,
-        });
-        doc.text(
-          risposta,
-          50 + colWidths.utente + colWidths.questionario + colWidths.domanda,
-          y,
-          { width: colWidths.risposta, continued: true }
-        );
-        doc.text(
-          data,
-          50 +
-            colWidths.utente +
-            colWidths.questionario +
-            colWidths.domanda +
-            colWidths.risposta,
-          y,
-          { width: colWidths.data }
-        );
+        xPos = margin;
+        drawCell(utente, xPos, y, colWidths.utente, rowHeight);
+        xPos += colWidths.utente;
+        drawCell(questionario, xPos, y, colWidths.questionario, rowHeight);
+        xPos += colWidths.questionario;
+        drawCell(domanda, xPos, y, colWidths.domanda, rowHeight);
+        xPos += colWidths.domanda;
+        drawCell(risposta, xPos, y, colWidths.risposta, rowHeight);
+        xPos += colWidths.risposta;
+        drawCell(data, xPos, y, colWidths.data, rowHeight);
 
-        y += lineHeight;
+        y += rowHeight;
       });
 
-      if (exportData.length > 100) {
+      if (exportData.length > 150) {
         doc.moveDown(2);
         doc
           .fontSize(10)
           .font("Helvetica-Oblique")
-          .text(`... e altre ${exportData.length - 100} risposte`, {
+          .text(`... e altre ${exportData.length - 150} risposte`, {
             align: "center",
           });
       }

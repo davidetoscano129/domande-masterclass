@@ -62,18 +62,29 @@ function ExportManager({ user, onClose }) {
       if (dateTo) params.append("date_to", dateTo);
 
       const response = await fetch(url + params.toString());
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       setPreview(data);
     } catch (error) {
       console.error("Errore anteprima:", error);
-      alert("Errore nel caricamento dell'anteprima");
+      alert(`Errore nel caricamento dell'anteprima: ${error.message}`);
+      setPreview(null);
     } finally {
       setLoading(false);
     }
   };
 
   const handleExport = async () => {
-    if (!preview || preview.risposte.length === 0) {
+    if (!preview || !preview.risposte || preview.risposte.length === 0) {
       alert("Nessun dato da esportare");
       return;
     }
@@ -103,8 +114,17 @@ function ExportManager({ user, onClose }) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
+
+        const extensions = {
+          excel: "xlsx",
+          csv: "csv",
+          pdf: "pdf",
+          json: "json",
+          word: "docx",
+        };
+
         a.download = `export_risposte_${new Date().getTime()}.${
-          format === "excel" ? "xlsx" : format
+          extensions[format] || format
         }`;
         document.body.appendChild(a);
         a.click();
@@ -113,11 +133,12 @@ function ExportManager({ user, onClose }) {
 
         alert("Export completato con successo!");
       } else {
-        alert("Errore durante l'export");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Errore durante l'export");
       }
     } catch (error) {
       console.error("Errore export:", error);
-      alert("Errore durante l'export");
+      alert(`Errore durante l'export: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -487,43 +508,46 @@ function ExportManager({ user, onClose }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {preview.risposte.slice(0, 50).map((risposta, index) => (
-                        <tr
-                          key={index}
-                          style={{ borderBottom: "1px solid var(--gray-100)" }}
-                        >
-                          <td style={{ padding: "var(--space-sm)" }}>
-                            {risposta.utente_nome}
-                          </td>
-                          <td style={{ padding: "var(--space-sm)" }}>
-                            {risposta.questionario_titolo}
-                          </td>
-                          <td style={{ padding: "var(--space-sm)" }}>
-                            {new Date(risposta.submitted_at).toLocaleDateString(
-                              "it-IT"
-                            )}
-                          </td>
-                          <td
+                      {preview.risposte &&
+                        preview.risposte.slice(0, 50).map((risposta, index) => (
+                          <tr
+                            key={index}
                             style={{
-                              padding: "var(--space-sm)",
-                              textAlign: "center",
+                              borderBottom: "1px solid var(--gray-100)",
                             }}
                           >
-                            <span
-                              className={
-                                risposta.completata
-                                  ? "badge-success"
-                                  : "badge-elimina"
-                              }
+                            <td style={{ padding: "var(--space-sm)" }}>
+                              {risposta.utente_nome}
+                            </td>
+                            <td style={{ padding: "var(--space-sm)" }}>
+                              {risposta.questionario_titolo}
+                            </td>
+                            <td style={{ padding: "var(--space-sm)" }}>
+                              {new Date(
+                                risposta.submitted_at
+                              ).toLocaleDateString("it-IT")}
+                            </td>
+                            <td
+                              style={{
+                                padding: "var(--space-sm)",
+                                textAlign: "center",
+                              }}
                             >
-                              {risposta.completata ? "✓" : "✗"}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                              <span
+                                className={
+                                  risposta.completata
+                                    ? "badge-success"
+                                    : "badge-elimina"
+                                }
+                              >
+                                {risposta.completata ? "✓" : "✗"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
-                  {preview.risposte.length > 50 && (
+                  {preview.risposte && preview.risposte.length > 50 && (
                     <div
                       style={{
                         textAlign: "center",
