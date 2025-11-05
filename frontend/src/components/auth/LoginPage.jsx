@@ -51,28 +51,12 @@ function LoginPage({ onLogin }) {
 
   return (
     <div className="login-page">
-      <div className="login-logo-text">
-        <h1 className="logo-main">
-          <span className="letter-i">I</span>{" "}
-          <span className="letter-t1">T</span>
-          <span className="letter-e1">E</span>
-          <span className="letter-s">S</span>
-          <span className="letter-o">O</span>
-          <span className="letter-r">R</span>
-          <span className="letter-i2">I</span>
-        </h1>
-        <h2 className="logo-sub">
-          <span className="dell">dell'</span>{" "}
-          <span className="logo-impresa">
-            <span className="letter-i3">I</span>
-            <span className="letter-m">M</span>
-            <span className="letter-p">P</span>
-            <span className="letter-r2">R</span>
-            <span className="letter-e2">E</span>
-            <span className="letter-s2">S</span>
-            <span className="letter-a">A</span>
-          </span>
-        </h2>
+      <div className="login-logo-container">
+        <img
+          src="/images/logo-tesoridellimpresa.png"
+          alt="I Tesori dell'Impresa"
+          className="login-logo-image"
+        />
       </div>
       <div className="login-card">
         {!loginType ? (
@@ -84,9 +68,6 @@ function LoginPage({ onLogin }) {
                   onClick={() => setLoginType("relatore")}
                   className="login-option-btn login-option-relatore"
                 >
-                  <div className="option-avatar option-avatar-relatore">
-                    {/* Avatar senza lettera */}
-                  </div>
                   <div className="option-content">
                     <span className="option-title">AREA RELATORE</span>
                     <span className="option-subtitle">
@@ -99,9 +80,6 @@ function LoginPage({ onLogin }) {
                   onClick={() => setLoginType("utente")}
                   className="login-option-btn login-option-utente"
                 >
-                  <div className="option-avatar option-avatar-utente">
-                    {/* Avatar senza lettera */}
-                  </div>
                   <div className="option-content">
                     <span className="option-title">AREA UTENTE</span>
                     <span className="option-subtitle">
@@ -115,13 +93,6 @@ function LoginPage({ onLogin }) {
         ) : (
           <>
             <div className="login-card-header">
-              <div
-                className={`login-logo ${
-                  loginType === "relatore" ? "logo-relatore" : "logo-utente"
-                }`}
-              >
-                {/* Logo senza lettera */}
-              </div>
               <h1 className="login-card-title">
                 {loginType === "relatore" ? "AREA RELATORE" : "AREA UTENTE"}
               </h1>

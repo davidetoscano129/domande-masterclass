@@ -1,4 +1,4 @@
-/* ===== LOGIN PAGE - I TESORI DELL'IMPRESA ===== */
+/* ===== LOGIN PAGE ===== */
 
 .login-page {
   min-height: 100vh;
@@ -10,74 +10,25 @@
   padding: var(--spacing-lg);
 }
 
-/* Logo con stile tipografico */
-.login-logo-text {
+.login-page > .login-logo-container {
+  display: block;
+  width: auto;
+}
+
+.login-logo-container {
   text-align: center;
-  margin-bottom: 40px;
-}
-
-.logo-main {
-  font-family: "Playfair Display", serif;
-  font-size: 5rem;
-  font-weight: 900;
-  letter-spacing: 0.2em;
-  margin: 0;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.logo-main span {
+  margin-bottom: 48px;
+  background: white;
+  padding: var(--space-xl);
+  border-radius: var(--radius-xl);
   display: inline-block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Colori per I TESORI */
-.letter-i {
-  color: #f4c430;
-}
-.letter-t1 {
-  color: #f4c430;
-}
-.letter-e1 {
-  color: #d4a420;
-}
-.letter-s {
-  color: #9b9154;
-}
-.letter-o {
-  color: #618088;
-}
-.letter-r {
-  color: #4577a2;
-}
-.letter-i2 {
-  color: #3d7ec9;
-}
-
-.logo-sub {
-  font-family: "Playfair Display", serif;
-  font-size: 3.5rem;
-  font-weight: 400;
-  font-style: italic;
-  margin: -15px 0 0 0;
-  letter-spacing: 0.08em;
-  line-height: 1;
-}
-
-.dell {
-  color: #2c3e50;
-}
-
-.logo-impresa {
-  font-family: "Playfair Display", serif;
-  font-weight: 900;
-  font-style: normal;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-}
-
-/* Colori per IMPRESA */
-.letter-i3 {
-  color: #f4c430;
+.login-logo-image {
+  height: 80px;
+  width: auto;
+  display: block;
 }
 .letter-m {
   color: #f4c430;
