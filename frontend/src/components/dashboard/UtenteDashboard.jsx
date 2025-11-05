@@ -24,6 +24,8 @@ function UtenteDashboard({ user, onLogout }) {
       const questionariData = await questionariRes.json();
       const relatoriData = await relatoriRes.json();
 
+      console.log("Relatori ricevuti:", relatoriData);
+
       const questionariWithStatus = await Promise.all(
         questionariData.map(async (questionario) => {
           const checkResponse = await fetch(
