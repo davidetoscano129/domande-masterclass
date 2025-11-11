@@ -14,15 +14,41 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
 
   useEffect(() => {
     if (questionario) {
+      console.log("Questionario ricevuto per editing:", questionario);
+
+      // Controlli di sicurezza per le domande
+      let questionsData = questionario.domande;
+
+      // Se domande è una stringa, prova a parsarla
+      if (typeof questionsData === "string") {
+        try {
+          questionsData = JSON.parse(questionsData);
+        } catch (error) {
+          console.error("Errore parsing domande:", error);
+          questionsData = { questions: [] };
+        }
+      }
+
+      // Se questionsData è null, undefined o non ha la struttura corretta
+      if (!questionsData || typeof questionsData !== "object") {
+        questionsData = { questions: [] };
+      }
+
+      // Assicurati che questions sia un array
+      if (!Array.isArray(questionsData.questions)) {
+        questionsData = { ...questionsData, questions: [] };
+      }
+
+      console.log("Dati processati per editing:", questionsData);
+
+      const normalizedConfig = normalizeConfig(questionsData);
+      console.log("Config normalizzata:", normalizedConfig);
+
       setFormData({
-        titolo: questionario.titolo,
-        descrizione: questionario.descrizione,
-        lezione_id: questionario.lezione_id,
-        config: normalizeConfig(
-          typeof questionario.domande === "string"
-            ? JSON.parse(questionario.domande)
-            : questionario.domande
-        ),
+        titolo: questionario.titolo || "",
+        descrizione: questionario.descrizione || "",
+        lezione_id: questionario.lezione_id || "",
+        config: normalizedConfig,
       });
     }
   }, [questionario]);
@@ -50,7 +76,7 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
       ...prev,
       config: {
         ...prev.config,
-        questions: prev.config.questions.map((q) =>
+        questions: (prev.config?.questions || []).map((q) =>
           q.id === questionId ? { ...q, [field]: value } : q
         ),
       },
@@ -62,7 +88,9 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
       ...prev,
       config: {
         ...prev.config,
-        questions: prev.config.questions.filter((q) => q.id !== questionId),
+        questions: (prev.config?.questions || []).filter(
+          (q) => q.id !== questionId
+        ),
       },
     }));
   };
@@ -70,14 +98,18 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
   const addOption = (questionId) => {
     const newOption = { id: Date.now(), text: "" };
     updateQuestion(questionId, "options", [
-      ...(formData.config.questions.find((q) => q.id === questionId)?.options ||
-        []),
+      ...((formData.config?.questions || []).find((q) => q.id === questionId)
+        ?.options || []),
       newOption,
     ]);
   };
 
   const updateOption = (questionId, optionId, text) => {
-    const question = formData.config.questions.find((q) => q.id === questionId);
+    const question = (formData.config?.questions || []).find(
+      (q) => q.id === questionId
+    );
+    if (!question || !question.options) return;
+
     const updatedOptions = question.options.map((opt) =>
       opt.id === optionId ? { ...opt, text } : opt
     );
@@ -85,7 +117,11 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
   };
 
   const deleteOption = (questionId, optionId) => {
-    const question = formData.config.questions.find((q) => q.id === questionId);
+    const question = (formData.config?.questions || []).find(
+      (q) => q.id === questionId
+    );
+    if (!question || !question.options) return;
+
     const updatedOptions = question.options.filter(
       (opt) => opt.id !== optionId
     );
@@ -123,11 +159,23 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
   return (
     <div className="form-card-modern">
       <div className="form-header">
-        <h3>{questionario ? "Modifica Questionario" : "Nuovo Questionario"}</h3>
-        <p>
-          Compila tutti i campi per {questionario ? "modificare" : "creare"} il
-          questionario
-        </p>
+        <div>
+          <h3>
+            {questionario ? "Modifica Questionario" : "Nuovo Questionario"}
+          </h3>
+          <p>
+            Compila tutti i campi per {questionario ? "modificare" : "creare"}{" "}
+            il questionario
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="btn btn-text"
+          style={{ fontSize: "24px", padding: "8px" }}
+        >
+          ✕
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="form-modern">
@@ -169,45 +217,48 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
             className="input-modern"
           >
             <option value="">Seleziona lezione</option>
-            {lezioni.map((lezione) => (
-              <option key={lezione.id} value={lezione.id}>
-                {lezione.titolo}
-              </option>
-            ))}
+            {lezioni && Array.isArray(lezioni)
+              ? lezioni.map((lezione) => (
+                  <option key={lezione.id} value={lezione.id}>
+                    {lezione.titolo}
+                  </option>
+                ))
+              : null}
           </select>
         </div>
 
-        <div
-          className="questions-section"
-          style={{ marginTop: "var(--space-lg)" }}
-        >
-          <div className="section-header-modern">
-            <h4>Domande</h4>
+        <div className="domande-section">
+          <div className="domande-header">
+            <h4 className="domande-title">Domande</h4>
             <button
               type="button"
               onClick={addQuestion}
-              className="btn-small-modern btn-view"
+              className="btn-add-question"
             >
-              + Aggiungi Domanda
+              <span>+</span> Aggiungi Domanda
             </button>
           </div>
 
-          {formData.config.questions.map((question, index) => (
-            <QuestionEditor
-              key={question.id}
-              question={question}
-              index={index}
-              onUpdate={(field, value) =>
-                updateQuestion(question.id, field, value)
-              }
-              onDelete={() => deleteQuestion(question.id)}
-              onAddOption={() => addOption(question.id)}
-              onUpdateOption={(optionId, text) =>
-                updateOption(question.id, optionId, text)
-              }
-              onDeleteOption={(optionId) => deleteOption(question.id, optionId)}
-            />
-          ))}
+          {formData.config.questions && Array.isArray(formData.config.questions)
+            ? formData.config.questions.map((question, index) => (
+                <QuestionEditor
+                  key={question.id}
+                  question={question}
+                  index={index}
+                  onUpdate={(field, value) =>
+                    updateQuestion(question.id, field, value)
+                  }
+                  onDelete={() => deleteQuestion(question.id)}
+                  onAddOption={() => addOption(question.id)}
+                  onUpdateOption={(optionId, text) =>
+                    updateOption(question.id, optionId, text)
+                  }
+                  onDeleteOption={(optionId) =>
+                    deleteOption(question.id, optionId)
+                  }
+                />
+              ))
+            : null}
         </div>
 
         <div className="form-actions">
@@ -251,22 +302,21 @@ function QuestionEditor({
   const needsOptions = ["multiple_choice", "checkbox"].includes(question.type);
 
   return (
-    <div
-      className="relatore-card-modern"
-      style={{ marginBottom: "var(--space-md)" }}
-    >
-      <div className="relatore-card-header">
-        <span className="relatore-card-number">Domanda {index + 1}</span>
-        <button
-          type="button"
-          onClick={onDelete}
-          className="btn-small-modern btn-delete"
-        >
-          Elimina
-        </button>
+    <div className="question-card">
+      <div className="question-header">
+        <div className="question-number">{index + 1}</div>
+        <div className="question-actions">
+          <button
+            type="button"
+            onClick={onDelete}
+            className="btn-small-modern btn-delete"
+          >
+            Elimina
+          </button>
+        </div>
       </div>
 
-      <div className="relatore-card-content">
+      <div className="question-content">
         <div className="input-group">
           <input
             type="text"
@@ -311,28 +361,16 @@ function QuestionEditor({
         </div>
 
         {needsOptions && (
-          <div
-            className="options-section"
-            style={{
-              marginTop: "var(--space-md)",
-              padding: "var(--space-md)",
-              backgroundColor: "var(--gray-50)",
-              borderRadius: "var(--radius-sm)",
-            }}
-          >
+          <div className="options-section">
             <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "var(--space-sm)",
-              }}
+              className="domande-header"
+              style={{ marginBottom: "16px", paddingBottom: "8px" }}
             >
               <span
                 style={{
-                  fontSize: "0.875rem",
+                  fontSize: "16px",
                   fontWeight: "600",
-                  color: "var(--gray-700)",
+                  color: "#1d1d1f",
                 }}
               >
                 Opzioni:
@@ -340,38 +378,40 @@ function QuestionEditor({
               <button
                 type="button"
                 onClick={onAddOption}
-                className="btn-small-modern btn-view"
+                className="btn-add-option"
               >
                 + Opzione
               </button>
             </div>
 
-            {(question.options || []).map((option, optIndex) => (
-              <div
-                key={option.id || optIndex}
-                style={{
-                  display: "flex",
-                  gap: "var(--space-xs)",
-                  marginBottom: "var(--space-xs)",
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder={`Opzione ${optIndex + 1}`}
-                  value={option.text}
-                  onChange={(e) => onUpdateOption(option.id, e.target.value)}
-                  className="input-modern"
-                  style={{ flex: 1 }}
-                />
-                <button
-                  type="button"
-                  onClick={() => onDeleteOption(option.id)}
-                  className="btn-small-modern btn-delete"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
+            <div className="options-list">
+              {(question.options || []).map((option, optIndex) => (
+                <div key={option.id || optIndex} className="option-item">
+                  <span
+                    style={{
+                      color: "#666",
+                      fontSize: "14px",
+                      minWidth: "60px",
+                    }}
+                  >
+                    Opzione {optIndex + 1}
+                  </span>
+                  <input
+                    type="text"
+                    placeholder={`Scrivi l'opzione...`}
+                    value={option.text}
+                    onChange={(e) => onUpdateOption(option.id, e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => onDeleteOption(option.id)}
+                    className="btn-remove-option"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

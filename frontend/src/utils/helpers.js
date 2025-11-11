@@ -1,5 +1,8 @@
 export const normalizeConfig = (config) => {
-  if (!config || !config.questions) return config;
+  // Se config è null, undefined o non ha questions, restituisce struttura base
+  if (!config || !config.questions || !Array.isArray(config.questions)) {
+    return { questions: [] };
+  }
 
   return {
     ...config,

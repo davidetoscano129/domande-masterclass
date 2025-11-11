@@ -148,7 +148,7 @@
 
 .tesoro-blue .tesoro-view-btn:hover,
 .tesoro-view-btn-blue:hover {
-  background-color: #2563eb;
+  background-color: var(--color-primary-hover);
 }
 
 .tesoro-yellow .tesoro-view-btn,
@@ -159,7 +159,7 @@
 
 .tesoro-yellow .tesoro-view-btn:hover,
 .tesoro-view-btn-yellow:hover {
-  background-color: #eab308;
+  background-color: var(--color-secondary-hover);
 }
 
 /* Legacy compatibility styles */
@@ -198,8 +198,8 @@
 }
 
 .btn-responses:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 .btn-share {
@@ -284,13 +284,13 @@
 
 .btn-primary {
   flex: 2;
-  background: #5b8def;
+  background: var(--color-primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4a7dd9;
-  box-shadow: 0 4px 12px rgba(91, 141, 239, 0.3);
+  background: var(--color-primary-hover);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
   transform: translateY(-1px);
 }
 
@@ -300,17 +300,17 @@
 }
 
 .btn-relatore-primary {
-  background: #5b8def;
+  background: var(--color-primary);
 }
 
 .btn-relatore-primary:hover:not(:disabled) {
-  background: #4a7dd9;
+  background: var(--color-primary-hover);
 }
 
 .btn-utente-primary {
-  background: #f59e0b;
+  background: var(--color-secondary);
 }
 
 .btn-utente-primary:hover:not(:disabled) {
-  background: #ea9307;
+  background: var(--color-secondary-hover);
 }

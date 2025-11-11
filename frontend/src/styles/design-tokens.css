@@ -15,18 +15,18 @@
      ========================================== */
 
   /* Brand Colors - Primari */
-  --color-primary: #3b82f6; /* Blue - azioni principali, link, focus */
-  --color-primary-hover: #2563eb; /* Blue scuro - hover state */
+  --color-primary: #4a90e2; /* Blue - azioni principali, link, focus */
+  --color-primary-hover: #3a7bd5; /* Blue scuro - hover state */
   --color-primary-light: rgba(
-    59,
-    130,
-    246,
+    74,
+    144,
+    226,
     0.1
   ); /* Blue trasparente - background */
 
-  --color-secondary: #fbbf24; /* Yellow/Gold - accenti, highlight */
-  --color-secondary-hover: #eab308; /* Yellow scuro - hover */
-  --color-secondary-light: rgba(251, 191, 36, 0.1);
+  --color-secondary: #f5d547; /* Yellow/Gold - accenti, highlight */
+  --color-secondary-hover: #f2cf2a; /* Yellow scuro - hover */
+  --color-secondary-light: rgba(245, 213, 71, 0.1);
 
   /* Status Colors - Feedback utente */
   --color-success: #10b981; /* Green - completato, successo */

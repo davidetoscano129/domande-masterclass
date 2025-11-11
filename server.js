@@ -337,7 +337,9 @@ app.get("/api/lezioni", async (req, res) => {
 app.get("/api/lezioni/relatore/:relatore_id", async (req, res) => {
   try {
     const { relatore_id } = req.params;
-    const [rows] = await db.execute(
+
+    // Prima ottieni le lezioni
+    const [lezioni] = await db.execute(
       `
       SELECT l.*, r.nome as relatore_nome 
       FROM lezioni l
@@ -347,8 +349,28 @@ app.get("/api/lezioni/relatore/:relatore_id", async (req, res) => {
     `,
       [relatore_id]
     );
-    res.json(rows);
+
+    // Poi per ogni lezione, ottieni i questionari usando Promise.all
+    const lezioniConQuestionari = await Promise.all(
+      lezioni.map(async (lezione) => {
+        const [questionari] = await db.execute(
+          `SELECT id, titolo, descrizione, attivo, created_at, updated_at
+           FROM questionari
+           WHERE lezione_id = ?
+           ORDER BY created_at DESC`,
+          [lezione.id]
+        );
+
+        return {
+          ...lezione,
+          questionari: questionari,
+        };
+      })
+    );
+
+    res.json(lezioniConQuestionari);
   } catch (error) {
+    console.error("Errore in lezioni/relatore:", error);
     res.status(500).json({ error: error.message });
   }
 });

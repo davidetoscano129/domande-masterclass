@@ -9,9 +9,13 @@
   --color-text-secondary: #6e6e73;
   --color-text-tertiary: #86868b;
 
-  --color-primary: #0071e3;
-  --color-primary-hover: #0077ed;
-  --color-primary-active: #006edb;
+  --color-primary: #4a90e2;
+  --color-primary-hover: #3a7bd5;
+  --color-primary-active: #2a66c8;
+
+  --color-secondary: #f5d547;
+  --color-secondary-hover: #f2cf2a;
+  --color-secondary-active: #efc90d;
 
   --color-surface: #ffffff;
   --color-background: #f5f5f7;
@@ -19,7 +23,7 @@
   --color-border-light: #e5e5ea;
 
   --color-success: #30d158;
-  --color-warning: #ff9f0a;
+  --color-warning: #f5d547;
   --color-danger: #ff3b30;
 
   /* Typography */
@@ -114,9 +118,9 @@ h4 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
-  font-size: 15px;
-  font-weight: var(--font-weight-regular);
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
   line-height: 1.17648;
   text-decoration: none;
   border-radius: var(--radius-lg);
@@ -124,7 +128,7 @@ h4 {
   cursor: pointer;
   transition: all var(--transition-base);
   white-space: nowrap;
-  min-height: 42px;
+  min-height: 36px;
 }
 
 .btn:focus-visible {
@@ -187,6 +191,38 @@ h4 {
 
 .btn-danger:active {
   background: #e32119;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+  min-height: 32px;
+}
+
+.btn-success {
+  background: #32d74b;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #30d257;
+}
+
+.btn-success:active {
+  background: #1eba3e;
+}
+
+.btn-warning {
+  background: #ff9500;
+  color: white;
+}
+
+.btn-warning:hover {
+  background: #ff9f0a;
+}
+
+.btn-warning:active {
+  background: #f08c00;
 }
 
 /* ============================================

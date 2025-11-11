@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { API_BASE } from "../../constants/api.js";
 import QuestionarioEditor from "../questionari/QuestionarioEditor.jsx";
 import ExportManager from "../shared/ExportManager.jsx";
+import ShareModal from "../shared/ShareModal.jsx";
 import "../../styles/design-system.css";
 import "../../styles/dashboard.css";
+import "../../styles/dashboard/relatore.css";
 
 function RelatoreDashboard({ user, onLogout }) {
   const [lezioni, setLezioni] = useState([]);
@@ -12,6 +14,8 @@ function RelatoreDashboard({ user, onLogout }) {
   const [showExportManager, setShowExportManager] = useState(false);
   const [showNewLezioneForm, setShowNewLezioneForm] = useState(false);
   const [editingQuestionario, setEditingQuestionario] = useState(null);
+  const [shareData, setShareData] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const [newLezione, setNewLezione] = useState({
     numero: "",
@@ -72,6 +76,84 @@ function RelatoreDashboard({ user, onLogout }) {
 
   const toggleLezione = (lezioneId) => {
     setExpandedLezione(expandedLezione === lezioneId ? null : lezioneId);
+  };
+
+  const handleDeleteQuestionario = async (questionarioId) => {
+    if (!confirm("Eliminare questo questionario?")) return;
+    try {
+      const response = await fetch(
+        `${API_BASE}/questionari/${questionarioId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (response.ok) {
+        await fetchLezioni(); // Ricarica le lezioni
+      }
+    } catch (error) {
+      console.error("Errore nell'eliminazione questionario:", error);
+    }
+  };
+
+  const handleToggleActiveQuestionario = async (questionario) => {
+    try {
+      const response = await fetch(
+        `${API_BASE}/questionari/${questionario.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...questionario,
+            attivo: !questionario.attivo,
+          }),
+        }
+      );
+      if (response.ok) {
+        await fetchLezioni(); // Ricarica le lezioni
+      }
+    } catch (error) {
+      console.error("Errore nell'aggiornamento questionario:", error);
+    }
+  };
+
+  const handleShareQuestionario = async (questionario) => {
+    console.log("🔗 Condivisione questionario:", questionario);
+    try {
+      console.log("📡 Chiamata API condivisione...");
+      const response = await fetch(
+        `${API_BASE}/questionari/${questionario.id}/condividi`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            relatore_id: user.relatore.id,
+          }),
+        }
+      );
+
+      console.log("📡 Risposta API:", response.status, response.ok);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("✅ Dati condivisione ricevuti:", data);
+        setShareData({
+          questionario: questionario.titolo,
+          shareLink: data.shareLink,
+          shareToken: data.shareToken,
+          expiresAt: data.expiresAt,
+        });
+        setShowShareModal(true);
+      } else {
+        const errorText = await response.text();
+        console.error(
+          "❌ Errore API condivisione:",
+          response.status,
+          errorText
+        );
+      }
+    } catch (error) {
+      console.error("❌ Errore nella creazione link condivisione:", error);
+    }
   };
 
   if (loading) {
@@ -209,6 +291,10 @@ function RelatoreDashboard({ user, onLogout }) {
               onDelete={() => handleDeleteLezione(lezione.id)}
               onEditQuestionario={setEditingQuestionario}
               onUpdate={fetchLezioni}
+              onDeleteQuestionario={handleDeleteQuestionario}
+              onToggleActiveQuestionario={handleToggleActiveQuestionario}
+              onShareQuestionario={handleShareQuestionario}
+              setExpandedLezione={setExpandedLezione}
               user={user}
             />
           ))
@@ -223,12 +309,28 @@ function RelatoreDashboard({ user, onLogout }) {
       )}
 
       {editingQuestionario && (
-        <QuestionarioEditor
-          questionario={editingQuestionario}
-          onClose={() => setEditingQuestionario(null)}
-          onSave={() => {
-            setEditingQuestionario(null);
-            fetchLezioni();
+        <div className="modal-overlay">
+          <div className="modal-content-large">
+            <QuestionarioEditor
+              questionario={editingQuestionario}
+              lezioni={lezioni}
+              user={user}
+              onCancel={() => setEditingQuestionario(null)}
+              onSave={() => {
+                setEditingQuestionario(null);
+                fetchLezioni();
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {showShareModal && shareData && (
+        <ShareModal
+          shareData={shareData}
+          onClose={() => {
+            setShowShareModal(false);
+            setShareData(null);
           }}
         />
       )}
@@ -243,6 +345,10 @@ function LezioneCard({
   onDelete,
   onEditQuestionario,
   onUpdate,
+  onDeleteQuestionario,
+  onToggleActiveQuestionario,
+  onShareQuestionario,
+  setExpandedLezione,
   user,
 }) {
   const [showNewQuestionarioForm, setShowNewQuestionarioForm] = useState(false);
@@ -256,52 +362,28 @@ function LezioneCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           titolo: newQuestionario.titolo,
+          descrizione: "",
           lezione_id: lezione.id,
           relatore_id: user.relatore.id,
-          domande: [],
+          config: { questions: [] },
         }),
       });
       if (response.ok) {
         setNewQuestionario({ titolo: "" });
         setShowNewQuestionarioForm(false);
+        // Mantieni la lezione espansa dopo l'aggiornamento
+        const currentExpanded = lezione.id;
         onUpdate();
+        // Usa setTimeout per assicurarsi che l'aggiornamento sia completato
+        setTimeout(() => setExpandedLezione(currentExpanded), 100);
+      } else {
+        console.error(
+          "Errore nella creazione questionario:",
+          await response.text()
+        );
       }
     } catch (error) {
       console.error("Errore nella creazione questionario:", error);
-    }
-  };
-
-  const handleDeleteQuestionario = async (questionarioId) => {
-    if (!confirm("Eliminare questo questionario?")) return;
-    try {
-      const response = await fetch(
-        `${API_BASE}/questionari/${questionarioId}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (response.ok) onUpdate();
-    } catch (error) {
-      console.error("Errore nell'eliminazione questionario:", error);
-    }
-  };
-
-  const handleToggleActive = async (questionario) => {
-    try {
-      const response = await fetch(
-        `${API_BASE}/questionari/${questionario.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...questionario,
-            attivo: !questionario.attivo,
-          }),
-        }
-      );
-      if (response.ok) onUpdate();
-    } catch (error) {
-      console.error("Errore nell'aggiornamento questionario:", error);
     }
   };
 
@@ -407,25 +489,38 @@ function LezioneCard({
                   </div>
                   <div className="questionario-actions">
                     <button
-                      onClick={() => handleToggleActive(q)}
-                      className="icon-btn"
-                      title={q.attivo ? "Disattiva" : "Attiva"}
+                      onClick={() => onToggleActiveQuestionario(q)}
+                      className={`btn btn-sm ${
+                        q.attivo ? "btn-warning" : "btn-success"
+                      }`}
+                      title={
+                        q.attivo
+                          ? "Disattiva questionario"
+                          : "Attiva questionario"
+                      }
                     >
-                      {q.attivo ? "⏸" : "▶"}
+                      {q.attivo ? "Disattiva" : "Attiva"}
                     </button>
                     <button
                       onClick={() => onEditQuestionario(q)}
-                      className="icon-btn"
-                      title="Modifica"
+                      className="btn btn-sm btn-secondary"
+                      title="Modifica questionario"
                     >
-                      ✎
+                      Modifica
                     </button>
                     <button
-                      onClick={() => handleDeleteQuestionario(q.id)}
-                      className="icon-btn icon-btn-danger"
-                      title="Elimina"
+                      onClick={() => onShareQuestionario(q)}
+                      className="btn btn-sm btn-primary"
+                      title="Condividi questionario"
                     >
-                      ✕
+                      Condividi
+                    </button>
+                    <button
+                      onClick={() => onDeleteQuestionario(q.id)}
+                      className="btn btn-sm btn-danger"
+                      title="Elimina questionario"
+                    >
+                      Elimina
                     </button>
                   </div>
                 </div>
