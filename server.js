@@ -354,16 +354,28 @@ app.get("/api/lezioni/relatore/:relatore_id", async (req, res) => {
     const lezioniConQuestionari = await Promise.all(
       lezioni.map(async (lezione) => {
         const [questionari] = await db.execute(
-          `SELECT id, titolo, descrizione, attivo, created_at, updated_at
-           FROM questionari
-           WHERE lezione_id = ?
-           ORDER BY created_at DESC`,
+          `SELECT 
+             q.id, q.titolo, q.descrizione, q.attivo, q.created_at, q.updated_at,
+             COUNT(c.id) as risposte_count,
+             JSON_LENGTH(q.domande) as domande_count
+           FROM questionari q
+           LEFT JOIN compilazioni c ON q.id = c.questionario_id
+           WHERE q.lezione_id = ?
+           GROUP BY q.id
+           ORDER BY q.created_at DESC`,
           [lezione.id]
+        );
+
+        // Calcola il totale risposte per questa lezione
+        const totalRisposte = questionari.reduce(
+          (sum, q) => sum + (parseInt(q.risposte_count) || 0),
+          0
         );
 
         return {
           ...lezione,
           questionari: questionari,
+          risposte_count: totalRisposte,
         };
       })
     );
@@ -1122,6 +1134,56 @@ app.get("/api/shared/:token/utenti", async (req, res) => {
   } catch (error) {
     console.error("Errore recupero utenti:", error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Login utente per questionario condiviso tramite codice fiscale
+app.post("/api/shared/:token/login", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { codice_fiscale } = req.body;
+
+    if (!codice_fiscale) {
+      return res.status(400).json({ error: "Codice fiscale richiesto" });
+    }
+
+    // Verifica che il token sia valido
+    const [condivisione] = await db.execute(
+      `SELECT c.relatore_id FROM condivisioni c 
+       WHERE c.share_token = ? AND c.expires_at > NOW()`,
+      [token]
+    );
+
+    if (condivisione.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "Link di condivisione non valido o scaduto" });
+    }
+
+    // Cerca l'utente per codice fiscale
+    const [utente] = await db.execute(
+      "SELECT id, nome, codice_fiscale FROM utenti WHERE UPPER(codice_fiscale) = UPPER(?)",
+      [codice_fiscale.trim()]
+    );
+
+    if (utente.length === 0) {
+      return res.status(401).json({
+        error:
+          "Codice fiscale non trovato. Verifica di aver inserito il dato corretto.",
+      });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: utente[0].id,
+        nome: utente[0].nome,
+        codice_fiscale: utente[0].codice_fiscale,
+      },
+    });
+  } catch (error) {
+    console.error("Errore login utente:", error);
+    res.status(500).json({ error: "Errore interno del server" });
   }
 });
 

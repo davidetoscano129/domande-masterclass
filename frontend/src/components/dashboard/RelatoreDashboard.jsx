@@ -3,6 +3,7 @@ import { API_BASE } from "../../constants/api.js";
 import QuestionarioEditor from "../questionari/QuestionarioEditor.jsx";
 import ExportManager from "../shared/ExportManager.jsx";
 import ShareModal from "../shared/ShareModal.jsx";
+import ResponsesViewer from "../shared/ResponsesViewer.jsx";
 import "../../styles/design-system.css";
 import "../../styles/dashboard.css";
 import "../../styles/dashboard/relatore.css";
@@ -14,6 +15,8 @@ function RelatoreDashboard({ user, onLogout }) {
   const [showExportManager, setShowExportManager] = useState(false);
   const [showNewLezioneForm, setShowNewLezioneForm] = useState(false);
   const [editingQuestionario, setEditingQuestionario] = useState(null);
+  const [creatingQuestionario, setCreatingQuestionario] = useState(null); // Lezione per cui creare questionario
+  const [viewingResponses, setViewingResponses] = useState(null); // Questionario di cui vedere le risposte
   const [shareData, setShareData] = useState(null);
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -290,10 +293,12 @@ function RelatoreDashboard({ user, onLogout }) {
               onToggle={() => toggleLezione(lezione.id)}
               onDelete={() => handleDeleteLezione(lezione.id)}
               onEditQuestionario={setEditingQuestionario}
+              onCreateQuestionario={setCreatingQuestionario}
               onUpdate={fetchLezioni}
               onDeleteQuestionario={handleDeleteQuestionario}
               onToggleActiveQuestionario={handleToggleActiveQuestionario}
               onShareQuestionario={handleShareQuestionario}
+              onViewResponses={setViewingResponses}
               setExpandedLezione={setExpandedLezione}
               user={user}
             />
@@ -325,6 +330,24 @@ function RelatoreDashboard({ user, onLogout }) {
         </div>
       )}
 
+      {creatingQuestionario && (
+        <div className="modal-overlay">
+          <div className="modal-content-large">
+            <QuestionarioEditor
+              questionario={null}
+              lezioni={[creatingQuestionario]}
+              user={user}
+              lezionePreselezionata={creatingQuestionario}
+              onCancel={() => setCreatingQuestionario(null)}
+              onSave={() => {
+                setCreatingQuestionario(null);
+                fetchLezioni();
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {showShareModal && shareData && (
         <ShareModal
           shareData={shareData}
@@ -333,6 +356,17 @@ function RelatoreDashboard({ user, onLogout }) {
             setShareData(null);
           }}
         />
+      )}
+
+      {viewingResponses && (
+        <div className="modal-overlay">
+          <div className="modal-content-large">
+            <ResponsesViewer
+              questionario={viewingResponses}
+              onClose={() => setViewingResponses(null)}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
@@ -344,49 +378,15 @@ function LezioneCard({
   onToggle,
   onDelete,
   onEditQuestionario,
+  onCreateQuestionario,
   onUpdate,
   onDeleteQuestionario,
   onToggleActiveQuestionario,
   onShareQuestionario,
+  onViewResponses,
   setExpandedLezione,
   user,
 }) {
-  const [showNewQuestionarioForm, setShowNewQuestionarioForm] = useState(false);
-  const [newQuestionario, setNewQuestionario] = useState({ titolo: "" });
-
-  const handleCreateQuestionario = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch(`${API_BASE}/questionari`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          titolo: newQuestionario.titolo,
-          descrizione: "",
-          lezione_id: lezione.id,
-          relatore_id: user.relatore.id,
-          config: { questions: [] },
-        }),
-      });
-      if (response.ok) {
-        setNewQuestionario({ titolo: "" });
-        setShowNewQuestionarioForm(false);
-        // Mantieni la lezione espansa dopo l'aggiornamento
-        const currentExpanded = lezione.id;
-        onUpdate();
-        // Usa setTimeout per assicurarsi che l'aggiornamento sia completato
-        setTimeout(() => setExpandedLezione(currentExpanded), 100);
-      } else {
-        console.error(
-          "Errore nella creazione questionario:",
-          await response.text()
-        );
-      }
-    } catch (error) {
-      console.error("Errore nella creazione questionario:", error);
-    }
-  };
-
   return (
     <div className="lezione-card">
       <div className="lezione-header" onClick={onToggle}>
@@ -416,115 +416,158 @@ function LezioneCard({
         <div className="lezione-content">
           <div className="actions-bar">
             <button
-              onClick={() =>
-                setShowNewQuestionarioForm(!showNewQuestionarioForm)
-              }
+              onClick={() => onCreateQuestionario(lezione)}
               className="btn btn-primary"
             >
-              {showNewQuestionarioForm ? "Annulla" : "Nuovo Questionario"}
+              Nuovo Questionario
             </button>
             <button onClick={onDelete} className="btn btn-danger">
               Elimina Lezione
             </button>
           </div>
 
-          {showNewQuestionarioForm && (
-            <form onSubmit={handleCreateQuestionario} className="form">
-              <div className="form-group">
-                <label className="form-label">Titolo Questionario</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={newQuestionario.titolo}
-                  onChange={(e) =>
-                    setNewQuestionario({ titolo: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="form-actions">
-                <button
-                  type="button"
-                  onClick={() => setShowNewQuestionarioForm(false)}
-                  className="btn btn-text"
-                >
-                  Annulla
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Crea
-                </button>
-              </div>
-            </form>
-          )}
-
           <div className="questionari-section">
             <h4 className="section-subtitle">Questionari</h4>
             {!lezione.questionari || lezione.questionari.length === 0 ? (
-              <div className="empty-state">
+              <div className="empty-state-card">
+                <div className="empty-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                  </svg>
+                </div>
                 <h3 className="empty-state-title">Nessun questionario</h3>
                 <p className="empty-state-description">
                   Crea il primo questionario per questa lezione
                 </p>
+                <button
+                  onClick={() => onCreateQuestionario(lezione)}
+                  className="btn btn-primary-outline"
+                >
+                  Crea Questionario
+                </button>
               </div>
             ) : (
-              lezione.questionari.map((q) => (
-                <div key={q.id} className="questionario-item">
-                  <div className="questionario-info">
-                    <h5 className="questionario-title">{q.titolo}</h5>
-                    <div className="questionario-meta">
-                      <span
-                        className={`badge ${
-                          q.attivo ? "badge-active" : "badge-inactive"
+              <div className="questionari-grid">
+                {lezione.questionari.map((q) => (
+                  <div key={q.id} className="questionario-card-modern">
+                    <div className="questionario-card-header">
+                      <div className="questionario-badge-group">
+                        <span
+                          className={`status-badge ${
+                            q.attivo ? "active" : "inactive"
+                          }`}
+                        >
+                          {q.attivo ? "Attivo" : "Inattivo"}
+                        </span>
+                      </div>
+                      <div className="questionario-menu">
+                        <button
+                          onClick={() => onToggleActiveQuestionario(q)}
+                          className={`toggle-switch ${
+                            q.attivo ? "active" : "inactive"
+                          }`}
+                          title={
+                            q.attivo
+                              ? "Disattiva questionario"
+                              : "Attiva questionario"
+                          }
+                        >
+                          <div className="toggle-track">
+                            <div className="toggle-thumb"></div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="questionario-card-body">
+                      <h5 className="questionario-card-title">{q.titolo}</h5>
+                      <div className="questionario-stats">
+                        <div className="stat-item">
+                          <span className="stat-number">
+                            {q.domande?.length || 0}
+                          </span>
+                          <span className="stat-label">Domande</span>
+                        </div>
+                        <div className="stat-item highlight">
+                          <span className="stat-number">
+                            {q.risposte_count || 0}
+                          </span>
+                          <span className="stat-label">Risposte</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="questionario-card-actions">
+                      <button
+                        onClick={() => onViewResponses(q)}
+                        className={`card-action-btn primary ${
+                          !q.risposte_count || q.risposte_count === 0
+                            ? "disabled"
+                            : ""
                         }`}
+                        disabled={!q.risposte_count || q.risposte_count === 0}
+                        title="Visualizza risposte"
                       >
-                        {q.attivo ? "Attivo" : "Non attivo"}
-                      </span>
-                      <span className="badge badge-neutral">
-                        {q.domande?.length || 0} domande
-                      </span>
-                      <span className="badge badge-neutral">
-                        {q.risposte_count || 0} risposte
-                      </span>
+                        <svg
+                          className="btn-icon"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                        </svg>
+                        Visualizza
+                      </button>
+                      <button
+                        onClick={() => onEditQuestionario(q)}
+                        className="card-action-btn secondary"
+                        title="Modifica questionario"
+                      >
+                        <svg
+                          className="btn-icon"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </svg>
+                        Modifica
+                      </button>
+                      <button
+                        onClick={() => onShareQuestionario(q)}
+                        className="card-action-btn accent"
+                        title="Condividi questionario"
+                      >
+                        <svg
+                          className="btn-icon"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.50-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
+                        </svg>
+                        Condividi
+                      </button>
+                      <button
+                        onClick={() => onDeleteQuestionario(q.id)}
+                        className="card-action-btn danger"
+                        title="Elimina questionario"
+                      >
+                        <svg
+                          className="btn-icon"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                        </svg>
+                        Elimina
+                      </button>
                     </div>
                   </div>
-                  <div className="questionario-actions">
-                    <button
-                      onClick={() => onToggleActiveQuestionario(q)}
-                      className={`btn btn-sm ${
-                        q.attivo ? "btn-warning" : "btn-success"
-                      }`}
-                      title={
-                        q.attivo
-                          ? "Disattiva questionario"
-                          : "Attiva questionario"
-                      }
-                    >
-                      {q.attivo ? "Disattiva" : "Attiva"}
-                    </button>
-                    <button
-                      onClick={() => onEditQuestionario(q)}
-                      className="btn btn-sm btn-secondary"
-                      title="Modifica questionario"
-                    >
-                      Modifica
-                    </button>
-                    <button
-                      onClick={() => onShareQuestionario(q)}
-                      className="btn btn-sm btn-primary"
-                      title="Condividi questionario"
-                    >
-                      Condividi
-                    </button>
-                    <button
-                      onClick={() => onDeleteQuestionario(q.id)}
-                      className="btn btn-sm btn-danger"
-                      title="Elimina questionario"
-                    >
-                      Elimina
-                    </button>
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </div>

@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import { API_BASE } from "../../constants/api.js";
 import { normalizeConfig } from "../../utils/helpers.js";
 
-function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
+function QuestionarioEditor({
+  questionario,
+  lezioni,
+  user,
+  lezionePreselezionata,
+  onSave,
+  onCancel,
+}) {
   const [formData, setFormData] = useState({
     titolo: "",
     descrizione: "",
@@ -50,8 +57,18 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
         lezione_id: questionario.lezione_id || "",
         config: normalizedConfig,
       });
+    } else if (lezionePreselezionata) {
+      // Modalità creazione con lezione preselezionata
+      setFormData({
+        titolo: "",
+        descrizione: "",
+        lezione_id: lezionePreselezionata.id,
+        config: {
+          questions: [],
+        },
+      });
     }
-  }, [questionario]);
+  }, [questionario, lezionePreselezionata]);
 
   const addQuestion = () => {
     const newQuestion = {
@@ -162,10 +179,25 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
         <div>
           <h3>
             {questionario ? "Modifica Questionario" : "Nuovo Questionario"}
+            {lezionePreselezionata && !questionario && (
+              <span
+                style={{
+                  color: "#666",
+                  fontSize: "16px",
+                  display: "block",
+                  marginTop: "4px",
+                }}
+              >
+                per {lezionePreselezionata.titolo}
+              </span>
+            )}
           </h3>
           <p>
             Compila tutti i campi per {questionario ? "modificare" : "creare"}{" "}
             il questionario
+            {lezionePreselezionata && !questionario
+              ? ` per la ${lezionePreselezionata.titolo}`
+              : ""}
           </p>
         </div>
         <button
@@ -206,26 +238,28 @@ function QuestionarioEditor({ questionario, lezioni, user, onSave, onCancel }) {
           />
         </div>
 
-        <div className="input-group">
-          <label>Seleziona lezione</label>
-          <select
-            value={formData.lezione_id}
-            onChange={(e) =>
-              setFormData({ ...formData, lezione_id: e.target.value })
-            }
-            required
-            className="input-modern"
-          >
-            <option value="">Seleziona lezione</option>
-            {lezioni && Array.isArray(lezioni)
-              ? lezioni.map((lezione) => (
-                  <option key={lezione.id} value={lezione.id}>
-                    {lezione.titolo}
-                  </option>
-                ))
-              : null}
-          </select>
-        </div>
+        {!lezionePreselezionata && (
+          <div className="input-group">
+            <label>Seleziona lezione</label>
+            <select
+              value={formData.lezione_id}
+              onChange={(e) =>
+                setFormData({ ...formData, lezione_id: e.target.value })
+              }
+              required
+              className="input-modern"
+            >
+              <option value="">Seleziona lezione</option>
+              {lezioni && Array.isArray(lezioni)
+                ? lezioni.map((lezione) => (
+                    <option key={lezione.id} value={lezione.id}>
+                      {lezione.titolo}
+                    </option>
+                  ))
+                : null}
+            </select>
+          </div>
+        )}
 
         <div className="domande-section">
           <div className="domande-header">

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { API_BASE } from "../../constants/api.js";
 
 function LoginPage({ onLogin }) {
@@ -6,6 +7,19 @@ function LoginPage({ onLogin }) {
   const [codiceFiscale, setCodiceFiscale] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Controlla se c'è un redirect per questionario condiviso
+  const redirectPath = searchParams.get("redirect");
+  const isSharedRedirect = redirectPath?.startsWith("shared/");
+
+  useEffect(() => {
+    if (isSharedRedirect) {
+      // Se è un redirect da questionario condiviso, forza il login come utente
+      setLoginType("utente");
+    }
+  }, [isSharedRedirect]);
 
   const handleLogin = async () => {
     if (!codiceFiscale.trim()) {
@@ -19,19 +33,36 @@ function LoginPage({ onLogin }) {
       return;
     }
 
+    // Per i redirect condivisi, usa sempre "utente"
+    const currentLoginType = isSharedRedirect ? "utente" : loginType;
+
+    if (!currentLoginType) {
+      setError("Tipo di login non selezionato");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE}/auth/${loginType}`, {
+      const response = await fetch(`${API_BASE}/auth/${currentLoginType}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ codice_fiscale: codiceFiscale.toUpperCase() }),
       });
 
       const data = await response.json();
+
       if (data.success) {
-        onLogin(data);
+        // Se c'è un redirect per questionario condiviso, vai direttamente lì
+        if (isSharedRedirect) {
+          navigate(`/${redirectPath}`, {
+            state: { user: data.utente },
+            replace: true,
+          });
+        } else {
+          onLogin(data);
+        }
       } else {
         setError(data.error || "Credenziali non valide");
       }
@@ -59,7 +90,7 @@ function LoginPage({ onLogin }) {
         />
       </div>
       <div className="login-card">
-        {!loginType ? (
+        {!loginType && !isSharedRedirect ? (
           <>
             <div className="login-card-body">
               <h2 className="selection-title">Seleziona il tipo di accesso</h2>
@@ -94,8 +125,17 @@ function LoginPage({ onLogin }) {
           <>
             <div className="login-card-header">
               <h1 className="login-card-title">
-                {loginType === "relatore" ? "AREA RELATORE" : "AREA UTENTE"}
+                {isSharedRedirect
+                  ? "ACCESSO QUESTIONARIO CONDIVISO"
+                  : loginType === "relatore"
+                  ? "AREA RELATORE"
+                  : "AREA UTENTE"}
               </h1>
+              {isSharedRedirect && (
+                <p className="shared-redirect-message">
+                  Inserisci il tuo codice fiscale per accedere al questionario
+                </p>
+              )}
               <p className="login-card-subtitle">
                 {loginType === "relatore"
                   ? "Gestione lezioni e questionari"
@@ -132,14 +172,16 @@ function LoginPage({ onLogin }) {
                 {error && <div className="alert-error">{error}</div>}
 
                 <div className="form-buttons">
-                  <button
-                    type="button"
-                    onClick={handleBack}
-                    className="btn btn-secondary"
-                    disabled={loading}
-                  >
-                    Indietro
-                  </button>
+                  {!isSharedRedirect && (
+                    <button
+                      type="button"
+                      onClick={handleBack}
+                      className="btn btn-secondary"
+                      disabled={loading}
+                    >
+                      Indietro
+                    </button>
+                  )}
                   <button
                     type="submit"
                     disabled={loading || !codiceFiscale.trim()}

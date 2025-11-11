@@ -89,6 +89,17 @@
   margin: 0;
 }
 
+.shared-redirect-message {
+  font-size: 0.9rem;
+  color: var(--color-primary);
+  margin: var(--space-xs) 0 0 0;
+  font-weight: 500;
+  background: rgba(74, 144, 226, 0.1);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
 .login-card-body {
   padding: 28px;
   background: white;
