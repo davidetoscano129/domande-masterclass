@@ -77,10 +77,6 @@ function RelatoreDashboard({ user, onLogout }) {
     }
   };
 
-  const toggleLezione = (lezioneId) => {
-    setExpandedLezione(expandedLezione === lezioneId ? null : lezioneId);
-  };
-
   const handleDeleteQuestionario = async (questionarioId) => {
     if (!confirm("Eliminare questo questionario?")) return;
     try {
@@ -95,27 +91,6 @@ function RelatoreDashboard({ user, onLogout }) {
       }
     } catch (error) {
       console.error("Errore nell'eliminazione questionario:", error);
-    }
-  };
-
-  const handleToggleActiveQuestionario = async (questionario) => {
-    try {
-      const response = await fetch(
-        `${API_BASE}/questionari/${questionario.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...questionario,
-            attivo: !questionario.attivo,
-          }),
-        }
-      );
-      if (response.ok) {
-        await fetchLezioni(); // Ricarica le lezioni
-      }
-    } catch (error) {
-      console.error("Errore nell'aggiornamento questionario:", error);
     }
   };
 
@@ -290,13 +265,16 @@ function RelatoreDashboard({ user, onLogout }) {
               key={lezione.id}
               lezione={lezione}
               expanded={expandedLezione === lezione.id}
-              onToggle={() => toggleLezione(lezione.id)}
+              onToggle={() =>
+                setExpandedLezione(
+                  expandedLezione === lezione.id ? null : lezione.id
+                )
+              }
               onDelete={() => handleDeleteLezione(lezione.id)}
               onEditQuestionario={setEditingQuestionario}
               onCreateQuestionario={setCreatingQuestionario}
               onUpdate={fetchLezioni}
               onDeleteQuestionario={handleDeleteQuestionario}
-              onToggleActiveQuestionario={handleToggleActiveQuestionario}
               onShareQuestionario={handleShareQuestionario}
               onViewResponses={setViewingResponses}
               setExpandedLezione={setExpandedLezione}
@@ -381,7 +359,6 @@ function LezioneCard({
   onCreateQuestionario,
   onUpdate,
   onDeleteQuestionario,
-  onToggleActiveQuestionario,
   onShareQuestionario,
   onViewResponses,
   setExpandedLezione,
@@ -455,51 +432,8 @@ function LezioneCard({
               <div className="questionari-grid">
                 {lezione.questionari.map((q) => (
                   <div key={q.id} className="questionario-card-modern">
-                    <div className="questionario-card-header">
-                      <div className="questionario-badge-group">
-                        <span
-                          className={`status-badge ${
-                            q.attivo ? "active" : "inactive"
-                          }`}
-                        >
-                          {q.attivo ? "Attivo" : "Inattivo"}
-                        </span>
-                      </div>
-                      <div className="questionario-menu">
-                        <button
-                          onClick={() => onToggleActiveQuestionario(q)}
-                          className={`toggle-switch ${
-                            q.attivo ? "active" : "inactive"
-                          }`}
-                          title={
-                            q.attivo
-                              ? "Disattiva questionario"
-                              : "Attiva questionario"
-                          }
-                        >
-                          <div className="toggle-track">
-                            <div className="toggle-thumb"></div>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-
                     <div className="questionario-card-body">
                       <h5 className="questionario-card-title">{q.titolo}</h5>
-                      <div className="questionario-stats">
-                        <div className="stat-item">
-                          <span className="stat-number">
-                            {q.domande?.length || 0}
-                          </span>
-                          <span className="stat-label">Domande</span>
-                        </div>
-                        <div className="stat-item highlight">
-                          <span className="stat-number">
-                            {q.risposte_count || 0}
-                          </span>
-                          <span className="stat-label">Risposte</span>
-                        </div>
-                      </div>
                     </div>
 
                     <div className="questionario-card-actions">

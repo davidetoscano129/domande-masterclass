@@ -355,7 +355,7 @@ app.get("/api/lezioni/relatore/:relatore_id", async (req, res) => {
       lezioni.map(async (lezione) => {
         const [questionari] = await db.execute(
           `SELECT 
-             q.id, q.titolo, q.descrizione, q.attivo, q.created_at, q.updated_at,
+             q.id, q.titolo, q.descrizione, q.domande, q.attivo, q.created_at, q.updated_at,
              COUNT(c.id) as risposte_count,
              JSON_LENGTH(q.domande) as domande_count
            FROM questionari q
